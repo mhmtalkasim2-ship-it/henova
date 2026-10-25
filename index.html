@@ -1017,7 +1017,7 @@ main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
    No mining, claim, balance, navigation or reward logic is changed. */
 main.farm-mode #farm-scene.farm-v3,
 main.farm-mode #farm-scene.farm-v3:not(.realistic-ready){
- background:#88bf56 url('./assets/henova-orchard-v6.svg?v=20261025c') center center/100% 100% no-repeat!important;
+ background:#88bf56 url('./assets/henova-orchard-v6.svg?v=20261025d') center center/100% 100% no-repeat!important;
  image-rendering:auto!important;
  filter:none!important;
  opacity:1!important;
@@ -1218,6 +1218,37 @@ body:has(main.farm-mode)>nav button span{filter:none!important;font-size:20px!im
  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;left:49%!important;top:63%!important;transform:none!important}
  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{animation:none!important}
 }
+
+/* HENOVA V6.1 refinements: reference scale and scene balance. */
+main.farm-mode #farm-scene.farm-v3 .v3-windmill{
+ left:69%!important;
+ top:21.9%!important;
+ width:31%!important;
+ height:16.7%!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ top:52%!important;
+ left:48%!important;
+ width:clamp(75px,18vw,104px)!important;
+}
+@keyframes henovaRoamV6{
+ 0%,10%{left:48%;top:52%;transform:scaleX(-1)}
+ 26%{left:54%;top:53%;transform:scaleX(-1)}
+ 39%{left:58%;top:54%;transform:scaleX(-1)}
+ 47%{left:58%;top:54%;transform:scaleX(1)}
+ 68%{left:47%;top:52.5%;transform:scaleX(1)}
+ 84%{left:43%;top:51.5%;transform:scaleX(1)}
+ 91%,100%{left:48%;top:52%;transform:scaleX(-1)}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+ filter:drop-shadow(1px 3px 1px #355c304d)!important;
+}
+/* Preserve the original real game actions rather than painting fake buttons. */
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  top:52%!important;left:48%!important;
+ }
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -1227,7 +1258,7 @@ let s;try{s=JSON.parse(localStorage.getItem(K))||{}}catch{s={}}s={eggs:0,coins:0
 const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem(K,JSON.stringify(s)),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const rate=()=>H.reduce((a,h)=>a+h[3]*(s.hen[h[0]]||0),0)*(1+[0,.10,.20,.35,.50,.75][Math.min(5,s.fan||0)]),prod=()=>Math.min(60,Math.floor(Math.max(0,Date.now()-s.start)*rate()/hr));
 function toast(m){let n=document.getElementById('notice');n.textContent=m;n.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>n.classList.add('hidden'),2700)}
-function collect(){let q=prod();if(!q)return toast('No eggs available yet');let hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());s.eggs+=q;s.start=Date.now();save();render();playCollectEggs(hens,q);toast('+'+q+' eggs collected!')}
+function collect(){let q=prod();if(!q)return toast('No eggs available yet');let hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());s.eggs+=q;s.start=Date.now();save();render();playCollectEggs(hens,q);toast(s.lang==='ar'?'تم جمع '+q+' بيضات!':s.lang==='tr'?q+' yumurta toplandı!':'+'+q+' eggs collected!')}
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');s.coins-=h[4];s.hen[id]=(s.hen[id]||0)+1;save();render();toast('New hen added!')}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');/* Close elapsed cycle before changing rate to avoid retroactive gains */let pending=prod();s.coins-=prices[lv];s.fan=lv+1;s.start=Date.now()-Math.floor(pending*hr/rate());save();render();toast('Power upgraded to level '+s.fan+'!')}
