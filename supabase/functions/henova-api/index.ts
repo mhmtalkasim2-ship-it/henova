@@ -145,22 +145,16 @@ Deno.serve(async (request) => {
     }
     // Preserve bootstrap logic by carrying the verified membership flag, then claim below.
   }
-  // Bind referrals only when a Telegram-signed start_param points to an existing inviter.
-  // Insert-only: existing players can never change their inviter.
-  let inviter = null;
-  if (Number.isSafeInteger(telegram.referral_id) && telegram.referral_id > 0
-      && telegram.referral_id !== telegram.id) {
-    const { data: parent } = await admin.from("henova_players")
-      .select("telegram_id").eq("telegram_id", telegram.referral_id).maybeSingle();
-    if (parent) inviter = parent.telegram_id;
-  }
-  const { error: initError } = await admin.from("henova_players").upsert(
-    { telegram_id: telegram.id, first_name: telegram.first_name,
-      username: telegram.username, referred_by: inviter },
-    { onConflict: "telegram_id", ignoreDuplicates: true }
-  );
+  // Atomic registration: first signed entry only; credit inviter 100 coins once.
+  // The SQL function refuses to change the inviter for existing users.
+  const { error: initError } = await admin.rpc("henova_register_player", {
+    p_telegram_id: telegram.id,
+    p_first_name: telegram.first_name,
+    p_username: telegram.username,
+    p_inviter_id: telegram.referral_id,
+  });
   if (initError) {
-    console.error("HENOVA player bootstrap failed", initError.code);
+    console.error("HENOVA player registration failed", initError.code);
     return reply({ ok: false, error: "database_unavailable" }, 503);
   }
   const action = body?.action;
@@ -174,7 +168,7 @@ Deno.serve(async (request) => {
   }
   if (action === "state") {
     const { data, error } = await admin.from("henova_players")
-      .select("egg_balance,coin_balance,starter_hens,red_hens,gold_hens,royal_hens,legend_hens,fan_level,production_started_at,last_daily_on,referral_eggs_earned")
+      .select("egg_balance,coin_balance,starter_hens,red_hens,gold_hens,royal_hens,legend_hens,fan_level,production_started_at,last_daily_on,referral_eggs_earned,referral_coins_earned")
       .eq("telegram_id", telegram.id).single();
     if (error || !data) return reply({ ok: false, error: "database_unavailable" }, 503);
     const { count: referralCount, error: referralErr } = await admin.from("henova_players")
@@ -185,6 +179,7 @@ Deno.serve(async (request) => {
     return reply({ ok: true, state: {
       ...publicState(data), referrals_count: referralCount || 0,
       referral_eggs_earned: data.referral_eggs_earned || 0,
+      referral_coins_earned: data.referral_coins_earned || 0,
       channel_next_at: reward?.last_rewarded_at
         ? new Date(Date.parse(reward.last_rewarded_at) + 21600000).toISOString() : null
     } });
