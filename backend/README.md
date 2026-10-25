@@ -1,6 +1,8 @@
+> **Live integration update — 2026-10-25:** `index.html` now uses authenticated `henova-api` requests for state, collecting eggs, daily rewards, purchasing hens and boosting fans. Only the language preference and a retry request ID remain on-device. No old demo balances are automatically imported; the owner confirmed no users exist yet. Visual farm artwork was not changed. End-to-end live gameplay on a Telegram device is still to be checked. Note: invalid/missing Telegram session blocks the backend; the app does not credit local rewards.
+
 # HENOVA — Server-side data foundation (not yet live)
 
-The current Telegram Mini App in `index.html` still runs in **local demo mode**. Its balances, hen purchases and egg production are stored in `localStorage` (`henova-demo-v1`).
+The Telegram Mini App in `index.html` now fetches and mutates server-authoritative state via the Telegram-authenticated Edge Function. Legacy `henova-demo-v1` balances are ignored, not migrated.
 
 **Database status (2026-10-25): ACTIVE schema on the dedicated Free HENOVA Supabase project.**
 - Project ID: `gnkyduafxivfyrpoznnp` (HENOVA, region `eu-west-1`)
@@ -27,7 +29,7 @@ The current Telegram Mini App in `index.html` still runs in **local demo mode**.
 3. **Deployment complete:** `henova-api` ACTIVE v1 on the HENOVA project with `verify_jwt = false`; access still requires valid Telegram initData verified inside the function. Confirm `HENOVA_ALLOWED_ORIGIN=https://mhmtalkasim2-ship-it.github.io` (default if not explicitly set).
 4. Test signed Telegram `initData` and reject tampered/expired signatures. Test duplicate requests, concurrent collect, purchases, fan boosts, denied direct Data API requests and daily limits.
 5. Design a **verified one-time balance migration** from the current local demo before switching the front end. Do **not** upload or trust raw `localStorage` values for payouts.
-6. Only after these tests, update `index.html` to use the new API; avoid updating the UI and gameplay visuals.
+6. **Completed:** `index.html` now calls the API for all reward-bearing actions while preserving farm graphics. Complete a live on-device game transaction smoke test before opening the bot to users.
 
 ## Action contracts (planned API)
 
