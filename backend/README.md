@@ -2,23 +2,32 @@
 
 The current Telegram Mini App in `index.html` still runs in **local demo mode**. Its balances, hen purchases and egg production are stored in `localStorage` (`henova-demo-v1`).
 
-This folder prepares a **dedicated, separate HENOVA backend**. It has **not** been applied to Supabase, and no MIMA/LTF data has been changed.
+**Database status (2026-10-25): ACTIVE schema on the dedicated Free HENOVA Supabase project.**
+- Project ID: `gnkyduafxivfyrpoznnp` (HENOVA, region `eu-west-1`)
+- Applied migration versions: `20261025193516`, `20261025193630`
+- Created: `public.henova_players`, `public.henova_events`, and `public.henova_process_action` (service-role only)
+- Both tables have RLS enabled with **no client access policies**, deliberately keeping all operations behind Telegram-authenticating API
+- Verified roles: `anon` and `authenticated` have no direct table or action RPC access. Supabase's RLS event-trigger helper EXECUTE privileges have also been restricted.
+- Transactional smoke tests passed: collect capped at 60, duplicate request ignored, daily reward +100 coins, red hen purchased for 1000 coins, fan boost costs 500 coins. Fake test records were rolled back, leaving both tables empty.
+- Checked Supabase security and performance advisors: no WARN/ERROR findings. The INFO notices about RLS without policies are **intentional**.
+- No MIMA/LTF data has been changed. The live Telegram app **still uses local demo balances** until secure API integration and verified migration are complete.
 
-## Prepared components
+## Deployed database and prepared API
 
-- `backend/henova_schema.sql` — players, real server balances, hens, boosts, daily reward, immutable transaction history, unique request IDs; RLS enabled and no public row access.
+- `backend/henova_schema.sql` — reference SQL source for players, balances, hens, boosts, daily rewards, and idempotent transaction ledger.
+- `supabase/migrations/20261025193516_henova_initial_players_events_secure_actions.sql` — versioned copy of applied HENOVA schema migration.
+- `supabase/migrations/20261025193630_henova_restrict_rls_event_trigger_permissions.sql` — hardens Supabase's default RLS helper function.
 - `supabase/functions/henova-api/index.ts` — Telegram Mini App `initData` HMAC check, fresh `auth_date`, server-side balance mutations, UUID request deduplication and state response.
 - `supabase/config.toml` — opt-out of **Supabase JWT verification for the single function**, because Telegram identity is independently verified inside the function. Do not turn this off on other functions.
 
-## Requirements before activation
+## Remaining requirements before the Mini App can use the database
 
-1. Create/select a **dedicated Supabase project for HENOVA**; do **not** run the SQL against the existing MIMA/LTF project.
-2. Review and apply `backend/henova_schema.sql` in the HENOVA database, then run security advisors and verify no `anon`/`authenticated` access to player data.
-3. Configure **Edge Function secrets only on the server**: `HENOVA_TELEGRAM_BOT_TOKEN` (the token of `@HenovaEggsBot`), and check that `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are available. Never commit actual tokens or service keys.
-4. Set `HENOVA_ALLOWED_ORIGIN=https://mhmtalkasim2-ship-it.github.io`. Deploy `henova-api` to HENOVA's own Supabase project only, preserving `verify_jwt = false`.
-5. Test signed Telegram `initData` and reject tampered/expired signatures. Test duplicate requests, concurrent collect, purchases, fan boosts, denied direct Data API requests and daily limits.
-6. Design a **verified one-time balance migration** from the current local demo before switching the front end. Do **not** upload or trust raw `localStorage` values for payouts.
-7. Only after these tests, update `index.html` to use the new API; avoid updating the UI and gameplay visuals.
+1. **Already completed:** HENOVA's separate Free Supabase database and migrations. Do not rerun migrations in the MIMA/LTF organization.
+2. Configure **Edge Function secrets only on the server**: `HENOVA_TELEGRAM_BOT_TOKEN` (the token of `@HenovaEggsBot`), and check that `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are available. Never commit actual tokens or service keys.
+3. Set `HENOVA_ALLOWED_ORIGIN=https://mhmtalkasim2-ship-it.github.io`. Deploy `henova-api` to HENOVA's own Supabase project only, preserving `verify_jwt = false`.
+4. Test signed Telegram `initData` and reject tampered/expired signatures. Test duplicate requests, concurrent collect, purchases, fan boosts, denied direct Data API requests and daily limits.
+5. Design a **verified one-time balance migration** from the current local demo before switching the front end. Do **not** upload or trust raw `localStorage` values for payouts.
+6. Only after these tests, update `index.html` to use the new API; avoid updating the UI and gameplay visuals.
 
 ## Action contracts (planned API)
 
@@ -43,4 +52,4 @@ Use `crypto.randomUUID()` once per intended action and reuse the **same requestI
 
 ## Important
 
-Supabase CLI was not available when these files were prepared. `henova_schema.sql` is **a reviewed draft, not an applied migration**. Once the dedicated backend is created, use Supabase's migration tooling to create and test the final migration, and deploy only after validation.
+The database migrations **are applied on the dedicated HENOVA project**, and the records are mirrored in `supabase/migrations/`. **The `henova-api` Edge Function remains undeployed**, pending the private bot token and end-to-end tests. `index.html` has not been switched off `localStorage`. Never copy unverified local balances as authoritative payout amounts.
