@@ -1574,16 +1574,21 @@ main.farm-mode #farm-scene.farm-v3 .v3-feeder::after{
   }
 }
 
-/* HENOVA V22 — no bottom menu on the farm. Keep all five destinations accessible
-   through the new compact top menu; other pages keep their normal bottom nav. */
+/* HENOVA V23 — restore permanent five-button bottom navigation.
+   The collect bar has no outer background, but stays ABOVE the bottom buttons. */
 body:has(main.farm-mode)>nav#nav{
-  display:none!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-around!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:28!important;
 }
 main.farm-mode .collect-dock{
   position:absolute!important;
   left:clamp(10px,3vw,20px)!important;
   right:clamp(10px,3vw,20px)!important;
-  bottom:calc(max(env(safe-area-inset-bottom),0px) + 16px)!important;
+  bottom:calc(max(env(safe-area-inset-bottom),0px) + 85px)!important;
   z-index:24!important;
   display:flex!important;
   align-items:stretch!important;
@@ -1591,8 +1596,8 @@ main.farm-mode .collect-dock{
   min-height:0!important;
   max-height:none!important;
   height:auto!important;
-  padding:0!important;
   margin:0!important;
+  padding:0!important;
   background:transparent!important;
   backdrop-filter:none!important;
   -webkit-backdrop-filter:none!important;
@@ -1615,7 +1620,7 @@ main.farm-mode .collect-info{
   margin:0!important;
   border-radius:20px!important;
   border:2px solid #c6d7a6!important;
-  background:#edf4dceF!important;
+  background:#edf4dcef!important;
   box-shadow:0 3px 6px rgba(38,65,30,.20)!important;
   text-align:center!important;
 }
@@ -1649,42 +1654,17 @@ main.farm-mode .collect-action button{
   font-size:clamp(16px,4.6vw,22px)!important;
 }
 main.farm-mode .collect-meter{display:none!important}
-main.farm-mode .farm-pages-menu{
-  position:absolute!important;
-  display:grid;
-  top:calc(100% + 8px)!important;
-  right:0!important;
-  width:min(235px,calc(100vw - 28px))!important;
-  max-height:min(400px,65dvh);
-  overflow-y:auto;
-  gap:5px;
-  padding:9px!important;
-  border-radius:18px;
-  background:#f2f6e5f7;
-  border:2px solid #fff9e5;
-  box-shadow:0 9px 19px rgba(33,56,28,.28);
-  z-index:40!important;
-}
-main.farm-mode .farm-pages-menu.hidden{display:none!important}
-main.farm-mode .farm-pages-menu button{
-  display:block;
-  width:100%;
-  border:0;
-  text-align:start;
-  background:#e3edcff2;
-  color:#345d2c;
-  padding:11px 13px;
-  border-radius:12px;
-  font-size:14px;
-  font-weight:700;
-}
-main.farm-mode .farm-pages-menu button[aria-current="page"]{background:#d4e6b5}
 @media(max-height:680px){
-  main.farm-mode .collect-dock{bottom:calc(max(env(safe-area-inset-bottom),0px) + 10px)!important}
+  main.farm-mode .collect-dock{
+    bottom:calc(max(env(safe-area-inset-bottom),0px) + 78px)!important;
+  }
   main.farm-mode .collect-action button,
-  main.farm-mode .collect-info{min-height:57px!important;height:57px!important}
+  main.farm-mode .collect-info{
+    min-height:57px!important;
+    height:57px!important;
+  }
 }
-</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button id="farm-menu-toggle" onclick="toggleFarmMenu()" title="Farm pages" aria-label="Farm pages" aria-expanded="false">☰</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div><div id="farm-pages-menu" class="farm-pages-menu hidden" role="navigation" aria-label="Farm pages"></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
@@ -1702,21 +1682,7 @@ function invite(){let id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;let u
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){s.lang=x;save();render()}
-function toggleFarmMenu(){
-  const menu=document.getElementById('farm-pages-menu');
-  const toggle=document.getElementById('farm-menu-toggle');
-  if(!menu||tab!==0)return;
-  const show=menu.classList.contains('hidden');
-  menu.classList.toggle('hidden',!show);
-  if(toggle)toggle.setAttribute('aria-expanded',String(show));
-}
-function openTab(i){
-  const menu=document.getElementById('farm-pages-menu');
-  if(menu)menu.classList.add('hidden');
-  document.getElementById('farm-menu-toggle')?.setAttribute('aria-expanded','false');
-  tab=i;
-  render();
-}
+function openTab(i){tab=i;render()}
 
 /* One click / tap gives a short synthesized chicken-like cluck, without external audio. */
 let henovaCluckAudio=null;
@@ -1811,12 +1777,6 @@ function render(){
 updateFarmIdentity();
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
 const names=t(),icons=['🏡','🐣','📋','👥','💰'];
-const pagesMenu=document.getElementById('farm-pages-menu');
-if(pagesMenu){
-  pagesMenu.dir=s.lang==='ar'?'rtl':'ltr';
-  pagesMenu.innerHTML=icons.map((v,i)=>'<button type="button" onclick="openTab('+i+')"'+(tab===i?' aria-current="page"':'')+'>'+v+' '+names[i]+'</button>').join('');
-  if(tab!==0)pagesMenu.classList.add('hidden');
-}
 const labels=document.querySelectorAll('.stats small');if(labels.length===2){labels[0].textContent=s.lang==='ar'?'بيض':'EGGS';labels[1].textContent=s.lang==='ar'?'عملات':'COINS';}document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
 if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking" draggable="false"></div></div></div><div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+(s.lang==='ar'?'بيضة/س':'eggs/h')+'</strong><small id="clock">'+(p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+(s.lang==='ar'?'اجمع':'Collect')+' · <span id="collect-count">'+p+'</span>/60</button><div class="collect-meter"><div id="progress" style="width:'+p/60*100+'%"></div></div></div></section>'}
