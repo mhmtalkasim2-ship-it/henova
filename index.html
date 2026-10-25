@@ -110,12 +110,27 @@ main.farm-mode .panel .bar{direction:ltr}
  main.farm-mode .scene .windmill{bottom:43%;transform:scale(.8)}
  main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 252px)}
 }
+
+/* Farm composition v2.2 — keep middle of screen open for the animals */
+main.farm-mode .power-panel{position:absolute;top:calc(env(safe-area-inset-top) + 172px);bottom:auto;right:14px;left:auto;width:187px;padding:9px 11px;z-index:13;background:#faf5d8ed;border:1px solid #fff7d3;border-radius:14px}
+main.farm-mode .power-panel .power-head{align-items:center}.power-panel .power-head b{font-size:12px}.power-panel .power-stats{font-size:9px;line-height:1.3}.power-panel .power-boost{font-size:17px}
+main.farm-mode .power-panel .power-btn{font-size:10px;padding:7px 4px;margin-top:6px}
+main.farm-mode .scene .hen-barn{left:11%;bottom:32%;transform:scale(.72)}
+main.farm-mode .scene .windmill{right:12%;bottom:35%;transform:scale(.68)}
+main.farm-mode .scene .hen-characters{bottom:24%;left:9%;right:9%;font-size:48px;z-index:8}
+main.farm-mode .scene .farm-basket{bottom:35%;left:45%}
+main.farm-mode .scene .flowers{bottom:20%}
+main.farm-mode #view>.panel{bottom:calc(env(safe-area-inset-bottom) + 93px);padding:9px 13px 11px}
+main.farm-mode #view>.panel .primary{padding:11px}
+main.farm-mode .scene .orchard .tree-art{font-size:clamp(54px,13vw,90px)}
+main.farm-mode .scene .orchard .tree-art:nth-child(3),main.farm-mode .scene .orchard .tree-art:nth-child(4){top:38%}
+@media(max-height:720px){main.farm-mode .power-panel{top:calc(env(safe-area-inset-top) + 158px)}main.farm-mode .scene .hen-characters{bottom:26%;font-size:42px}}
 </style></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الدجاج','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
-let s;try{s=JSON.parse(localStorage.getItem(K))||{}}catch{s={}}s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:'en',fan:0,...s};s.hen={starter:1,...s.hen};let tab=0;
+let s;try{s=JSON.parse(localStorage.getItem(K))||{}}catch{s={}}s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:'en',fan:0,...s};s.hen={starter:1,...s.hen};if(!s.languageDefaultV2){s.lang='en';s.languageDefaultV2=true;localStorage.setItem(K,JSON.stringify(s));}let tab=0;
 const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem(K,JSON.stringify(s)),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const rate=()=>H.reduce((a,h)=>a+h[3]*(s.hen[h[0]]||0),0)*(1+[0,.10,.20,.35,.50,.75][Math.min(5,s.fan||0)]),prod=()=>Math.min(60,Math.floor(Math.max(0,Date.now()-s.start)*rate()/hr));
 function toast(m){let n=document.getElementById('notice');n.textContent=m;n.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>n.classList.add('hidden'),2700)}
