@@ -640,6 +640,23 @@ main.farm-mode .farm-user{background:#eef4e1e8!important;border-radius:36px!impo
 main.farm-mode .farm-tools button{background:#e9f1dddb!important;border-radius:19px!important}
 @media(max-height:710px){.farm-v3 .v3-barn{top:30%!important}.farm-v3 .v3-windmill{top:30%!important}}
 
+
+/* HENOVA VIDEO MOTION: roaming hen across the grass like the reference */
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:0!important;bottom:auto!important;top:0!important;width:clamp(63px,15vw,94px)!important;transform:translate(0,0);transition:none!important;animation:henovaRoam 19s linear infinite!important;will-change:transform}
+main.farm-mode .farm-v3 .farm-hen.hen-a img{width:100%;animation:henovaStepPeck 2.3s ease-in-out infinite!important;transform-origin:53% 78%!important}
+@keyframes henovaRoam{
+0%{transform:translate(46vw,67vh) scaleX(1)}
+17%{transform:translate(53vw,64vh) scaleX(1)}
+30%{transform:translate(61vw,68vh) scaleX(1)}
+46%{transform:translate(67vw,72vh) scaleX(1)}
+48%{transform:translate(67vw,72vh) scaleX(-1)}
+69%{transform:translate(47vw,72vh) scaleX(-1)}
+83%{transform:translate(34vw,66vh) scaleX(-1)}
+85%{transform:translate(34vw,66vh) scaleX(1)}
+100%{transform:translate(46vw,67vh) scaleX(1)}
+}
+@keyframes henovaStepPeck{0%,70%,100%{transform:translateY(0) rotate(0)}12%,35%{transform:translateY(-3px) rotate(-3deg)}22%,43%{transform:translateY(1px) rotate(2deg)}77%,84%{transform:translateY(5px) rotate(12deg)}90%{transform:translateY(0) rotate(0)}}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a,main.farm-mode .farm-v3 .farm-hen.hen-a img{animation:none!important;transform:translate(48vw,69vh)!important}}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
