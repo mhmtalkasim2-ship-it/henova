@@ -281,6 +281,15 @@ main.farm-mode .scene.realistic-ready .farm-hen{display:block!important;opacity:
 main.farm-mode .scene.realistic-ready .farm-hen.hen-a{left:30%;bottom:23%;width:clamp(63px,17vw,90px)}
 main.farm-mode .scene.realistic-ready .farm-hen.hen-b{left:52%;bottom:28%;width:clamp(66px,18vw,94px)}
 main.farm-mode .scene.realistic-ready .farm-hen.hen-c{left:43%;bottom:17%;width:clamp(55px,15vw,80px)}
+
+/* 2026-10-25: preserve original image proportions (never stretch). */
+main.farm-mode .scene.realistic-ready{
+ background-image:linear-gradient(#102a0a08,#102a0a08),url('./assets/henova-farm-scene.jpg')!important;
+ background-size:cover!important;
+ background-position:50% 50%!important;
+ image-rendering:auto;
+}
+main.farm-mode .scene.realistic-ready .farm-hen{opacity:.84;filter:drop-shadow(0 5px 3px #224b2455)}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
