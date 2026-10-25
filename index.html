@@ -972,11 +972,11 @@ main.farm-mode #farm-scene.farm-v3{
  background-color:#608e3d!important;
  background-image:
    url('./assets/henova-real-basket-and-hay-v2.svg?v=1'),
-   url('./assets/henova-game-scene-v1.svg?v=8')!important;
+   url('./assets/henova-game-scene-v2.svg?v=1')!important;
  background-size:100% 100%,100% 100%!important;
  background-position:center center,center center!important;
  background-repeat:no-repeat,no-repeat!important;
- filter:saturate(.90) contrast(1.07) brightness(.94)!important;
+ filter:none!important; /* avoid heavy GPU filtering and stray pixel artifacts */
 }
 main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
  filter:drop-shadow(2px 7px 4px #23412172)!important;
@@ -987,6 +987,29 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
  main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
    animation:none!important;
  }
+}
+
+/* HENOVA V12 — clean natural composition and readable, correctly scaled bird. */
+main.farm-mode #farm-scene.farm-v3{
+  background-color:#5f8f43!important;
+  image-rendering:auto!important;
+  transform:none!important;
+  backface-visibility:visible!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  width:clamp(80px,20vw,122px)!important;
+  z-index:12!important;
+  will-change:auto!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+  image-rendering:auto!important;
+  filter:drop-shadow(1px 4px 2px rgba(32,55,27,.25))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
+  will-change:auto!important;
+}
+@media(max-width:380px){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{width:clamp(78px,22vw,100px)!important}
 }
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
