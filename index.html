@@ -1712,10 +1712,18 @@ async function henovaAction(action,item){
   const previousEggs=s.eggs;
   const hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());
   try{
-    const requestId=crypto.randomUUID();
+    // Reuse the identical request ID after network failure: no duplicate payouts.
+    const pendingKey='henova-pending-action-v1';
+    let pending=null;try{pending=JSON.parse(localStorage.getItem(pendingKey))}catch{}
+    if(pending && (pending.action!==action || pending.item!==(item||null))){
+      return toast('Previous action pending; retry it first');
+    }
+    const requestId=pending?.requestId||crypto.randomUUID();
+    if(!pending)localStorage.setItem(pendingKey,JSON.stringify({action,item:item||null,requestId}));
     const result=await henovaCall(action,{requestId,...(item?{item}:{})});
     const fresh=await henovaCall('state');
     henovaApplyState(fresh.state);
+    localStorage.removeItem('henova-pending-action-v1');
     render();
     if(action==='collect'){
       const diff=Math.max(0,s.eggs-previousEggs);
@@ -1726,6 +1734,9 @@ async function henovaAction(action,item){
   }catch(error){
     console.warn('HENOVA action not confirmed',error);
     toast('Action not confirmed: '+String(error.message||'server_error').slice(0,36));
+    if(['no_eggs','already_claimed','insufficient_coins','invalid_hen','max_boost','invalid_request_id'].includes(error.message)){
+      localStorage.removeItem('henova-pending-action-v1');
+    }
     try{const fresh=await henovaCall('state');henovaApplyState(fresh.state);render()}catch{}
   }finally{henovaBusy=false}
 }
