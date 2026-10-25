@@ -574,6 +574,42 @@ main.farm-mode .stats{flex-direction:row-reverse!important}
 main.farm-mode .stats>div{min-height:49px!important}
 main.farm-mode .collect-dock{min-height:54px!important;padding:5px!important}
 main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 56px)!important}
+
+/* HENOVA v4 — unified farm composition; override older competing layouts */
+main.farm-mode #farm-scene.farm-v3{
+ background:linear-gradient(180deg,#bdd9b6 0%,#9dca7c 18%,#8cbc63 47%,#71a44b 100%)!important;
+ background-image:radial-gradient(ellipse at 52% 12%,#e6ebbd9e 0%,transparent 58%),linear-gradient(180deg,#b9d8b0 0%,#94c176 43%,#6e9d49 100%)!important;
+ isolation:isolate;
+}
+.farm-v3 .v3-field{inset:0!important;background:
+ radial-gradient(ellipse at 60% 71%,#b0c67a75,transparent 58%),
+ repeating-linear-gradient(93deg,transparent 0 53px,#3c6f2510 55px 57px),
+ linear-gradient(180deg,transparent,#537c3030)!important;z-index:0}
+.farm-v3 .v3-tree.t1{top:14%!important;left:-27%!important;transform:scale(.86)!important}
+.farm-v3 .v3-tree.t2{top:12%!important;right:-29%!important;transform:scale(.83)!important}
+.farm-v3 .v3-tree.t3{bottom:15%!important;left:-39%!important;transform:scale(.7)!important}
+.farm-v3 .v3-fence{top:37%!important;height:8%!important;opacity:.74!important;z-index:1!important;filter:blur(.35px) drop-shadow(0 3px 2px #314c2c55)!important}
+.farm-v3 .v3-barn{top:30%!important;left:7%!important;width:39%!important;height:21%!important;z-index:2!important;filter:drop-shadow(1px 8px 6px #22472b45)}
+.farm-v3 .v3-windmill{top:29%!important;right:7%!important;width:26%!important;height:20%!important;z-index:2!important;filter:drop-shadow(1px 7px 5px #24472d44)}
+.farm-v3 .v3-lane{top:49%!important;left:28%!important;width:28%!important;bottom:-12%!important;background:linear-gradient(90deg,#a77e516b,#e0bb8288 27%,#e6c89595 66%,#a77e516b)!important;border-radius:45% 45% 0 0!important;opacity:.75}
+.farm-v3 .v3-nest{top:59%!important;left:9%!important;font-size:clamp(30px,8vw,45px)!important}
+.farm-v3 .v3-feeder{top:62%!important;left:49%!important;width:25%!important;z-index:5!important}
+.farm-v3 .v3-hay{bottom:27%!important;left:3%!important;font-size:clamp(34px,9vw,58px)!important;opacity:.85}
+.farm-v3 .v3-pond{bottom:24%!important;right:-7%!important;width:29%!important;opacity:.74!important}
+.farm-v3 .v3-grain{bottom:19%!important;left:38%!important;width:47%!important;z-index:6!important}
+main.farm-mode .farm-v3 .farm-hen{z-index:8!important;filter:drop-shadow(1px 6px 3px #28432878)!important;transition:left .4s ease}
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:36%!important;bottom:19%!important;width:clamp(68px,18vw,112px)!important}
+main.farm-mode .farm-v3 .farm-hen.hen-b{left:62%!important;bottom:18%!important;width:clamp(67px,17vw,105px)!important}
+main.farm-mode .farm-v3 .farm-hen.hen-c{left:49%!important;bottom:25%!important;width:clamp(56px,15vw,91px)!important}
+.farm-v3 .farm-hen.hen-a img{animation:henovaPeck 3.1s ease-in-out infinite -1.1s!important;transform-origin:68% 77%!important}
+.farm-v3 .farm-hen.hen-b img{animation:henovaPeck 3.7s ease-in-out infinite -.3s!important;transform-origin:68% 77%!important}
+.farm-v3 .farm-hen.hen-c img{animation:henovaPeck 2.4s ease-in-out infinite -1.7s!important;transform-origin:68% 77%!important}
+@keyframes henovaPeck{0%,17%,67%,100%{transform:rotate(0) translateY(0)}26%,39%,52%{transform:rotate(14deg) translateY(6px)}33%,46%{transform:rotate(4deg) translateY(2px)}}
+main.farm-mode .collect-dock{min-height:56px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 81px)!important;z-index:20!important}
+main.farm-mode .collect-action button{font-size:14px!important;padding:8px 10px!important}
+@media(max-width:390px){main.farm-mode .farm-v3 .farm-hen.hen-a{left:34%!important}main.farm-mode .farm-v3 .farm-hen.hen-b{left:64%!important}}
+@media(prefers-reduced-motion:reduce){.farm-v3 .farm-hen img{animation:none!important}}
+
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
