@@ -178,7 +178,15 @@ main.farm-mode .collect-dock{position:absolute;display:flex;align-items:center;g
 .collect-action button{font-size:20px;font-weight:900;color:#684116;border:0;border-radius:15px;background:linear-gradient(#ffdf72,#f3af28);width:100%;padding:11px 6px;box-shadow:0 4px #c98925}.collect-action button:disabled{opacity:.65}
 .collect-meter{height:5px;border-radius:8px;background:#d9d9b8;margin-top:7px;overflow:hidden}.collect-meter div{height:100%;background:#fff1a0;transition:width .4s}
 @media(max-height:720px){main.farm-mode .scene .hen-barn{bottom:51%;transform:scale(.77)}main.farm-mode .scene .windmill{bottom:51%;transform:scale(.70)}main.farm-mode .collect-dock{bottom:calc(env(safe-area-inset-bottom) + 78px)}}
-</style></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+
+/* Fullscreen Telegram Mini App safe positioning */
+:root{--henova-top-safe:env(safe-area-inset-top,0px);--henova-bottom-safe:env(safe-area-inset-bottom,0px)}
+@supports(height:100dvh){main.farm-mode{height:100dvh}}
+main.farm-mode>header{top:calc(max(16px,var(--henova-top-safe)) + 33px)}
+main.farm-mode .stats{top:calc(max(16px,var(--henova-top-safe)) + 112px)}
+main.farm-mode .collect-dock{bottom:calc(max(0px,var(--henova-bottom-safe)) + 85px)}
+main.farm-mode nav{padding-bottom:max(0px,var(--henova-bottom-safe))}
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
@@ -209,5 +217,16 @@ if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class=
 if(tab===0)prepareFarmArtwork();
 }
 render();setInterval(()=>{if(tab!==0)return;let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));let a=document.getElementById('collect-count'),b=document.getElementById('progress'),c=document.getElementById('clock'),d=document.getElementById('collect'),e=document.getElementById('rate');if(a&&b&&c&&d){a.textContent=p;b.style.width=p/60*100+'%';c.textContent=p>=60?'Basket full':'Full in '+time(secs);d.disabled=!p;if(e)e.textContent=num(r)}},1000);
-try{window.Telegram?.WebApp?.ready();window.Telegram?.WebApp?.expand()}catch{}
+try{
+ const app=window.Telegram?.WebApp;
+ if(app){
+  app.ready();
+  app.expand();
+  app.setHeaderColor?.('#347b48');
+  app.setBackgroundColor?.('#72b452');
+  if(typeof app.requestFullscreen==='function' && (app.isVersionAtLeast?.('8.0') ?? true)){
+    app.requestFullscreen();
+  }
+ }
+}catch(e){console.warn('Telegram fullscreen unavailable:',e)}
 </script></body></html>
