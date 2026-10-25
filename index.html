@@ -31,6 +31,22 @@ main{background:linear-gradient(180deg,#def5ed 0%,#f5f9e6 45%,#fff9e8 100%)}
 .power-btn:disabled{background:#b5c3a3;box-shadow:none}
 @keyframes windspin{to{transform:rotate(360deg)}}@keyframes floaty{50%{transform:translateY(-8px)}}@keyframes chickenwalk{50%{transform:translateY(-7px)}}
 @media(prefers-reduced-motion:reduce){.rotor,.hen-characters,.scene .cloud{animation:none}}
+
+/* HENOVA spacious mobile layout: edge-to-edge farm, compact controls */
+html,body{width:100%;overflow-x:hidden}
+main{width:100%;max-width:760px;padding:12px 10px 98px}
+header{padding:3px 6px;margin-bottom:10px}
+.stats{gap:8px}.stats>div{padding:10px 8px;min-width:0;border-radius:14px}.stats b{font-size:20px}
+.title{font-size:24px;margin:16px 5px 12px}
+.scene{width:calc(100% + 20px);margin-left:-10px;margin-right:-10px;border:0;border-radius:0;height:clamp(355px,74vh,690px);box-shadow:0 8px 20px #316b3230}
+.scene .hen-barn{left:15%;bottom:27%;transform:scale(1.20);transform-origin:center bottom}
+.scene .windmill{right:13%;bottom:29%;transform:scale(1.23);transform-origin:center bottom}
+.scene .farm-path{height:38%;left:37%;bottom:-10%}
+.scene .hen-characters{bottom:10%;font-size:clamp(49px,12vw,72px)}
+.scene .farm-basket{bottom:22%;left:50%;font-size:43px}
+.panel,.power-panel,.item{border-radius:17px;padding:15px;margin:13px 2px}
+.bottom-nav,nav{max-width:760px;border-radius:17px 17px 0 0}
+@media(min-width:600px){main{padding-left:18px;padding-right:18px}.scene{width:100%;margin:0;border-radius:24px}.scene .hen-barn{left:22%}}
 </style></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
