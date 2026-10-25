@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 220" width="240" height="220">
+<defs>
+<linearGradient id="body" x2=".7" y2="1"><stop stop-color="#fff8c2"/><stop offset=".56" stop-color="#f0c854"/><stop offset="1" stop-color="#c39130"/></linearGradient>
+<linearGradient id="wing" x2=".6" y2="1"><stop stop-color="#fffbd1"/><stop offset=".75" stop-color="#e6bd4e"/><stop offset="1" stop-color="#b98831"/></linearGradient>
+<linearGradient id="crest" x2=".7" y2="1"><stop stop-color="#f3684d"/><stop offset="1" stop-color="#b62e2b"/></linearGradient>
+</defs>
+<ellipse cx="121" cy="205" rx="88" ry="10" fill="#355f34" opacity=".24"/>
+<g stroke="#8b5a30" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+<path d="M116 179l-4 25-17 5m17-5 10 6m-10-6 2 9"/>
+<path d="M151 175l-1 26-18 8m18-8 15 7m-15-7-2 11"/>
+</g>
+<g fill="url(#body)" stroke="#a77c2c" stroke-width="4.5" stroke-linejoin="round">
+<path d="M65 138Q15 120 21 89Q43 106 65 108Q32 86 43 62Q73 89 89 107Q70 62 90 43Q113 86 109 118Z"/>
+<path d="M46 149Q17 135 21 109Q52 128 76 120Z"/>
+</g>
+<path d="M53 134Q46 93 86 86Q124 74 155 96Q192 119 179 161Q160 194 101 189Q50 183 53 134Z" fill="url(#body)" stroke="#a27c38" stroke-width="5" stroke-linejoin="round"/>
+<path d="M70 139Q84 99 140 111Q165 123 146 151Q120 180 89 167Q69 157 70 139Z" fill="url(#wing)" stroke="#c69b46" stroke-width="3.8"/>
+<g fill="none" stroke="#ffe399" stroke-width="3" stroke-linecap="round">
+<path d="M88 137q11 14 25 19M101 128q10 12 25 19M112 122q12 10 23 14M82 149q9 12 19 14"/>
+</g>
+<path d="M149 100Q145 54 169 39Q193 29 206 52Q219 81 207 108Q201 130 184 133Q157 132 149 100Z" fill="url(#body)" stroke="#a27c38" stroke-width="4.7"/>
+<path d="M169 48Q151 35 158 19Q163 11 174 25Q179 5 188 8Q198 10 195 28Q206 10 213 20Q219 28 207 46Z" fill="url(#crest)" stroke="#972b29" stroke-width="3.2" stroke-linejoin="round"/>
+<path d="M207 76Q225 73 234 84Q223 98 204 96Z" fill="#efb64c" stroke="#9b6b38" stroke-width="3"/>
+<path d="M196 99q17 4 10 22q-10 12-19-4q-11-14 3-21" fill="url(#crest)" stroke="#a83e32" stroke-width="3"/>
+<circle cx="196" cy="68" r="5.9" fill="#40332d"/><circle cx="198" cy="66" r="2.1" fill="#fffdf6"/>
+<path d="M156 126Q173 140 178 155" fill="none" stroke="#dbba62" stroke-width="3"/>
+<path d="M79 174q47 22 87-4" fill="none" stroke="#fff1b0" stroke-width="3.7" opacity=".9"/>
+</svg>
