@@ -311,6 +311,16 @@ main.farm-mode .scene:not(.realistic-ready) .pond{filter:saturate(.65) drop-shad
 main.farm-mode .scene:not(.realistic-ready) .grain-trough{filter:saturate(.75) drop-shadow(3px 5px 5px #243f2960)}
 main.farm-mode .scene:not(.realistic-ready) .farm-hen img{filter:saturate(.7) contrast(1.07) drop-shadow(4px 8px 6px #192d2388)}
 main.farm-mode .scene:not(.realistic-ready) .cloud{display:none!important}
+
+/* Compact harvest controls and realistic feathered birds */
+main.farm-mode .collect-dock{min-height:53px!important;padding:5px 8px!important;gap:7px!important;border-radius:15px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 83px)!important}
+main.farm-mode .collect-info{flex-basis:38%;font-size:11px!important}
+main.farm-mode .collect-info strong{font-size:12px!important}
+main.farm-mode .collect-info small{font-size:10px!important}
+main.farm-mode .collect-action button{font-size:14px!important;padding:7px 4px!important;border-radius:11px!important;box-shadow:0 3px #b97a20!important}
+main.farm-mode .collect-meter{height:3px!important;margin-top:5px!important}
+main.farm-mode .scene .farm-hen img{filter:saturate(.8) contrast(1.09) drop-shadow(2px 5px 3px #1b342388)!important}
+main.farm-mode .scene .farm-hen.hen-b img{filter:sepia(.38) saturate(.9) contrast(1.13) drop-shadow(2px 5px 3px #1b342388)!important}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
