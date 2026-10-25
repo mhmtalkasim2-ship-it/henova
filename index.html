@@ -1447,6 +1447,10 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a:focus-visible{
   }
 }
 
+/* Final hide of legacy illustrated feeder/hay blocks: never overlap the photo props. */
+main.farm-mode #farm-scene.farm-v3 .v3-feeder,
+main.farm-mode #farm-scene.farm-v3 .v3-hay,
+main.farm-mode #farm-scene.farm-v3 .v3-hay-bales{display:none!important}
 /* HENOVA V13 — authentic photography for feeder and hay, real farm audio on tap.
    The separate overlays never block collect buttons or the walking hen. */
 main.farm-mode #farm-scene.farm-v3 .henova-real-hay{
@@ -1485,7 +1489,7 @@ main.farm-mode #farm-scene.farm-v3 .henova-real-feeder .henova-feeder-photo{
  main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{width:29%!important;left:39%!important}
 }
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
-<div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Feeder photograph: <a href="https://commons.wikimedia.org/wiki/File:Mangiatoia_per_galline.jpg" target="_blank" rel="noopener">Marica Massaro</a> (CC BY-SA 4.0). Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
+<div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Feeder photograph (cropped): <a href="https://commons.wikimedia.org/wiki/File:Mangiatoia_per_galline.jpg" target="_blank" rel="noopener">Marica Massaro</a> (CC BY-SA 4.0). Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الحزم','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
@@ -1520,6 +1524,10 @@ function henovaPlayCluck(){
     henovaCluckAudio.currentTime=0;
     const playPromise=henovaCluckAudio.play();
     if(playPromise && typeof playPromise.catch==='function')playPromise.catch(()=>{});
+    clearTimeout(window.henovaCluckStop);
+    window.henovaCluckStop=setTimeout(()=>{
+      if(henovaCluckAudio && !henovaCluckAudio.paused)henovaCluckAudio.pause();
+    },2100);
   }catch(error){console.warn('Real hen recording unavailable',error);}
 }
 function henovaTapHen(event){
