@@ -1751,7 +1751,7 @@ function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');return henovaAction('purchase',id)}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');return henovaAction('boost')}
 function daily(){return henovaAction('daily')}
-function henovaJoinLink(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_FARM')||window.open('https://t.me/HENOVA_FARM','_blank');}
+function henovaJoinLink(){const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink('https://t.me/HENOVA_FARM');else window.open('https://t.me/HENOVA_FARM','_blank');}
 async function henovaClaimChannel(){
   if(!henovaReady||henovaChannelChecking)return;
   if(henovaChannelNext>Date.now())return toast('Reward available after cooldown');
