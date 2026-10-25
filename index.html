@@ -1697,13 +1697,13 @@ const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Wit
 // Balances are now server-authoritative. Only the visual language setting stays local.
 let preference={};try{preference=JSON.parse(localStorage.getItem('henova-display-preferences-v1'))||{}}catch{}
 let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:'en',fan:0};
-let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0;
+let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0;
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
 function henovaApplyState(st){
   if(!st || !Number.isFinite(st.eggs) || !Number.isFinite(st.coins))throw Error('invalid_server_state');
   s.eggs=st.eggs;s.coins=st.coins;s.hen=st.hen||{starter:1};s.fan=st.fan||0;
-  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);henovaReferralCoins=Math.max(0,Number(st.referral_coins_earned)||0);
+  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);henovaReferralCoins=Math.max(0,Number(st.referral_coins_earned)||0);henovaChannelNext=st.channel_next_at?Date.parse(st.channel_next_at):0;
 }
 async function henovaCall(action,details={}){
   const initData=window.Telegram?.WebApp?.initData;
@@ -1773,6 +1773,7 @@ function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');return henovaAction('purchase',id)}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');return henovaAction('boost')}
 function daily(){return henovaAction('daily')}
+function henovaOpenChannel(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_FARM')}
 async function henovaJoinReward(){
 const app=window.Telegram?.WebApp;
 if(!app?.initData)return toast('Open in Telegram');
@@ -1891,7 +1892,7 @@ if(tab===2){
 const claimed=s.daily===new Date().toLocaleDateString('en-CA');
 const name=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join Us';
 el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>Daily Login</h3><p>+100 Coins / day</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?'Claimed':'Claim')+'</button></article>'+
-'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 20 Coins / 6 hours</p></div><button onclick="henovaJoinReward()">Join & Claim</button></article>';
+'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 20 Coins / 6 hours</p><small id="join-timer">'+(Date.now()<henovaChannelNext?time(Math.ceil((henovaChannelNext-Date.now())/1000)):'Ready')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">Open Channel</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>Verify & Claim</button></div></article>';
 }
 if(tab===3){
 const w=s.lang==='ar'?
@@ -1912,7 +1913,7 @@ el.innerHTML='<section class="hv-friends-hero"><h1>'+w.heading+'</h1><p>'+w.sub+
 if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class="cover"><small>AVAILABLE EGGS</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>≈ '+(s.eggs*.0001).toFixed(4)+' GRAM</p></section><section class="panel"><div class="between"><b>'+names[7]+'</b><span class="badge">DEMO ONLY</span></div><p>Minimum: <b>50 eggs</b> = 0.005 GRAM</p><p>Withdrawal frequency: once every 24 hours</p><label class="muted">Eggs to withdraw</label><input id="qty" type="number" value="50" min="50"><p class="warning">Payouts and deposits are disabled until a secure, funded payment backend is configured.</p><button class="primary" disabled>Withdraw • Coming soon</button></section>';
 if(tab===0)prepareFarmArtwork();
 }
-render();henovaLoad();setInterval(()=>{if(tab!==0)return;let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6)),elapsed=Math.min(6*hr,Math.max(0,Date.now()-s.start));let a=document.getElementById('collect-count'),b=document.getElementById('progress'),c=document.getElementById('clock'),d=document.getElementById('collect'),e=document.getElementById('rate');if(a&&b&&c&&d){a.textContent=p;b.style.width=(elapsed/(6*hr)*100)+'%';c.textContent=secs===0?(s.lang==='ar'?'انتهت 6 ساعات — اجمع البيض':'6 hours completed — collect eggs'):(s.lang==='ar'?'المتبقي: ':'Remaining: ')+time(secs);d.disabled=!p;if(e)e.textContent=num(r)}},1000);
+render();henovaLoad();setInterval(()=>{if(tab===2){const x=document.getElementById('join-timer'),b=document.getElementById('join-claim');if(x){const secs=Math.max(0,Math.ceil((henovaChannelNext-Date.now())/1000));x.textContent=secs?time(secs):'Ready';if(b)b.disabled=!!secs;}}},1000);setInterval(()=>{if(tab!==0)return;let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6)),elapsed=Math.min(6*hr,Math.max(0,Date.now()-s.start));let a=document.getElementById('collect-count'),b=document.getElementById('progress'),c=document.getElementById('clock'),d=document.getElementById('collect'),e=document.getElementById('rate');if(a&&b&&c&&d){a.textContent=p;b.style.width=(elapsed/(6*hr)*100)+'%';c.textContent=secs===0?(s.lang==='ar'?'انتهت 6 ساعات — اجمع البيض':'6 hours completed — collect eggs'):(s.lang==='ar'?'المتبقي: ':'Remaining: ')+time(secs);d.disabled=!p;if(e)e.textContent=num(r)}},1000);
 function showFullscreenStatus(message){
   const el=document.getElementById('fullscreen-status');
   if(el){el.textContent=message;el.title=message;}
