@@ -954,6 +954,17 @@ main.farm-mode .farm-v3 .v3-windmill .v3-rotor{
  main.farm-mode .farm-v3 .v3-windmill .v3-rotor{animation:none!important}
 }
 
+
+/* HENOVA PHOTOREAL PROPS V1: real transparent cutouts, not SVG illustrations */
+main.farm-mode #farm-scene.farm-v3{
+ background-color:#73ad43!important;
+ background-image:
+   url('./assets/henova-real-basket-and-hay-v1.svg?v=2'),
+   url('./assets/henova-game-scene-v1.svg?v=7')!important;
+ background-size:100% 100%,100% 100%!important;
+ background-position:center center,center center!important;
+ background-repeat:no-repeat,no-repeat!important;
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
