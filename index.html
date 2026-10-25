@@ -1669,15 +1669,74 @@ main.farm-mode .collect-meter{display:none!important}
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الحزم','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
-let s;try{s=JSON.parse(localStorage.getItem(K))||{}}catch{s={}}s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:'en',fan:0,...s};s.hen={starter:1,...s.hen};if(!s.languageDefaultV2){s.lang='en';s.languageDefaultV2=true;localStorage.setItem(K,JSON.stringify(s));}let tab=0;
-const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem(K,JSON.stringify(s)),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
+// Balances are now server-authoritative. Only the visual language setting stays local.
+let preference={};try{preference=JSON.parse(localStorage.getItem('henova-display-preferences-v1'))||{}}catch{}
+let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:'en',fan:0};
+let tab=0,henovaReady=false,henovaBusy=false;
+const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
+function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
+function henovaApplyState(st){
+  if(!st || !Number.isFinite(st.eggs) || !Number.isFinite(st.coins))throw Error('invalid_server_state');
+  s.eggs=st.eggs;s.coins=st.coins;s.hen=st.hen||{starter:1};s.fan=st.fan||0;
+  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';
+}
+async function henovaCall(action,details={}){
+  const initData=window.Telegram?.WebApp?.initData;
+  if(!initData)throw Error('Open HENOVA inside Telegram');
+  const response=await fetch(HENOVA_API_URL,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({initData,action,...details}),cache:'no-store'
+  });
+  const data=await response.json();
+  if(!response.ok || data?.ok===false)throw Error(String(data?.error||'server_unavailable'));
+  return data;
+}
+async function henovaLoad(){
+  if(!henovaIsTelegram()){render();return;}
+  try{
+    const data=await henovaCall('state');
+    henovaApplyState(data.state);
+    henovaReady=true;
+    render();
+  }catch(error){
+    henovaReady=false;
+    console.warn('HENOVA initial sync failed',error);
+    toast('Unable to sync HENOVA. Reopen the app to retry.');
+    render();
+  }
+}
+async function henovaAction(action,item){
+  if(!henovaReady)return toast('Connecting to HENOVA server');
+  if(henovaBusy)return;
+  henovaBusy=true;
+  const previousEggs=s.eggs;
+  const hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());
+  try{
+    const requestId=crypto.randomUUID();
+    const result=await henovaCall(action,{requestId,...(item?{item}:{})});
+    const fresh=await henovaCall('state');
+    henovaApplyState(fresh.state);
+    render();
+    if(action==='collect'){
+      const diff=Math.max(0,s.eggs-previousEggs);
+      if(diff>0){playCollectEggs(hens,diff);toast('+'+diff+' eggs collected!')}
+    }else if(action==='daily')toast('+100 Coins!');
+    else if(action==='purchase')toast('New hen added!');
+    else if(action==='boost')toast('Power upgraded!');
+  }catch(error){
+    console.warn('HENOVA action not confirmed',error);
+    toast('Action not confirmed: '+String(error.message||'server_error').slice(0,36));
+    try{const fresh=await henovaCall('state');henovaApplyState(fresh.state);render()}catch{}
+  }finally{henovaBusy=false}
+}
+const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem('henova-display-preferences-v1',JSON.stringify({lang:s.lang})),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const rate=()=>H.reduce((a,h)=>a+h[3]*(s.hen[h[0]]||0),0)*(1+[0,.10,.20,.35,.50,.75][Math.min(5,s.fan||0)]),prod=()=>Math.min(60,Math.floor(Math.max(0,Date.now()-s.start)*rate()/hr));
 function toast(m){let n=document.getElementById('notice');n.textContent=m;n.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>n.classList.add('hidden'),2700)}
-function collect(){let q=prod();if(!q)return toast('No eggs available yet');let hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());s.eggs+=q;s.start=Date.now();save();render();playCollectEggs(hens,q);toast(s.lang==='ar'?'تم جمع '+q+' بيضات!':s.lang==='tr'?q+' yumurta toplandı!':'+'+q+' eggs collected!')}
+function collect(){if(!prod())return toast('No eggs available yet');return henovaAction('collect')}
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
-function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');s.coins-=h[4];s.hen[id]=(s.hen[id]||0)+1;save();render();toast('New hen added!')}
-function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');/* Close elapsed cycle before changing rate to avoid retroactive gains */let pending=prod();s.coins-=prices[lv];s.fan=lv+1;s.start=Date.now()-Math.ceil(pending*hr/rate());save();render();toast('Power upgraded to level '+s.fan+'!')}
-function daily(){let d=new Date().toLocaleDateString('en-CA');if(s.daily===d)return;s.daily=d;s.coins+=100;save();render();toast('+100 Coins!')}
+function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');return henovaAction('purchase',id)}
+function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');return henovaAction('boost')}
+function daily(){return henovaAction('daily')}
 function invite(){let id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;let u='https://t.me/HenovaEggsBot'+(id?'?startapp=ref_'+id:'');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
@@ -1786,7 +1845,7 @@ if(tab===3)el.innerHTML='<h1 class="title">🤝 '+names[3]+'</h1><section class=
 if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class="cover"><small>AVAILABLE EGGS</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>≈ '+(s.eggs*.0001).toFixed(4)+' GRAM</p></section><section class="panel"><div class="between"><b>'+names[7]+'</b><span class="badge">DEMO ONLY</span></div><p>Minimum: <b>50 eggs</b> = 0.005 GRAM</p><p>Withdrawal frequency: once every 24 hours</p><label class="muted">Eggs to withdraw</label><input id="qty" type="number" value="50" min="50"><p class="warning">Payouts and deposits are disabled until a secure, funded payment backend is configured.</p><button class="primary" disabled>Withdraw • Coming soon</button></section>';
 if(tab===0)prepareFarmArtwork();
 }
-render();setInterval(()=>{if(tab!==0)return;let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));let a=document.getElementById('collect-count'),b=document.getElementById('progress'),c=document.getElementById('clock'),d=document.getElementById('collect'),e=document.getElementById('rate');if(a&&b&&c&&d){a.textContent=p;b.style.width=p/60*100+'%';c.textContent=p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs);d.disabled=!p;if(e)e.textContent=num(r)}},1000);
+render();henovaLoad();setInterval(()=>{if(tab!==0)return;let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));let a=document.getElementById('collect-count'),b=document.getElementById('progress'),c=document.getElementById('clock'),d=document.getElementById('collect'),e=document.getElementById('rate');if(a&&b&&c&&d){a.textContent=p;b.style.width=p/60*100+'%';c.textContent=p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs);d.disabled=!p;if(e)e.textContent=num(r)}},1000);
 function showFullscreenStatus(message){
   const el=document.getElementById('fullscreen-status');
   if(el){el.textContent=message;el.title=message;}
