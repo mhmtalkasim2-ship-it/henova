@@ -1488,6 +1488,29 @@ main.farm-mode #farm-scene.farm-v3 .henova-real-feeder .henova-feeder-photo{
 @media(max-width:380px){
  main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{width:29%!important;left:39%!important}
 }
+
+/* HENOVA V14: truly transparent locally embedded real feeder cutout.
+   Override the old photo-with-ground CSS. Artwork and app logic remain intact. */
+main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{
+  position:absolute!important;
+  inset:0!important;
+  left:0!important;
+  top:0!important;
+  right:0!important;
+  bottom:0!important;
+  width:100%!important;
+  height:100%!important;
+  z-index:8!important;
+  background:transparent url('./assets/henova-feeder-cutout-v14.svg?v=1') center center/100% 100% no-repeat!important;
+  pointer-events:none!important;
+  overflow:visible!important;
+  filter:none!important;
+  transform:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-real-feeder .henova-feeder-photo{
+  display:none!important;
+  background-image:none!important;
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Feeder photograph (cropped): <a href="https://commons.wikimedia.org/wiki/File:Mangiatoia_per_galline.jpg" target="_blank" rel="noopener">Marica Massaro</a> (CC BY-SA 4.0). Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
