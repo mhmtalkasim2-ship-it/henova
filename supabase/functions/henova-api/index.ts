@@ -72,7 +72,7 @@ function publicState(player) {
     hen: { starter: player.starter_hens, red: player.red_hens, gold: player.gold_hens,
       royal: player.royal_hens, legend: player.legend_hens },
     fan: player.fan_level,
-    pending: Math.min(60, Math.floor(elapsed * rate / 3600000)),
+    pending: Math.floor(Math.min(6 * 3600000, elapsed) * rate / 3600000),
     rate, production_started_at: player.production_started_at,
     daily_claimed_on: player.last_daily_on,
   };
