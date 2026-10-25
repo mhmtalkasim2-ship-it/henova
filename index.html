@@ -1803,6 +1803,29 @@ function toggleTelegramFullscreen(){
     showFullscreenStatus('Requesting fullscreen');
   }catch(error){toast('Fullscreen request failed');showFullscreenStatus(String(error));}
 }
+/* One-off administrator connectivity test, only from an explicit Telegram startapp link.
+   No balances, eggs, purchases, or visuals are modified. Server enforces admin ID. */
+async function henovaAdminConnectionTest(){
+  const app=window.Telegram?.WebApp;
+  if(!app?.initData || app.initDataUnsafe?.start_param!=='henova_admin_test')return;
+  try{
+    const response=await fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'diagnostic',initData:app.initData}),
+      cache:'no-store'
+    });
+    const result=await response.json();
+    if(response.ok && result?.ok===true && result?.auth==='telegram_verified' && result?.database==='connected'){
+      toast('HENOVA server connection verified ✓');
+    }else{
+      toast('HENOVA server test: '+String(result?.error||'unavailable').slice(0,60));
+    }
+  }catch(error){
+    console.warn('HENOVA diagnostic network unavailable',error);
+    toast('HENOVA server test: connection unavailable');
+  }
+}
 function setupTelegram(){
   const app=window.Telegram?.WebApp;
   if(!app){showFullscreenStatus('Browser preview');return;}
@@ -1819,6 +1842,7 @@ function setupTelegram(){
       toast(reason==='UNSUPPORTED'?'Fullscreen not supported here':'Fullscreen: '+reason);
     });
     app.ready();
+    henovaAdminConnectionTest();
     app.expand();
     app.setHeaderColor?.('#347b48');
     app.setBackgroundColor?.('#72b452');
