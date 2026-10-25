@@ -1489,7 +1489,7 @@ main.farm-mode #farm-scene.farm-v3 .henova-real-feeder .henova-feeder-photo{
  main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{width:29%!important;left:39%!important}
 }
 
-/* HENOVA V14: truly transparent locally embedded real feeder cutout.
+/* HENOVA V15: real feeder displayed near native resolution to prevent huge, blurry and dirty photo cutout.
    Override the old photo-with-ground CSS. Artwork and app logic remain intact. */
 main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{
   position:absolute!important;
@@ -1501,7 +1501,7 @@ main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{
   width:100%!important;
   height:100%!important;
   z-index:8!important;
-  background:transparent url('./assets/henova-feeder-cutout-v14.svg?v=1') center center/100% 100% no-repeat!important;
+  background:transparent url('./assets/henova-feeder-cutout-v15.svg?v=15') center center/100% 100% no-repeat!important;
   pointer-events:none!important;
   overflow:visible!important;
   filter:none!important;
