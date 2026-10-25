@@ -696,6 +696,14 @@ main.farm-mode #farm-user-name{font-size:clamp(12px,3.5vw,17px)!important;overfl
 main.farm-mode .farm-tools{gap:4px!important}
 main.farm-mode .farm-tools button{width:clamp(35px,10vw,48px)!important;min-width:0!important;padding:7px!important}
 @media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important;transform:translate(58vw,67dvh)!important}}
+
+/* HENOVA ART REBUILD 1: independent illustrated game assets */
+main.farm-mode .farm-v3 .v3-nest{font-size:0!important;width:21%!important;height:12%!important;top:49%!important;left:5%!important;background:url('./assets/henova-nest-v1.svg') center/contain no-repeat!important;filter:drop-shadow(1px 6px 2px #33532668)!important}
+main.farm-mode .farm-v3 .v3-hay-bales{top:63%!important;left:1%!important;width:30%!important;height:13%!important;background:transparent url('./assets/henova-hay-v1.svg') center/contain no-repeat!important;border:0!important;box-shadow:none!important;transform:none!important;filter:drop-shadow(2px 6px 2px #34492a70)!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{width:clamp(62px,16vw,90px)!important;animation:henovaSafeRoam 18s linear infinite!important}
+main.farm-mode .farm-v3 .v3-lantern{font-size:25px!important}
+main.farm-mode .farm-v3 .v3-fence{opacity:.92!important}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important}}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
