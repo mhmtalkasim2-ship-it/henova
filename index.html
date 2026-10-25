@@ -193,6 +193,32 @@ main.farm-mode>header{display:flex;justify-content:space-between;gap:6px}
 main.farm-mode>header #fullscreen-toggle{margin-left:auto}
 .fullscreen-status{position:fixed;bottom:0;left:0;max-width:1px;max-height:1px;opacity:0;overflow:hidden;pointer-events:none}
 html.telegram-fullscreen main.farm-mode{height:100dvh}
+
+/* Approved HENOVA farm: layered artwork and live interactive HUD */
+main.farm-mode .scene.realistic-ready{
+ background-image:linear-gradient(#1b421411,#1b421405),url('./assets/henova-farm-scene.jpg')!important;
+ background-size:cover!important;background-position:center center!important;
+}
+main.farm-mode .scene.realistic-ready .farm-decor,
+main.farm-mode .scene.realistic-ready .orchard,
+main.farm-mode .scene.realistic-ready .cloud,
+main.farm-mode .scene.realistic-ready .farm-path,
+main.farm-mode .scene.realistic-ready .hen-barn,
+main.farm-mode .scene.realistic-ready .windmill,
+main.farm-mode .scene.realistic-ready .farm-basket,
+main.farm-mode .scene.realistic-ready .hen-characters,
+main.farm-mode .scene.realistic-ready .flowers {display:none!important}
+main.farm-mode > header{top:calc(max(env(safe-area-inset-top),22px) + 53px)!important;left:12px;right:12px;padding:7px 9px;border-radius:19px}
+main.farm-mode > header strong{font-size:19px!important;letter-spacing:1px}
+main.farm-mode > header small{font-size:9px}
+main.farm-mode > header button{padding:6px 9px!important;font-size:16px!important;border-radius:12px!important}
+main.farm-mode .stats{top:calc(max(env(safe-area-inset-top),22px) + 123px)!important}
+main.farm-mode .stats>div{padding:6px 9px!important;border-radius:16px!important}
+main.farm-mode .stats b{font-size:21px!important}
+main.farm-mode .collect-dock{min-height:67px;padding:7px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 81px)!important;border-radius:17px}
+main.farm-mode .collect-info strong{font-size:14px}
+main.farm-mode .collect-action button{font-size:17px;padding:10px 5px}
+@media(max-height:700px){main.farm-mode>header{top:calc(env(safe-area-inset-top) + 40px)!important}main.farm-mode .stats{top:calc(env(safe-area-inset-top) + 109px)!important}}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -211,7 +237,7 @@ function settings(){document.getElementById('lang').value=s.lang;document.getEle
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){s.lang=x;save();render()}
 function openTab(i){tab=i;render()}
-function prepareFarmArtwork(){let el=document.getElementById('farm-scene');if(!el)return;let im=new Image();im.onload=()=>el.classList.add('realistic-ready');im.onerror=()=>el.classList.remove('realistic-ready');im.src='./assets/farm-realistic.jpg'}
+function prepareFarmArtwork(){let el=document.getElementById('farm-scene');if(!el)return;let im=new Image();im.onload=()=>el.classList.add('realistic-ready');im.onerror=()=>el.classList.remove('realistic-ready');im.src='./assets/henova-farm-scene.jpg'}
 function render(){
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
 const names=t(),icons=['🏡','🐣','📋','👥','💰'];document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
