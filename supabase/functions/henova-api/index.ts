@@ -4,6 +4,41 @@
 import { createClient } from "npm:@supabase/supabase-js@2.95.0";
 
 const encoder = new TextEncoder();
+// Bot start button bootstrap: runs only after verified Telegram Mini App initData.
+// A pre-existing webhook on another URL is never overwritten.
+const HENOVA_BOT_MINIAPP_URL="https://mhmtalkasim2-ship-it.github.io/henova/";
+let henovaBotStartup=null;
+async function ensureHenovaStartButton(botToken,supabaseUrl){
+  const botApi=async(method,params={})=>{
+    const r=await fetch("https://api.telegram.org/bot"+botToken+"/"+method,{
+      method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify(params),signal:AbortSignal.timeout(10000)
+    });
+    const json=await r.json().catch(()=>null);
+    if(!r.ok||!json?.ok)throw new Error("telegram_"+method+"_error_"+(json?.error_code||r.status));
+    return json.result;
+  };
+  const endpoint=supabaseUrl+"/functions/v1/henova-bot-webhook";
+  const status=await botApi("getWebhookInfo");
+  const current=String(status?.url||"");
+  if(current && current!==endpoint){
+    console.warn("HENOVA bot has existing webhook; preserving its configuration");
+    return;
+  }
+  if(!current){
+    const bytes=await crypto.subtle.digest("SHA-256",encoder.encode("henova-webhook-1:"+botToken));
+    const secret=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,"0")).join("");
+    await botApi("setWebhook",{url:endpoint,secret_token:secret,allowed_updates:["message"],max_connections:10,drop_pending_updates:false});
+    console.info("HENOVA bot /start webhook registered");
+  }
+  await Promise.allSettled([
+    botApi("setMyCommands",{commands:[{command:"start",description:"Open HENOVA Farm"}]}),
+    botApi("setMyCommands",{language_code:"ar",commands:[{command:"start",description:"افتح مزرعة HENOVA"}]}),
+    botApi("setMyCommands",{language_code:"tr",commands:[{command:"start",description:"HENOVA çiftliğini aç"}]}),
+    botApi("setChatMenuButton",{menu_button:{type:"web_app",text:"🐔 Start",web_app:{url:HENOVA_BOT_MINIAPP_URL}}})
+  ]);
+}
+
 const allowedOrigin = Deno.env.get("HENOVA_ALLOWED_ORIGIN") || "https://mhmtalkasim2-ship-it.github.io";
 const responses = {
   "Content-Type": "application/json; charset=utf-8",
@@ -158,6 +193,18 @@ Deno.serve(async (request) => {
     return reply({ ok: false, error: "database_unavailable" }, 503);
   }
   const action = body?.action;
+  // Telegram initData is verified before this point. Leaderboard values are
+  // aggregated on the server from confirmed collection events, not client state.
+  if (action === "leaderboard") {
+    const { data, error } = await admin.rpc("henova_leaderboard", {
+      p_telegram_id: telegram.id,
+    });
+    if (error || !data?.ok) {
+      console.error("HENOVA leaderboard unavailable", error?.code || "unknown");
+      return reply({ ok: false, error: "leaderboard_unavailable" }, 503);
+    }
+    return reply(data);
+  }
   if (action === "join_channel") {
     const { data, error } = await admin.rpc("henova_claim_channel_reward", {
       p_telegram_id: telegram.id,
@@ -167,6 +214,13 @@ Deno.serve(async (request) => {
     return reply(data);
   }
   if (action === "state") {
+    // Best-effort bot chat setup on the next authenticated app opening.
+    if (!henovaBotStartup) {
+      henovaBotStartup=ensureHenovaStartButton(botToken,supabaseUrl).catch(error=>{
+        console.warn("HENOVA bot start setup deferred",String(error).slice(0,120));
+      });
+      try { EdgeRuntime.waitUntil(henovaBotStartup); } catch { /* unavailable in test runtimes */ }
+    }
     const { data, error } = await admin.from("henova_players")
       .select("egg_balance,coin_balance,starter_hens,red_hens,gold_hens,royal_hens,legend_hens,fan_level,production_started_at,last_daily_on,referral_eggs_earned,referral_coins_earned")
       .eq("telegram_id", telegram.id).single();
