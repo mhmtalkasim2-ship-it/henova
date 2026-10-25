@@ -404,6 +404,31 @@ main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{bottom:25%!important
 main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 58px)!important}
 main.farm-mode .stats{top:calc(max(env(safe-area-inset-top),16px) + 120px)!important}
 main.farm-mode .collect-dock{min-height:56px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 83px)!important}
+
+/* V2 scene rebuild: standalone detailed orchard background, with interactive layers */
+main.farm-mode .scene:not(.realistic-ready) {
+ background:#7cab54 url('./assets/farm-v2-orchard.svg') center center / cover no-repeat!important;
+}
+main.farm-mode .scene:not(.realistic-ready)::after{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .orchard,
+main.farm-mode .scene:not(.realistic-ready) .cloud,
+main.farm-mode .scene:not(.realistic-ready) .farm-path{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+ top:29%!important;bottom:auto!important;left:10%!important;width:clamp(148px,37vw,260px)!important;height:clamp(135px,21vh,220px)!important;
+ border:7px solid #dbc09b!important;
+ background:repeating-linear-gradient(90deg,#9d3f2d 0 13px,#c65538 14px 18px,#aa422e 19px 33px)!important;
+ box-shadow:inset -11px 0 12px #43211938,7px 11px 7px #25422266!important;z-index:6
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before{border-bottom-color:#604030!important;filter:drop-shadow(0 -7px 0 #947251) drop-shadow(0 5px 4px #221c1377)!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill{top:30%!important;bottom:auto!important;right:11%!important;transform:scale(.80)!important}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{top:53%!important;left:4%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{top:51%!important;left:43%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{top:65%!important;left:3%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .pond{top:65%!important;right:2%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{left:68%!important;bottom:20%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{left:60%!important;bottom:22%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{left:63%!important;bottom:22%!important}
+main.farm-mode .collect-dock{min-height:56px!important}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
