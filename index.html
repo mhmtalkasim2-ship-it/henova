@@ -552,6 +552,28 @@ main.farm-mode .farm-v3 .farm-hen.hen-c{left:51%!important;bottom:23%!important;
 .farm-v3 .farm-hen.hen-c img{animation:henovaEat 2.7s ease-in-out infinite;transform-origin:60% 74%}
 main.farm-mode .farm-v3 .farm-hen.hen-a img{animation:henovaEat 3.2s ease-in-out infinite;transform-origin:60% 74%}
 @media(prefers-reduced-motion:reduce){.farm-v3 .farm-hen img,.farm-v3 .v3-rotor,.farm-v3 .v3-pond i{animation:none!important}}
+
+/* HENOVA orchard match: layout in live app, not a static screenshot */
+main.farm-mode #farm-scene.farm-v3{background:#80bb51!important;background-image:radial-gradient(circle at 20% 53%,#9ccb67 0,transparent 33%),radial-gradient(circle at 85% 77%,#67a646 0,transparent 35%),linear-gradient(#83bf54,#75b34a)!important}
+.farm-v3 .v3-sun,.farm-v3 .v3-hills{display:none!important}
+.farm-v3 .v3-field{inset:0!important;background:radial-gradient(circle at 24% 21%,#a2d57055 0 2px,transparent 3px) 0 0/29px 31px,radial-gradient(circle at 62% 71%,#477a3760 0 2px,transparent 3px) 0 0/35px 41px!important}
+.farm-v3 .v3-tree{width:clamp(118px,31vw,195px)!important;height:clamp(120px,31vw,195px)!important;filter:drop-shadow(2px 7px 2px #29492377)!important}
+.farm-v3 .v3-tree.t1{top:1%!important;left:-10%!important}.farm-v3 .v3-tree.t2{top:0%!important;right:-10%!important}.farm-v3 .v3-tree.t3{bottom:9%!important;left:-21%!important}
+.farm-v3 .v3-fence{top:34%!important;height:10%!important}
+.farm-v3 .v3-barn{top:36%!important;left:8%!important;width:45%!important;height:23%!important}
+.farm-v3 .v3-windmill{top:36%!important;right:8%!important;width:31%!important;height:23%!important}
+.farm-v3 .v3-lane{top:55%!important;left:27%!important;width:23%!important;bottom:-8%!important;transform:skewX(5deg)!important}
+.farm-v3 .v3-nest{top:60%!important;left:5%!important}
+.farm-v3 .v3-feeder{top:58%!important;left:47%!important;width:26%!important}
+.farm-v3 .v3-hay{bottom:29%!important;left:5%!important}
+.farm-v3 .v3-pond{right:2%!important;bottom:30%!important;width:34%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:70%!important;bottom:18%!important;width:13%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-b{left:61%!important;bottom:21%!important;width:12%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-c{left:55%!important;bottom:24%!important;width:11%!important}
+main.farm-mode .stats{flex-direction:row-reverse!important}
+main.farm-mode .stats>div{min-height:49px!important}
+main.farm-mode .collect-dock{min-height:54px!important;padding:5px!important}
+main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 56px)!important}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
