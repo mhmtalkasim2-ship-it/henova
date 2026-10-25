@@ -1017,7 +1017,7 @@ main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
    No mining, claim, balance, navigation or reward logic is changed. */
 main.farm-mode #farm-scene.farm-v3,
 main.farm-mode #farm-scene.farm-v3:not(.realistic-ready){
- background:#88bf56 url('./assets/henova-orchard-v6.svg?v=20261025g') center center/100% 100% no-repeat!important;
+ background:#88bf56 url('./assets/henova-orchard-v6.svg?v=20261025h') center center/100% 100% no-repeat!important;
  image-rendering:auto!important;
  filter:none!important;
  opacity:1!important;
@@ -1446,8 +1446,46 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a:focus-visible{
     animation:none!important;
   }
 }
+
+/* HENOVA V13 — authentic photography for feeder and hay, real farm audio on tap.
+   The separate overlays never block collect buttons or the walking hen. */
+main.farm-mode #farm-scene.farm-v3 .henova-real-hay{
+ position:absolute!important;
+ inset:0!important;
+ width:100%!important;
+ height:100%!important;
+ z-index:6!important;
+ pointer-events:none!important;
+ background:transparent url('./assets/henova-photographic-hay-v13.svg?v=1') center/100% 100% no-repeat!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{
+ position:absolute!important;
+ left:40%!important;
+ top:37.7%!important;
+ width:27.5%!important;
+ height:12%!important;
+ z-index:8!important;
+ border:0!important;
+ background:transparent!important;
+ pointer-events:none!important;
+ filter:drop-shadow(2px 6px 3px rgba(31,59,32,.3))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-real-feeder .henova-feeder-photo{
+ width:100%!important;
+ height:100%!important;
+ background-image:url('https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Mangiatoia_per_galline.jpg/960px-Mangiatoia_per_galline.jpg')!important;
+ background-size:280% auto!important;
+ background-position:44% 80%!important;
+ background-repeat:no-repeat!important;
+ /* Soft feathered photo cutout around actual feeder, no hard rectangular frame. */
+ -webkit-mask-image:radial-gradient(ellipse 61% 65% at 50% 54%,#000 47%,transparent 97%)!important;
+ mask-image:radial-gradient(ellipse 61% 65% at 50% 54%,#000 47%,transparent 97%)!important;
+}
+@media(max-width:380px){
+ main.farm-mode #farm-scene.farm-v3 .henova-real-feeder{width:29%!important;left:39%!important}
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
-<div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
+<div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Feeder photograph: <a href="https://commons.wikimedia.org/wiki/File:Mangiatoia_per_galline.jpg" target="_blank" rel="noopener">Marica Massaro</a> (CC BY-SA 4.0). Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الحزم','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
@@ -1470,30 +1508,19 @@ function openTab(i){tab=i;render()}
 let henovaCluckAudio=null;
 function henovaPlayCluck(){
   if(window.henovaMuted)return;
+  const soundURL='https://upload.wikimedia.org/wikipedia/commons/4/44/Hen_announcing_shes_lain_an_egg.ogg';
   try{
-    const AudioEngine=window.AudioContext||window.webkitAudioContext;
-    if(!AudioEngine)return;
-    if(!henovaCluckAudio)henovaCluckAudio=new AudioEngine();
-    const ctx=henovaCluckAudio;
-    if(ctx.state==='suspended')ctx.resume().catch(()=>{});
-    const base=ctx.currentTime+.008;
-    // Three descending, percussive chirps reminiscent of a hen's cluck.
-    for(let i=0;i<3;i++){
-      const t=base+i*.115;
-      const osc=ctx.createOscillator(),band=ctx.createBiquadFilter(),vol=ctx.createGain();
-      osc.type='sawtooth';
-      osc.frequency.setValueAtTime(600-i*75,t);
-      osc.frequency.exponentialRampToValueAtTime(195-i*12,t+.105);
-      band.type='bandpass';
-      band.frequency.value=800;
-      band.Q.value=1.3;
-      vol.gain.setValueAtTime(.0001,t);
-      vol.gain.exponentialRampToValueAtTime(.16,t+.012);
-      vol.gain.exponentialRampToValueAtTime(.0001,t+.115);
-      osc.connect(band);band.connect(vol);vol.connect(ctx.destination);
-      osc.start(t);osc.stop(t+.12);
+    if(!(henovaCluckAudio instanceof Audio)){
+      henovaCluckAudio=new Audio(soundURL);
+      henovaCluckAudio.preload='auto';
+      henovaCluckAudio.volume=.9;
     }
-  }catch(error){console.warn('Hen cluck audio unavailable',error);}
+    // A real hen vocalization, not an oscillator or synthesized effect.
+    henovaCluckAudio.pause();
+    henovaCluckAudio.currentTime=0;
+    const playPromise=henovaCluckAudio.play();
+    if(playPromise && typeof playPromise.catch==='function')playPromise.catch(()=>{});
+  }catch(error){console.warn('Real hen recording unavailable',error);}
 }
 function henovaTapHen(event){
   const hen=event?.currentTarget||document.querySelector('#farm-scene .farm-hen.hen-a');
@@ -1521,7 +1548,7 @@ updateFarmIdentity();
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
 const names=t(),icons=['🏡','🐣','📋','👥','💰'];const labels=document.querySelectorAll('.stats small');if(labels.length===2){labels[0].textContent=s.lang==='ar'?'بيض':'EGGS';labels[1].textContent=s.lang==='ar'?'عملات':'COINS';}document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
-if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking"></div></div></div><div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+(s.lang==='ar'?'بيضة/س':'eggs/h')+'</strong><small id="clock">'+(p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+(s.lang==='ar'?'اجمع':'Collect')+' · <span id="collect-count">'+p+'</span>/60</button><div class="collect-meter"><div id="progress" style="width:'+p/60*100+'%"></div></div></div></section>'}
+if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-real-hay" aria-hidden="true"></div><div class="henova-real-feeder" role="img" aria-label="Photograph of a real chicken feeder"><div class="henova-feeder-photo"></div></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking"></div></div></div><div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+(s.lang==='ar'?'بيضة/س':'eggs/h')+'</strong><small id="clock">'+(p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+(s.lang==='ar'?'اجمع':'Collect')+' · <span id="collect-count">'+p+'</span>/60</button><div class="collect-meter"><div id="progress" style="width:'+p/60*100+'%"></div></div></div></section>'}
 if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">Additional hens fill your shared 60-egg basket faster.</p>'+H.map(h=>'<article class="item"><div class="face">'+h[1]+'</div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+h[3]+' eggs/hour</p><small>Owned: '+(s.hen[h[0]]||0)+'</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')">'+num(h[4])+' 🪙<br>'+names[6]+'</button>':'<b>FREE</b>')+'</article>').join('')+'<p class="warning">Pack prices are provisional demo settings.</p>';
 if(tab===2){let claimed=s.daily===new Date().toLocaleDateString('en-CA');el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>Daily Login</h3><p>+100 Coins / day</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?'Claimed':'Claim')+'</button></article><article class="panel"><h3>More tasks are coming soon</h3><p class="muted">Ad, channel, and partner rewards will be added with server-side verification.</p></article>'}
 if(tab===3)el.innerHTML='<h1 class="title">🤝 '+names[3]+'</h1><section class="cover"><div style="font-size:55px">🐣🎁</div><h2>Grow together!</h2><p>Invite friends to your chicken farm.</p><button class="primary" onclick="invite()">📋 Copy invite link</button></section><article class="panel"><b>🏆 Leaderboards — Coming soon</b><p class="muted">Referral rewards require verification on the server.</p></article>';
