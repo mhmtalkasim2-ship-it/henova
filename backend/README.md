@@ -24,7 +24,7 @@ The current Telegram Mini App in `index.html` still runs in **local demo mode**.
 
 1. **Already completed:** HENOVA's separate Free Supabase database and migrations. Do not rerun migrations in the MIMA/LTF organization.
 2. Configure **Edge Function secrets only on the server**: `HENOVA_TELEGRAM_BOT_TOKEN` (the token of `@HenovaEggsBot`), and check that `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are available. Never commit actual tokens or service keys.
-3. Set `HENOVA_ALLOWED_ORIGIN=https://mhmtalkasim2-ship-it.github.io`. Deploy `henova-api` to HENOVA's own Supabase project only, preserving `verify_jwt = false`.
+3. **Deployment complete:** `henova-api` ACTIVE v1 on the HENOVA project with `verify_jwt = false`; access still requires valid Telegram initData verified inside the function. Confirm `HENOVA_ALLOWED_ORIGIN=https://mhmtalkasim2-ship-it.github.io` (default if not explicitly set).
 4. Test signed Telegram `initData` and reject tampered/expired signatures. Test duplicate requests, concurrent collect, purchases, fan boosts, denied direct Data API requests and daily limits.
 5. Design a **verified one-time balance migration** from the current local demo before switching the front end. Do **not** upload or trust raw `localStorage` values for payouts.
 6. Only after these tests, update `index.html` to use the new API; avoid updating the UI and gameplay visuals.
@@ -52,4 +52,4 @@ Use `crypto.randomUUID()` once per intended action and reuse the **same requestI
 
 ## Important
 
-The database migrations **are applied on the dedicated HENOVA project**, and the records are mirrored in `supabase/migrations/`. **The `henova-api` Edge Function remains undeployed**, pending the private bot token and end-to-end tests. `index.html` has not been switched off `localStorage`. Never copy unverified local balances as authoritative payout amounts.
+The database migrations **are applied on the dedicated HENOVA project**, and the records are mirrored in `supabase/migrations/`. `henova-api` was deployed in 2026-10-25 and reports ACTIVE v1. **The `henova-api` Edge Function has been deployed (ACTIVE, version 1, 2026-10-25) with Telegram HMAC verification. Its secrets and valid user requests have not yet been confirmed by a live end-to-end test; do not call it production-verified yet.** `index.html` has not been switched off `localStorage`. Never copy unverified local balances as authoritative payout amounts.
