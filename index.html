@@ -1519,6 +1519,73 @@ main.farm-mode #farm-scene.farm-v3 .v3-feeder{
   pointer-events:none!important;
 }
 main.farm-mode #farm-scene.farm-v3 .v3-feeder>span{display:none!important}
+
+/* HENOVA V20 — the walking hen feeds at the *actual* wooden trough.
+   A single trip goes to the trough, pecks four times into the grain, then returns.
+   Variables are measured from DOM geometry for any Telegram phone viewport. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  animation:henovaHenWalkToRealFeederV20 18s linear infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{
+  animation:henovaHenFacingFeederV20 18s steps(1,end) infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
+  transform-origin:71% 75%!important;
+  animation:henovaHenEatFromFeederV20 18s linear infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action.hen-tap-v11{
+  animation:henovaHenTapV11 .48s ease-out 1!important;
+}
+@keyframes henovaHenWalkToRealFeederV20{
+  0%,8%{translate:0 0}
+  17%{translate:calc(var(--hen-feed-x, -5vw) * .32) calc(var(--hen-feed-y, -10vh) * .27)}
+  27%{translate:calc(var(--hen-feed-x, -5vw) * .72) calc(var(--hen-feed-y, -10vh) * .73)}
+  36%,62%{translate:var(--hen-feed-x,-5vw) var(--hen-feed-y,-10vh)}
+  73%{translate:calc(var(--hen-feed-x, -5vw) * .68) calc(var(--hen-feed-y, -10vh) * .68)}
+  84%{translate:calc(var(--hen-feed-x, -5vw) * .26) calc(var(--hen-feed-y, -10vh) * .26)}
+  93%,100%{translate:0 0}
+}
+@keyframes henovaHenFacingFeederV20{
+  0%,62.9%{transform:scaleX(-1)}
+  63%,92.9%{transform:scaleX(1)}
+  93%,100%{transform:scaleX(-1)}
+}
+@keyframes henovaHenEatFromFeederV20{
+  0%,8%,27%,36%,42%,48%,54%,60%,62%,73%,84%,93%,100%{
+    transform:translateY(0) rotate(0deg)
+  }
+  17%,25%,76%,87%{transform:translateY(-2px) rotate(-2deg)}
+  39%,45%,51%,57%{transform:translateY(8px) rotate(25deg)}
+}
+/* Tiny feed kernels animate only when the beak is lowered into the trough. */
+main.farm-mode #farm-scene.farm-v3 .v3-feeder::after{
+  content:"";
+  display:block;
+  position:absolute;
+  width:3px;
+  height:3px;
+  left:77%;
+  top:54%;
+  border-radius:50%;
+  background:#edc25c;
+  box-shadow:-8px 4px 0 #f4d775,6px -3px 0 #d9a447,11px 3px 0 #f7db79;
+  pointer-events:none;
+  opacity:0;
+  animation:henovaHenNibbleGrainsV20 18s linear infinite;
+}
+@keyframes henovaHenNibbleGrainsV20{
+  0%,37%,62%,100%{opacity:0;transform:translateY(0)}
+  40%,46%,52%,58%{opacity:.85;transform:translateY(-3px)}
+  43%,49%,55%,61%{opacity:.2;transform:translateY(1px)}
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing,
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action,
+  main.farm-mode #farm-scene.farm-v3 .v3-feeder::after{
+    animation:none!important;
+  }
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -1579,7 +1646,46 @@ function henovaTapHen(event){
   henovaPlayCluck();
 }
 
-function prepareFarmArtwork(){/* Keep layered farm interactive: no screenshot backgrounds. */}
+/* Keep feeder contact aligned to its rendered trough bowl, not viewport vw/vh.
+   Offset coordinates are stable even while CSS translate animation is running. */
+function henovaAlignFeedingToTrough(){
+  const scene=document.getElementById('farm-scene');
+  if(!scene)return;
+  const hen=scene.querySelector('.farm-hen.hen-a');
+  const feeder=scene.querySelector('.v3-feeder');
+  if(!hen||!feeder||!feeder.offsetWidth||!hen.offsetWidth)return;
+  const henWidth=hen.offsetWidth;
+  const henHeight=hen.offsetHeight||henWidth*220/240;
+  const feederWidth=feeder.offsetWidth;
+  const feederHeight=feeder.offsetHeight;
+  const artworkHeight=Math.min(feederHeight,feederWidth*135/380);
+  const artworkTop=(feederHeight-artworkHeight)/2;
+  // Facing left: beak at 3% of hen width; aim near the bowl's right half.
+  const beakTargetX=feeder.offsetLeft+feederWidth*.79;
+  const beakTargetY=feeder.offsetTop+artworkTop+artworkHeight*.47;
+  // Reserve room for the beak to lower into the food during each peck.
+  const landingX=beakTargetX-henWidth*.04;
+  const landingY=beakTargetY-henHeight*.382-henWidth*.20;
+  hen.style.setProperty('--hen-feed-x',Math.round(landingX-hen.offsetLeft)+'px');
+  hen.style.setProperty('--hen-feed-y',Math.round(landingY-hen.offsetTop)+'px');
+}
+function prepareFarmArtwork(){
+  const hen=document.querySelector('#farm-scene .farm-hen.hen-a');
+  const portrait=hen?.querySelector('img');
+  if(portrait&&!portrait.complete){
+    portrait.addEventListener('load',henovaAlignFeedingToTrough,{once:true});
+  }
+  if(typeof requestAnimationFrame==='function'){
+    requestAnimationFrame(henovaAlignFeedingToTrough);
+  }else{
+    henovaAlignFeedingToTrough();
+  }
+}
+if(typeof window.addEventListener==='function'){
+  window.addEventListener('resize',()=>{
+    if(tab===0)henovaAlignFeedingToTrough();
+  },{passive:true});
+}
 function toggleFarmSound(){window.henovaMuted=!window.henovaMuted;let b=document.getElementById('sound-toggle');if(b)b.textContent=window.henovaMuted?'🔇':'🔊';toast(window.henovaMuted?'Sound off':'Sound on')}
 function updateFarmIdentity(){const u=window.Telegram?.WebApp?.initDataUnsafe?.user;let name=u?.first_name||'HENOVA',handle=u?.username?'@'+u.username:'CHICKEN FARM';document.getElementById('farm-user-name').textContent=name.toUpperCase();document.getElementById('farm-user-handle').textContent=handle;document.getElementById('farm-avatar').textContent=name.slice(0,1).toUpperCase()}
 function render(){
