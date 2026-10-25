@@ -233,6 +233,45 @@ main.farm-mode .scene .farm-hen.hen-a{bottom:29%;left:11%}
 main.farm-mode .scene .farm-hen.hen-b{bottom:32%;left:55%}
 main.farm-mode .scene .farm-hen.hen-c{bottom:43%;left:43%}
 @media(prefers-reduced-motion:reduce){.farm-hen,.farm-hen img{animation:none!important}}
+
+/* HENOVA illustrated farm refinement — original scene inspired by approved composition */
+main.farm-mode .scene:not(.realistic-ready){background:#78bc56 url('./assets/farm-landscape.svg') center center / cover no-repeat!important}
+main.farm-mode .scene:not(.realistic-ready) .orchard,
+main.farm-mode .scene:not(.realistic-ready) .cloud,
+main.farm-mode .scene:not(.realistic-ready) .farm-path,
+main.farm-mode .scene:not(.realistic-ready) .flowers{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+left:9%;bottom:53%;width:clamp(175px,40vw,285px);height:clamp(155px,24vh,240px);
+border:9px solid #fff0c9;border-bottom:12px solid #e6d7ad;
+background:repeating-linear-gradient(90deg,#c85338 0 18px,#bc482f 18px 21px,#db6945 21px 35px,#b74531 35px 38px);
+border-radius:3px 3px 10px 10px;box-shadow:12px 13px 0 #2e582c40,inset 7px 0 9px #ffffff31;
+transform:none;z-index:4
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn:before{
+top:-67px;left:-18px;border-left:calc(clamp(175px,40vw,285px) / 2) solid transparent;
+border-right:calc(clamp(175px,40vw,285px) / 2) solid transparent;
+border-bottom:72px solid #673c29;
+filter:drop-shadow(0 -6px 0 #ac7648) drop-shadow(0 6px 2px #57381d55)
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn:after{
+width:32%;height:51%;left:32%;bottom:-12px;background:linear-gradient(90deg,#402c23,#644633);
+border:9px solid #f6e5c2;border-radius:44% 44% 0 0;box-shadow:inset 0 0 0 6px #72503b
+}
+main.farm-mode .scene:not(.realistic-ready) .windmill{right:12%;bottom:53%;transform:scale(1.16);z-index:5}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{left:7%;bottom:46%;font-size:clamp(37px,9vw,63px)}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{
+left:55%;bottom:47%;width:24%;height:38px;background:repeating-radial-gradient(ellipse at 10px 8px,#f3ce67 0 3px,#be8230 4px 6px,#e3ad46 7px 9px);
+border:7px solid #8e522c;border-top:3px solid #a36636;box-shadow:0 7px 3px #385b2860;z-index:7
+}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{left:5%;bottom:27%;font-size:0;width:92px;height:73px;background:repeating-linear-gradient(8deg,#d9a43f 0 5px,#f3c65c 5px 8px,#bc862f 9px 12px);border:5px solid #bd853c;border-radius:18px 22px 13px 9px;transform:rotate(-7deg);box-shadow:5px 7px 4px #3b662d55}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack:after{content:'🌾';position:absolute;left:-28px;bottom:10px;font-size:55px;transform:rotate(-18deg)}
+main.farm-mode .scene:not(.realistic-ready) .pond{right:0%;bottom:24%;width:39%;max-width:300px;filter:drop-shadow(0 9px 3px #2a612960)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{left:25%;bottom:23%;width:clamp(75px,21vw,128px)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{left:45%;bottom:31%;width:clamp(83px,23vw,135px)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{left:34%;bottom:20%;width:clamp(69px,19vw,110px)}
+main.farm-mode .collect-dock{background:#f2f7e6f2;border:2px solid #fffdf0;box-shadow:0 7px 22px #28491f4f}
+main.farm-mode nav{background:#fffffff7}
+@media(max-width:370px){main.farm-mode .scene:not(.realistic-ready) .hen-barn{width:165px;height:150px;left:6%}main.farm-mode .scene:not(.realistic-ready) .windmill{right:5%;transform:scale(.95)}}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
