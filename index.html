@@ -1520,11 +1520,13 @@ main.farm-mode #farm-scene.farm-v3 .v3-feeder{
 }
 main.farm-mode #farm-scene.farm-v3 .v3-feeder>span{display:none!important}
 
-/* HENOVA V20 — the walking hen feeds at the *actual* wooden trough.
-   A single trip goes to the trough, pecks four times into the grain, then returns.
-   Variables are measured from DOM geometry for any Telegram phone viewport. */
+/* HENOVA V21: dry-land route. The hen starts LEFT of the pond, walks uphill
+   first on the grass, then across to the trough, pecks, and returns on the same
+   safe path. All coordinates derive from the currently rendered feeder. */
 main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
-  animation:henovaHenWalkToRealFeederV20 18s linear infinite!important;
+  left:42%!important;
+  top:58%!important;
+  animation:henovaHenDryLandRouteV21 18s linear infinite!important;
 }
 main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{
   animation:henovaHenFacingFeederV20 18s steps(1,end) infinite!important;
@@ -1536,15 +1538,16 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
 main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action.hen-tap-v11{
   animation:henovaHenTapV11 .48s ease-out 1!important;
 }
-@keyframes henovaHenWalkToRealFeederV20{
+@keyframes henovaHenDryLandRouteV21{
   0%,8%{translate:0 0}
-  17%{translate:calc(var(--hen-feed-x, -5vw) * .32) calc(var(--hen-feed-y, -10vh) * .27)}
-  27%{translate:calc(var(--hen-feed-x, -5vw) * .72) calc(var(--hen-feed-y, -10vh) * .73)}
-  36%,62%{translate:var(--hen-feed-x,-5vw) var(--hen-feed-y,-10vh)}
-  73%{translate:calc(var(--hen-feed-x, -5vw) * .68) calc(var(--hen-feed-y, -10vh) * .68)}
-  84%{translate:calc(var(--hen-feed-x, -5vw) * .26) calc(var(--hen-feed-y, -10vh) * .26)}
+  17%{translate:var(--hen-safe-x,0px) var(--hen-safe-y,-70px)}
+  28%{translate:var(--hen-approach-x,8px) var(--hen-approach-y,-120px)}
+  36%,62%{translate:var(--hen-feed-x,60px) var(--hen-feed-y,-140px)}
+  74%{translate:var(--hen-approach-x,8px) var(--hen-approach-y,-120px)}
+  85%{translate:var(--hen-safe-x,0px) var(--hen-safe-y,-70px)}
   93%,100%{translate:0 0}
 }
+/* Swap direction instantly so the hen's silhouette never becomes squashed. */
 @keyframes henovaHenFacingFeederV20{
   0%,62.9%{transform:scaleX(-1)}
   63%,92.9%{transform:scaleX(1)}
@@ -1557,32 +1560,16 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action.hen-tap-v11{
   17%,25%,76%,87%{transform:translateY(-2px) rotate(-2deg)}
   39%,45%,51%,57%{transform:translateY(8px) rotate(25deg)}
 }
-/* Tiny feed kernels animate only when the beak is lowered into the trough. */
+/* No floating grain or food particles during the pecking animation. */
 main.farm-mode #farm-scene.farm-v3 .v3-feeder::after{
-  content:"";
-  display:block;
-  position:absolute;
-  width:3px;
-  height:3px;
-  left:77%;
-  top:54%;
-  border-radius:50%;
-  background:#edc25c;
-  box-shadow:-8px 4px 0 #f4d775,6px -3px 0 #d9a447,11px 3px 0 #f7db79;
-  pointer-events:none;
-  opacity:0;
-  animation:henovaHenNibbleGrainsV20 18s linear infinite;
-}
-@keyframes henovaHenNibbleGrainsV20{
-  0%,37%,62%,100%{opacity:0;transform:translateY(0)}
-  40%,46%,52%,58%{opacity:.85;transform:translateY(-3px)}
-  43%,49%,55%,61%{opacity:.2;transform:translateY(1px)}
+  content:none!important;
+  display:none!important;
+  animation:none!important;
 }
 @media(prefers-reduced-motion:reduce){
   main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
   main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing,
-  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action,
-  main.farm-mode #farm-scene.farm-v3 .v3-feeder::after{
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
     animation:none!important;
   }
 }
@@ -1666,8 +1653,15 @@ function henovaAlignFeedingToTrough(){
   // Reserve room for the beak to lower into the food during each peck.
   const landingX=beakTargetX-henWidth*.04;
   const landingY=beakTargetY-henHeight*.382-henWidth*.20;
-  hen.style.setProperty('--hen-feed-x',Math.round(landingX-hen.offsetLeft)+'px');
-  hen.style.setProperty('--hen-feed-y',Math.round(landingY-hen.offsetTop)+'px');
+  const dx=landingX-hen.offsetLeft;
+  const dy=landingY-hen.offsetTop;
+  hen.style.setProperty('--hen-feed-x',Math.round(dx)+'px');
+  hen.style.setProperty('--hen-feed-y',Math.round(dy)+'px');
+  // Rise vertically on dry ground before moving sideways toward the feed bowl.
+  hen.style.setProperty('--hen-safe-x',Math.round(dx*.04)+'px');
+  hen.style.setProperty('--hen-safe-y',Math.round(dy*.55)+'px');
+  hen.style.setProperty('--hen-approach-x',Math.round(dx*.12)+'px');
+  hen.style.setProperty('--hen-approach-y',Math.round(dy*.92)+'px');
 }
 function prepareFarmArtwork(){
   const hen=document.querySelector('#farm-scene .farm-hen.hen-a');
