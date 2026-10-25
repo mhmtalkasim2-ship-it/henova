@@ -1701,6 +1701,7 @@ async function henovaLoad(){
     henovaApplyState(data.state);
     henovaReady=true;
     render();
+    henovaAutoVerifyChannel();
   }catch(error){
     henovaReady=false;
     console.warn('HENOVA initial sync failed',error);
@@ -1751,7 +1752,7 @@ function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');return henovaAction('purchase',id)}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');return henovaAction('boost')}
 function daily(){return henovaAction('daily')}
-function henovaJoinLink(){const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink('https://t.me/HENOVA_FARM');else window.open('https://t.me/HENOVA_FARM','_blank');}
+function henovaJoinLink(){localStorage.setItem('henova-channel-verify-pending','1');const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink('https://t.me/HENOVA_FARM');else window.open('https://t.me/HENOVA_FARM','_blank');}
 async function henovaClaimChannel(){
   if(!henovaReady||henovaChannelChecking)return;
   if(henovaChannelNext>Date.now())return toast('Reward available after cooldown');
@@ -1768,6 +1769,14 @@ async function henovaClaimChannel(){
   }finally{henovaChannelChecking=false}
 }
 
+async function henovaAutoVerifyChannel(){
+  if(!henovaReady || henovaChannelChecking || henovaChannelNext>Date.now())return;
+  if(localStorage.getItem('henova-channel-verify-pending')!=='1')return;
+  localStorage.removeItem('henova-channel-verify-pending');
+  await henovaClaimChannel();
+}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(henovaAutoVerifyChannel,700)});
+window.addEventListener('focus',()=>setTimeout(henovaAutoVerifyChannel,700));
 function invite(){let id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;let u='https://t.me/HenovaEggsBot'+(id?'?startapp=ref_'+id:'');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
