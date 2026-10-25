@@ -1664,6 +1664,20 @@ main.farm-mode .collect-meter{display:none!important}
     height:57px!important;
   }
 }
+
+/* Friends-only styles; farm scene and bottom navigation remain untouched. */
+.hv-friends-hero{text-align:center;border-radius:22px;background:linear-gradient(160deg,#64c0ef,#c9f2fe 70%,#f5fbdd);padding:21px 12px 8px;margin-top:16px}
+.hv-friends-hero h1{margin:0;color:#174d41;font-size:22px}.hv-friends-hero p{font-size:12px;color:#41675c}.hv-friends-icons{font-size:55px;letter-spacing:8px;padding:6px}
+.hv-friends-reward{display:flex;align-items:center;gap:15px;margin-top:14px;padding:18px;background:#fff9df;border-radius:20px;border:1px solid #e5d7a7}
+.hv-friends-reward span{font-size:39px}.hv-friends-reward b{font-size:15px}.hv-friends-reward p{font-size:12px;color:#947123;margin:5px 0 0}
+.hv-friends-link{background:#fff;border-radius:20px;padding:15px;margin-top:13px}.hv-friends-link small{color:#65815b}
+.hv-friends-url{font-size:12px;overflow-wrap:anywhere;margin:10px 0;padding:10px;border-radius:10px;background:#f0f6eb;font-weight:600}
+.hv-friends-link button,.hv-friends-share{border:0;border-radius:13px;padding:13px;background:#55a745;color:white;width:100%;font-weight:900}
+.hv-friends-share{margin-top:12px;background:linear-gradient(#ffd95b,#f6b929);color:#634a0d}
+.hv-friends-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:19px}
+.hv-friends-stats>div{background:white;padding:16px 10px;border-radius:16px;text-align:center;display:flex;flex-direction:column;gap:5px}
+.hv-friends-stats strong{font-size:20px}.hv-friends-stats small{font-size:11px;color:#73876d}
+.hv-friends-foot{text-align:center;color:#688260;font-size:12px;margin:22px 0}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -1672,13 +1686,13 @@ const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Wit
 // Balances are now server-authoritative. Only the visual language setting stays local.
 let preference={};try{preference=JSON.parse(localStorage.getItem('henova-display-preferences-v1'))||{}}catch{}
 let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:'en',fan:0};
-let tab=0,henovaReady=false,henovaBusy=false;
+let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0;
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
 function henovaApplyState(st){
   if(!st || !Number.isFinite(st.eggs) || !Number.isFinite(st.coins))throw Error('invalid_server_state');
   s.eggs=st.eggs;s.coins=st.coins;s.hen=st.hen||{starter:1};s.fan=st.fan||0;
-  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';
+  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);
 }
 async function henovaCall(action,details={}){
   const initData=window.Telegram?.WebApp?.initData;
@@ -1748,7 +1762,9 @@ function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');return henovaAction('purchase',id)}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');return henovaAction('boost')}
 function daily(){return henovaAction('daily')}
-function invite(){let id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;let u='https://t.me/HenovaEggsBot'+(id?'?startapp=ref_'+id:'');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
+function henovaReferralLink(){const id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;return id?'https://t.me/HenovaEggsBot?startapp=ref_'+id:''}
+function invite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
+function shareInvite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');const url='https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Join my HENOVA chicken farm!');const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink(url);else window.open(url,'_blank')}
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){s.lang=x;save();render()}
@@ -1852,7 +1868,20 @@ document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelec
 if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking" draggable="false"></div></div></div><div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+(s.lang==='ar'?'بيضة/س':'eggs/h')+'</strong><small id="clock">'+(secs===0?(s.lang==='ar'?'انتهت 6 ساعات — اجمع البيض':'6 hours completed — collect eggs'):(s.lang==='ar'?'المتبقي: ':'Remaining: ')+time(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+(s.lang==='ar'?'اجمع':'Collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
 if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">Additional hens increase your eggs per hour during each 6-hour production session.</p>'+H.map(h=>'<article class="item"><div class="face">'+h[1]+'</div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+h[3]+' eggs/hour</p><small>Owned: '+(s.hen[h[0]]||0)+'</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')">'+num(h[4])+' 🪙<br>'+names[6]+'</button>':'<b>FREE</b>')+'</article>').join('')+'<p class="warning">Pack prices are provisional demo settings.</p>';
 if(tab===2){let claimed=s.daily===new Date().toLocaleDateString('en-CA');el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>Daily Login</h3><p>+100 Coins / day</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?'Claimed':'Claim')+'</button></article><article class="panel"><h3>More tasks are coming soon</h3><p class="muted">Ad, channel, and partner rewards will be added with server-side verification.</p></article>'}
-if(tab===3)el.innerHTML='<h1 class="title">🤝 '+names[3]+'</h1><section class="cover"><div style="font-size:55px">🐣🎁</div><h2>Grow together!</h2><p>Invite friends to your chicken farm.</p><button class="primary" onclick="invite()">📋 Copy invite link</button></section><article class="panel"><b>🏆 Leaderboards — Coming soon</b><p class="muted">Referral rewards require verification on the server.</p></article>';
+if(tab===3){
+const w=s.lang==='ar'?
+{heading:'دعوة الأصدقاء',sub:'شارك رابطك واربح من أصدقائك',reward:'اربح 10% من البيض الذي يجمعه أصدقاؤك',link:'رابط الإحالة الخاص بك',copy:'نسخ الرابط',share:'مشاركة عبر تيليجرام',friends:'الأصدقاء',earned:'بيض الإحالات',empty:'ادع أصدقاءك وابدأ بجمع المكافآت'}:
+s.lang==='tr'?
+{heading:'Arkadaşlarını Davet Et',sub:'Bağlantını paylaş ve ödül kazan',reward:'Davet ettiğin arkadaşların topladığı yumurtaların %10 kadarını kazan',link:'Davet bağlantın',copy:'Bağlantıyı kopyala',share:'Telegramda Paylaş',friends:'Arkadaşlar',earned:'Davet yumurtaları',empty:'Arkadaşlarını davet ederek ödül kazanmaya başla'}:
+{heading:'Invite Friends',sub:'Share your link and earn rewards',reward:'Earn 10% of the eggs collected by invited friends',link:'Your personal referral link',copy:'Copy Link',share:'Share on Telegram',friends:'Friends',earned:'Referral Eggs',empty:'Invite friends to start earning rewards'};
+const url=henovaReferralLink();
+el.innerHTML='<section class="hv-friends-hero"><h1>🤝 '+w.heading+'</h1><p>'+w.sub+'</p><div class="hv-friends-icons">🎁 🐔 🎁</div></section>'+
+'<article class="hv-friends-reward"><span>🥚</span><div><b>'+w.reward+'</b><p>10% · HENOVA</p></div></article>'+
+'<section class="hv-friends-link"><small>'+w.link+'</small><div class="hv-friends-url">'+(url||'Open inside Telegram')+'</div><button onclick="invite()">'+w.copy+'</button></section>'+
+'<button class="hv-friends-share" onclick="shareInvite()">✈ '+w.share+'</button>'+
+'<section class="hv-friends-stats"><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.friends+'</small></div><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.earned+'</small></div></section>'+
+'<p class="hv-friends-foot">🎁 '+w.empty+'</p>';
+}
 if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class="cover"><small>AVAILABLE EGGS</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>≈ '+(s.eggs*.0001).toFixed(4)+' GRAM</p></section><section class="panel"><div class="between"><b>'+names[7]+'</b><span class="badge">DEMO ONLY</span></div><p>Minimum: <b>50 eggs</b> = 0.005 GRAM</p><p>Withdrawal frequency: once every 24 hours</p><label class="muted">Eggs to withdraw</label><input id="qty" type="number" value="50" min="50"><p class="warning">Payouts and deposits are disabled until a secure, funded payment backend is configured.</p><button class="primary" disabled>Withdraw • Coming soon</button></section>';
 if(tab===0)prepareFarmArtwork();
 }
