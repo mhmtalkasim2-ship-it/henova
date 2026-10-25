@@ -1799,8 +1799,33 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *{
  -webkit-user-select:none!important;
  user-select:none!important;
 }
-</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+
+/* HENOVA ranked miners: no coins from admin tests influence leaderboard. */
+.hv-leaderboard-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(12,30,17,.70);padding:22px 12px;padding-top:calc(22px + env(safe-area-inset-top));padding-bottom:calc(22px + env(safe-area-inset-bottom));backdrop-filter:blur(5px)}
+.hv-leaderboard-overlay.hidden{display:none!important}
+.hv-leaderboard-sheet{width:min(100%,460px);max-height:88vh;overflow-y:auto;overscroll-behavior:contain;border-radius:26px;border:3px solid #f7e9b5;background:linear-gradient(165deg,#f7fbe9,#e3edce 80%);box-shadow:0 15px 44px #0d251a85;padding:15px 13px 18px;color:#2c3c23}
+.hv-leaderboard-top{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #cbdaaa;padding:4px 5px 12px}
+.hv-rank-overline{font-size:11px;font-weight:800;color:#7a904e;letter-spacing:2px}
+.hv-leaderboard-top h2{margin:3px 0 0;font-size:22px;color:#47572d}
+.hv-leaderboard-close{border:0;background:#d9e6c8;color:#40522f;border-radius:15px;width:40px;height:40px;flex-shrink:0;font-weight:900;font-size:18px;cursor:pointer}
+.hv-rank-description{font-size:12px;color:#778760;text-align:center;padding:11px 5px 7px}
+.hv-rank-list{display:flex;flex-direction:column;gap:7px;padding:0 2px;margin-top:3px}
+.hv-rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;padding:10px 11px;background:#fffdf1;border:1px solid #d7e5bf;border-radius:16px;box-shadow:0 2px 0 #acc88d55}
+.hv-rank-row.hv-rank-me{border:2px solid #dba43d;background:#fff7da}
+.hv-rank-position{text-align:center;font-weight:900;font-size:18px;color:#778d52}
+.hv-rank-row:nth-child(1) .hv-rank-position{color:#d9a22c;font-size:23px}
+.hv-rank-row:nth-child(2) .hv-rank-position{color:#889495;font-size:21px}
+.hv-rank-row:nth-child(3) .hv-rank-position{color:#ae794b;font-size:21px}
+.hv-rank-name{font-weight:850;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hv-rank-meta{font-size:11px;color:#8a9a79;margin-top:2px}
+.hv-rank-score{font-variant-numeric:tabular-nums;color:#587038;font-size:14px;font-weight:900;white-space:nowrap}
+.hv-rank-self-title{margin:14px 3px 7px;color:#5c7342;font-size:13px;font-weight:850}
+.hv-rank-empty,.hv-rank-error{text-align:center;padding:25px 10px;color:#7c8d68;font-weight:700}
+@media(max-width:365px){.hv-rank-row{grid-template-columns:32px minmax(0,1fr) auto;gap:5px;padding:9px 7px}.hv-rank-score{font-size:12px}}
+
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
+<div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,200],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الحزم','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
@@ -2013,6 +2038,50 @@ function hvError(code){
  return errors[code]?.[s.lang]||errors[code]?.en||({ar:'تعذرت العملية، حاول لاحقاً',tr:'İşlem başarısız, tekrar dene',en:'Action failed, please try again'}[s.lang]||'Action failed');
 }
 function hvText(key){return (HV_TEXT[s.lang]||HV_TEXT.en)[key]||HV_TEXT.en[key]||key}
+
+/* Rank is verified server-side from collected egg events; no client-editable scores. */
+function henovaLeaderboardLabels(){
+ return ({
+ ar:{title:'🏆 لوحة المتصدرين',desc:'الترتيب حسب إجمالي البيض الذي جمعه المستخدمون',eggs:'بيضة',hens:'دجاجة',you:'أنت',mine:'مركزك',loading:'جاري تحميل المتصدرين...',empty:'لا يوجد متصدرون بعد',error:'تعذر تحميل الترتيب، حاول مرة أخرى'},
+ tr:{title:'🏆 Liderlik Tablosu',desc:'Sıralama toplam toplanan yumurtaya göre',eggs:'yumurta',hens:'tavuk',you:'Sen',mine:'Sıralaman',loading:'Liderler yükleniyor...',empty:'Henüz lider yok',error:'Sıralama yüklenemedi'},
+ en:{title:'🏆 Leaderboard',desc:'Ranked by lifetime eggs collected',eggs:'eggs',hens:'hens',you:'You',mine:'Your rank',loading:'Loading leaderboard...',empty:'No miners ranked yet',error:'Could not load leaderboard'}
+ })[s.lang]||({title:'🏆 Leaderboard',desc:'Ranked by lifetime eggs collected',eggs:'eggs',hens:'hens',you:'You',mine:'Your rank',loading:'Loading leaderboard...',empty:'No miners ranked yet',error:'Could not load leaderboard'});
+}
+function henovaLeaderboardEscape(value){
+ return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function henovaLeaderboardCard(entry,labels){
+ const position=Math.max(1,Math.floor(Number(entry.rank)||1));
+ const medal=position===1?'🥇':position===2?'🥈':position===3?'🥉':'#'+position;
+ const name=henovaLeaderboardEscape(entry.name||'Miner');
+ const count=Math.max(0,Math.floor(Number(entry.eggs)||0));
+ const hens=Math.max(0,Math.floor(Number(entry.hens)||0));
+ return '<div class="hv-rank-row'+(entry.me?' hv-rank-me':'')+'"><span class="hv-rank-position">'+medal+'</span><div><div class="hv-rank-name">'+name+(entry.me?' · '+labels.you:'')+'</div><div class="hv-rank-meta">🐔 '+num(hens)+' '+labels.hens+'</div></div><span class="hv-rank-score">🥚 '+num(count)+'</span></div>';
+}
+async function henovaOpenLeaderboard(){
+ const screen=document.getElementById('henova-leaderboard');
+ const holder=document.getElementById('henova-leaderboard-body');
+ const title=document.getElementById('hv-rank-title');
+ if(!screen||!holder)return;
+ const words=henovaLeaderboardLabels();
+ if(title)title.textContent=words.title;
+ screen.classList.remove('hidden');
+ holder.innerHTML='<p class="hv-rank-empty">'+words.loading+'</p>';
+ try{
+   const result=await henovaCall('leaderboard');
+   if(screen.classList.contains('hidden'))return;
+   const top=Array.isArray(result.top)?result.top.slice(0,20):[];
+   holder.innerHTML='<div class="hv-rank-description">'+words.desc+'</div>'+
+    '<div class="hv-rank-list">'+(top.length?top.map(row=>henovaLeaderboardCard(row,words)).join(''):'<p class="hv-rank-empty">'+words.empty+'</p>')+'</div>'+
+    (result.mine && !top.some(row=>row.me)?'<div class="hv-rank-self-title">'+words.mine+'</div>'+henovaLeaderboardCard(result.mine,words):'');
+ }catch(error){
+   if(!screen.classList.contains('hidden'))holder.innerHTML='<p class="hv-rank-error">'+words.error+'</p>';
+ }
+}
+function henovaCloseLeaderboard(){
+ document.getElementById('henova-leaderboard')?.classList.add('hidden');
+}
+
 
 /* Distinct feather artwork per breed; counts always read from confirmed Supabase state. */
 const HENOVA_MAX_HENS_PER_BREED=5;
