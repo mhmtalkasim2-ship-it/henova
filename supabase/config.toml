@@ -1,0 +1,4 @@
+# HENOVA Mini App uses Telegram initData HMAC validation rather than a Supabase user JWT.
+# NEVER deploy this function without the server-side HENOVA_TELEGRAM_BOT_TOKEN secret.
+[functions.henova-api]
+verify_jwt = false
