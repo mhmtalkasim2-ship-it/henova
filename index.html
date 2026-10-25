@@ -90,6 +90,26 @@ main.farm-mode .power-panel .power-btn{padding:5px 7px;font-size:11px;margin-top
 main.farm-mode #view>.panel.between{display:none}
 main.farm-mode nav{z-index:20}
 @media(max-height:720px){main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 245px)}main.farm-mode .scene .hen-characters{bottom:31%}}
+
+/* HENOVA mobile legibility pass: smaller structures, uncluttered viewport */
+main.farm-mode .scene .hen-barn{left:12%;bottom:44%;transform:scale(.87);transform-origin:left bottom}
+main.farm-mode .scene .windmill{right:12%;bottom:45%;transform:scale(.94);transform-origin:right bottom}
+main.farm-mode .scene .farm-path{left:39%;width:76px;bottom:4%;height:37%}
+main.farm-mode .scene .hen-characters{bottom:30%;font-size:clamp(36px,9vw,53px);left:6%;right:6%}
+main.farm-mode .scene .farm-basket{left:48%;bottom:46%;font-size:34px}
+main.farm-mode .scene .flowers{bottom:27%}
+main.farm-mode .scene .orchard .tree-art{font-size:clamp(58px,15vw,115px)}
+main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 273px);left:14px;right:14px}
+main.farm-mode #view>.panel{bottom:calc(env(safe-area-inset-bottom) + 92px);left:14px;right:14px}
+main.farm-mode .scene .farm-photo-shade{background:linear-gradient(180deg,#09190b25 0%,transparent 26%,transparent 72%,#153f1010)}
+main.farm-mode .stats b{direction:ltr;unicode-bidi:isolate}
+main.farm-mode .panel .between{direction:ltr}
+main.farm-mode .panel .bar{direction:ltr}
+@media(max-height:760px){
+ main.farm-mode .scene .hen-barn{bottom:43%;transform:scale(.75)}
+ main.farm-mode .scene .windmill{bottom:43%;transform:scale(.8)}
+ main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 252px)}
+}
 </style></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
