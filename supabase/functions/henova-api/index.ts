@@ -118,6 +118,31 @@ Deno.serve(async (request) => {
     }
     return reply({ ok: true, auth: "telegram_verified", database: "connected", mode: "read_only" });
   }
+  // Membership is checked against Telegram itself, never against client claims.
+  if (body?.action === "join_channel") {
+    const memberResponse = await fetch(
+      "https://api.telegram.org/bot" + botToken + "/getChatMember",
+      { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: "@HENOVA_FARM", user_id: telegram.id }) }
+    ).catch(() => null);
+    if (!memberResponse) return reply({ ok: false, error: "verification_unavailable" }, 503);
+    const member = await memberResponse.json().catch(() => null);
+    if (!member?.ok) {
+      console.warn("HENOVA channel verification unavailable", member?.error_code);
+      return reply({ ok: false, error: "verification_unavailable" }, 503);
+    }
+    const m = member.result;
+    if (!(["creator","administrator","member"].includes(m?.status) ||
+      (m?.status === "restricted" && m?.is_member === true))) {
+      return reply({ ok: false, error: "not_joined" }, 403);
+    }
+    const requestId = body?.requestId;
+    if (typeof requestId !== "string" ||
+      !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)) {
+      return reply({ ok: false, error: "invalid_request_id" }, 400);
+    }
+    // Preserve bootstrap logic by carrying the verified membership flag, then claim below.
+  }
   // Insert-only bootstrap. Never overwrite an existing user's balances or hens.
   const { error: initError } = await admin.from("henova_players").upsert(
     { telegram_id: telegram.id, first_name: telegram.first_name, username: telegram.username },
@@ -128,12 +153,25 @@ Deno.serve(async (request) => {
     return reply({ ok: false, error: "database_unavailable" }, 503);
   }
   const action = body?.action;
+  if (action === "join_channel") {
+    const { data, error } = await admin.rpc("henova_claim_channel_reward", {
+      p_telegram_id: telegram.id,
+      p_request_id: body.requestId,
+    });
+    if (error) return reply({ ok: false, error: "action_failed" }, 400);
+    return reply(data);
+  }
   if (action === "state") {
     const { data, error } = await admin.from("henova_players")
       .select("egg_balance,coin_balance,starter_hens,red_hens,gold_hens,royal_hens,legend_hens,fan_level,production_started_at,last_daily_on")
       .eq("telegram_id", telegram.id).single();
     if (error || !data) return reply({ ok: false, error: "database_unavailable" }, 503);
-    return reply({ ok: true, state: publicState(data) });
+    const { data: reward } = await admin.from("henova_channel_rewards")
+      .select("last_rewarded_at").eq("telegram_id", telegram.id).maybeSingle();
+    return reply({ ok: true, state: {
+      ...publicState(data), channel_next_at: reward?.last_rewarded_at
+        ? new Date(Date.parse(reward.last_rewarded_at) + 21600000).toISOString() : null
+    } });
   }
   if (!["collect", "daily", "purchase", "boost"].includes(action)) {
     return reply({ ok: false, error: "unknown_action" }, 400);
