@@ -890,6 +890,70 @@ main.farm-mode .farm-v3 .v3-windmill .v3-rotor>*{display:none!important}
  main.farm-mode .farm-v3 .v3-windmill .v3-rotor{animation:none!important}
 }
 
+
+/* HENOVA SEMI-REALISTIC THEME — natural surfaces, quiet controls, preserved gameplay */
+body:has(main.farm-mode){background:#698e60!important}
+main.farm-mode #farm-scene.farm-v3{
+ background:#7ba568 url('./assets/henova-game-scene-v1.svg?v=4') center/100% 100% no-repeat!important;
+}
+main.farm-mode .farm-toolbar{box-shadow:none!important;background:transparent!important}
+main.farm-mode .farm-user{
+ background:linear-gradient(125deg,#f8f7ebdb,#e1ecdacb)!important;
+ border:1px solid #fff8e4e6!important;
+ box-shadow:0 3px 13px #28452b35!important;
+ backdrop-filter:blur(6px)!important;
+}
+main.farm-mode .farm-tools button{
+ background:linear-gradient(135deg,#f4f3e7e8,#dbe4d7d9)!important;
+ border:1px solid #faf7e9dd!important;
+ box-shadow:0 3px 10px #25482c24!important;
+ color:#4e654a!important;
+}
+main.farm-mode .stats>div{
+ background:linear-gradient(135deg,#f1f4e5e0,#dce9d6d4)!important;
+ border:1px solid #fffdf1e5!important;
+ box-shadow:0 3px 12px #314c2e34!important;
+ color:#405640!important;
+}
+main.farm-mode .stats b{color:#3c523b!important}
+main.farm-mode .collect-dock{
+ background:linear-gradient(110deg,#f2f3e4ed,#e7eee0e8)!important;
+ border:2px solid #fffdf2ee!important;
+ border-radius:19px!important;
+ box-shadow:0 4px 15px #2d4e334a!important;
+}
+main.farm-mode .collect-info{
+ background:#f3f3e9dd!important;
+ border:1px solid #d8dfc8!important;
+ color:#486845!important;
+}
+main.farm-mode .collect-action button{
+ background:linear-gradient(180deg,#f9db8b,#dfb660)!important;
+ border:1px solid #fff1be!important;
+ color:#5f4827!important;
+ box-shadow:0 3px #ae8c4e!important;
+ text-shadow:none!important;
+}
+main.farm-mode .collect-action button:disabled{filter:saturate(.55)!important;opacity:.72!important}
+body:has(main.farm-mode)>nav{
+ background:linear-gradient(180deg,#f5f6eafa,#e5edddf7)!important;
+ border-top:1px solid #fafbef!important;
+ box-shadow:0 -3px 16px #24472b29!important;
+}
+body:has(main.farm-mode)>nav button{color:#839282!important}
+body:has(main.farm-mode)>nav button.active{color:#557a54!important}
+body:has(main.farm-mode)>nav button span{filter:saturate(.65) brightness(.96)}
+main.farm-mode .farm-v3 .farm-hen.hen-a{
+ filter:drop-shadow(0 6px 4px #28422a48)!important;
+}
+main.farm-mode .farm-v3 .v3-windmill .v3-rotor{
+ background:transparent url('./assets/henova-rotor-v1.svg?v=2') center/contain no-repeat!important;
+ animation-duration:7.5s!important;
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode .farm-v3 .v3-windmill .v3-rotor{animation:none!important}
+}
+
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -917,7 +981,7 @@ updateFarmIdentity();
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
 const names=t(),icons=['🏡','🐣','📋','👥','💰'];const labels=document.querySelectorAll('.stats small');if(labels.length===2){labels[0].textContent=s.lang==='ar'?'بيض':'EGGS';labels[1].textContent=s.lang==='ar'?'عملات':'COINS';}document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
-if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a"><img src="./assets/hen-realistic.svg" alt="Hen walking"></div><div class="farm-hen hen-b"><img src="./assets/hen-realistic.svg" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/hen-realistic.svg" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+(s.lang==='ar'?'بيضة/س':'eggs/h')+'</strong><small id="clock">'+(p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+(s.lang==='ar'?'اجمع':'Collect')+' · <span id="collect-count">'+p+'</span>/60</button><div class="collect-meter"><div id="progress" style="width:'+p/60*100+'%"></div></div></div></section>'}
+if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((60-p)*hr/r/1000));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a"><img src="./assets/hen-realistic.svg?v=2" alt="Hen walking"></div><div class="farm-hen hen-b"><img src="./assets/hen-realistic.svg?v=2" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/hen-realistic.svg?v=2" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+(s.lang==='ar'?'بيضة/س':'eggs/h')+'</strong><small id="clock">'+(p>=60?(s.lang==='ar'?'السلة ممتلئة':'Basket full'):(s.lang==='ar'?'يمتلئ خلال ':'Full in ')+time(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+(s.lang==='ar'?'اجمع':'Collect')+' · <span id="collect-count">'+p+'</span>/60</button><div class="collect-meter"><div id="progress" style="width:'+p/60*100+'%"></div></div></div></section>'}
 if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">Additional hens fill your shared 60-egg basket faster.</p>'+H.map(h=>'<article class="item"><div class="face">'+h[1]+'</div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+h[3]+' eggs/hour</p><small>Owned: '+(s.hen[h[0]]||0)+'</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')">'+num(h[4])+' 🪙<br>'+names[6]+'</button>':'<b>FREE</b>')+'</article>').join('')+'<p class="warning">Pack prices are provisional demo settings.</p>';
 if(tab===2){let claimed=s.daily===new Date().toLocaleDateString('en-CA');el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>Daily Login</h3><p>+100 Coins / day</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?'Claimed':'Claim')+'</button></article><article class="panel"><h3>More tasks are coming soon</h3><p class="muted">Ad, channel, and partner rewards will be added with server-side verification.</p></article>'}
 if(tab===3)el.innerHTML='<h1 class="title">🤝 '+names[3]+'</h1><section class="cover"><div style="font-size:55px">🐣🎁</div><h2>Grow together!</h2><p>Invite friends to your chicken farm.</p><button class="primary" onclick="invite()">📋 Copy invite link</button></section><article class="panel"><b>🏆 Leaderboards — Coming soon</b><p class="muted">Referral rewards require verification on the server.</p></article>';
