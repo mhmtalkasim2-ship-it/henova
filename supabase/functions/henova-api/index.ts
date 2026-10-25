@@ -103,6 +103,21 @@ Deno.serve(async (request) => {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  // Read-only diagnostic reserved for a configured Telegram admin.
+  // No player initialization or balances are changed by this action.
+  if (body?.action === "diagnostic") {
+    const allowedAdmin = Deno.env.get("HENOVA_ADMIN_TELEGRAM_ID") || "";
+    if (!/^\\d+$/.test(allowedAdmin) || String(telegram.id) !== allowedAdmin) {
+      return reply({ ok: false, error: "forbidden" }, 403);
+    }
+    const { error: dbError } = await admin.from("henova_players")
+      .select("telegram_id", { head: true, count: "exact" }).limit(1);
+    if (dbError) {
+      console.error("HENOVA diagnostic failed", dbError.code);
+      return reply({ ok: false, error: "database_unavailable" }, 503);
+    }
+    return reply({ ok: true, auth: "telegram_verified", database: "connected", mode: "read_only" });
+  }
   // Insert-only bootstrap. Never overwrite an existing user's balances or hens.
   const { error: initError } = await admin.from("henova_players").upsert(
     { telegram_id: telegram.id, first_name: telegram.first_name, username: telegram.username },
