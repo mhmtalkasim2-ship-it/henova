@@ -1665,19 +1665,30 @@ main.farm-mode .collect-meter{display:none!important}
   }
 }
 
-/* Friends-only styles; farm scene and bottom navigation remain untouched. */
-.hv-friends-hero{text-align:center;border-radius:22px;background:linear-gradient(160deg,#64c0ef,#c9f2fe 70%,#f5fbdd);padding:21px 12px 8px;margin-top:16px}
-.hv-friends-hero h1{margin:0;color:#174d41;font-size:22px}.hv-friends-hero p{font-size:12px;color:#41675c}.hv-friends-icons{font-size:55px;letter-spacing:8px;padding:6px}
-.hv-friends-reward{display:flex;align-items:center;gap:15px;margin-top:14px;padding:18px;background:#fff9df;border-radius:20px;border:1px solid #e5d7a7}
-.hv-friends-reward span{font-size:39px}.hv-friends-reward b{font-size:15px}.hv-friends-reward p{font-size:12px;color:#947123;margin:5px 0 0}
-.hv-friends-link{background:#fff;border-radius:20px;padding:15px;margin-top:13px}.hv-friends-link small{color:#65815b}
-.hv-friends-url{font-size:12px;overflow-wrap:anywhere;margin:10px 0;padding:10px;border-radius:10px;background:#f0f6eb;font-weight:600}
-.hv-friends-link button,.hv-friends-share{border:0;border-radius:13px;padding:13px;background:#55a745;color:white;width:100%;font-weight:900}
-.hv-friends-share{margin-top:12px;background:linear-gradient(#ffd95b,#f6b929);color:#634a0d}
-.hv-friends-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:19px}
-.hv-friends-stats>div{background:white;padding:16px 10px;border-radius:16px;text-align:center;display:flex;flex-direction:column;gap:5px}
-.hv-friends-stats strong{font-size:20px}.hv-friends-stats small{font-size:11px;color:#73876d}
-.hv-friends-foot{text-align:center;color:#688260;font-size:12px;margin:22px 0}
+/* Friends-only styles: match the bright invite design; no farm/navigation changes. */
+.hv-friends-hero{text-align:center;background:linear-gradient(180deg,#4ab1f3,#92d5f8 63%,#fff8e5);border-radius:24px 24px 12px 12px;padding:18px 8px 0;margin:12px 0 10px;overflow:hidden}
+.hv-friends-hero h1{color:#fff;text-shadow:1px 3px #27506b;font-size:26px;line-height:1.25;margin:0}
+.hv-friends-hero p{font-size:12px;color:#244857;margin:3px 0 0}
+.hv-friends-icons{display:flex;justify-content:space-around;align-items:center;font-size:68px;height:152px;line-height:1}
+.hv-friends-icons span:nth-child(2){font-size:83px}
+.hv-friends-reward{display:flex;align-items:center;gap:13px;margin-top:-3px;padding:17px 16px;background:#fffef5;border:1px solid #e2e9ce;border-radius:25px}
+.hv-friends-reward>span{font-size:43px}.hv-friends-reward b{font-size:17px;color:#506646}
+.hv-friends-reward p{font-size:12px;color:#647853;line-height:1.4;margin:5px 0}
+.hv-friends-link{background:linear-gradient(135deg,#e9f5df,#e1eed4);border-radius:24px;margin-top:13px;padding:18px 17px}
+.hv-friends-link>small{color:#80957c;font-size:13px}.hv-friends-linkrow{display:flex;align-items:center;gap:10px;margin-top:12px}
+.hv-friends-url{min-width:0;flex:1;overflow-wrap:anywhere;font-size:12px;color:#2f472b}
+.hv-friends-linkrow button{min-width:52px;height:52px;border:0;border-radius:16px;background:linear-gradient(#9cdc65,#55ad35);color:white;font-size:26px}
+.hv-friends-benefits,.hv-friends-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:13px}
+.hv-friends-benefits>div,.hv-friends-stats>div{min-width:0;background:linear-gradient(150deg,#e7f4df,#f9f9e9);border:1px solid white;border-radius:21px;padding:15px 11px;display:flex;flex-direction:column;gap:5px}
+.hv-friends-benefits strong,.hv-friends-stats strong{font-size:19px;color:#253e23}
+.hv-friends-benefits small,.hv-friends-stats small{font-size:11px;color:#7b8c74;line-height:1.35}
+.hv-friends-share{width:100%;margin-top:17px;border:0;border-radius:17px;background:linear-gradient(#ffdb56,#fbb226);color:#513918;font-size:18px;font-weight:900;padding:16px 9px;box-shadow:0 5px #d99720}
+.hv-friends-heading{display:flex;align-items:center;justify-content:space-between;margin:24px 4px 3px;font-size:21px}
+.hv-friends-heading span{background:#6cc449;color:white;border-radius:20px;padding:5px 17px;font-size:13px}
+.hv-friends-empty{text-align:center;padding:32px 10px 20px;color:#627956}
+.hv-friends-empty>span{display:block;font-size:85px;margin-bottom:10px}
+.hv-friends-empty strong{display:block;font-size:17px}
+.hv-friends-empty p{font-size:12px;line-height:1.5;color:#84917d}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -1870,17 +1881,19 @@ if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted
 if(tab===2){let claimed=s.daily===new Date().toLocaleDateString('en-CA');el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>Daily Login</h3><p>+100 Coins / day</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?'Claimed':'Claim')+'</button></article><article class="panel"><h3>More tasks are coming soon</h3><p class="muted">Ad, channel, and partner rewards will be added with server-side verification.</p></article>'}
 if(tab===3){
 const w=s.lang==='ar'?
-{heading:'دعوة الأصدقاء',sub:'شارك رابطك واربح من أصدقائك',reward:'اربح 10% من البيض الذي يجمعه أصدقاؤك',link:'رابط الإحالة الخاص بك',copy:'نسخ الرابط',share:'مشاركة عبر تيليجرام',friends:'الأصدقاء',earned:'بيض الإحالات',empty:'ادع أصدقاءك وابدأ بجمع المكافآت'}:
+{heading:'دعوة الأصدقاء',sub:'ادع أصدقاءك واربح المكافآت',reward:'مكافآت الإحالات',rewardSub:'اربح 10% من البيض الذي يجمعه أصدقاؤك',link:'رابط إحالتك',share:'مشاركة عبر تيليجرام',friends:'إحالاتك',eggs:'بيض الإحالات',joined:'الأصدقاء المسجلون',empty:'لا يوجد أصدقاء بعد. شارك رابطك!',foot:'اربح 10% من البيض الذي يجمعه أصدقاؤك.'}:
 s.lang==='tr'?
-{heading:'Arkadaşlarını Davet Et',sub:'Bağlantını paylaş ve ödül kazan',reward:'Davet ettiğin arkadaşların topladığı yumurtaların %10 kadarını kazan',link:'Davet bağlantın',copy:'Bağlantıyı kopyala',share:'Telegramda Paylaş',friends:'Arkadaşlar',earned:'Davet yumurtaları',empty:'Arkadaşlarını davet ederek ödül kazanmaya başla'}:
-{heading:'Invite Friends',sub:'Share your link and earn rewards',reward:'Earn 10% of the eggs collected by invited friends',link:'Your personal referral link',copy:'Copy Link',share:'Share on Telegram',friends:'Friends',earned:'Referral Eggs',empty:'Invite friends to start earning rewards'};
+{heading:'Arkadaşlarını Davet Et',sub:'Arkadaşlarını davet et ve ödüller kazan',reward:'Davet Ödülleri',rewardSub:'Arkadaşlarının topladığı yumurtalardan %10 kazan',link:'Davet Bağlantın',share:'Telegram ile Paylaş',friends:'Davetlerin',eggs:'Davet Yumurtaları',joined:'Kayıtlı Arkadaşlar',empty:'Henüz arkadaş yok. Bağlantını paylaş!',foot:'Arkadaşlarının topladığı yumurtalardan %10 kazan.'}:
+{heading:'Invite Friends',sub:'Invite friends and earn rewards',reward:'Referral rewards',rewardSub:'Earn 10% of the eggs your friends collect',link:'Your Referral Link',share:'Share on Telegram',friends:'Your Referrals',eggs:'Referral Eggs',joined:'Registered friends',empty:'No friends yet. Share your link!',foot:'You earn 10% of the eggs your invited friends collect.'};
 const url=henovaReferralLink();
-el.innerHTML='<section class="hv-friends-hero"><h1>🤝 '+w.heading+'</h1><p>'+w.sub+'</p><div class="hv-friends-icons">🎁 🐔 🎁</div></section>'+
-'<article class="hv-friends-reward"><span>🥚</span><div><b>'+w.reward+'</b><p>10% · HENOVA</p></div></article>'+
-'<section class="hv-friends-link"><small>'+w.link+'</small><div class="hv-friends-url">'+(url||'Open inside Telegram')+'</div><button onclick="invite()">'+w.copy+'</button></section>'+
+el.innerHTML='<section class="hv-friends-hero"><h1>'+w.heading+'</h1><p>'+w.sub+'</p><div class="hv-friends-icons"><span>🎁</span><span>🐔</span><span>🎁</span></div></section>'+
+'<article class="hv-friends-reward"><span>🧰</span><div><b>'+w.reward+'</b><p>'+w.rewardSub+'</p></div></article>'+
+'<section class="hv-friends-link"><small>'+w.link+'</small><div class="hv-friends-linkrow"><span class="hv-friends-url">'+(url||'Open inside Telegram')+'</span><button onclick="invite()" aria-label="Copy referral link">▢</button></div></section>'+
+'<section class="hv-friends-benefits"><div><strong>🥚 10%</strong><small>'+w.rewardSub+'</small></div><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.joined+'</small></div></section>'+
 '<button class="hv-friends-share" onclick="shareInvite()">✈ '+w.share+'</button>'+
-'<section class="hv-friends-stats"><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.friends+'</small></div><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.earned+'</small></div></section>'+
-'<p class="hv-friends-foot">🎁 '+w.empty+'</p>';
+'<div class="hv-friends-heading"><strong>'+w.friends+'</strong><span>'+num(henovaReferralCount)+'</span></div>'+
+'<section class="hv-friends-stats"><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.eggs+'</small></div><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.joined+'</small></div></section>'+
+'<section class="hv-friends-empty"><span>🎁</span><strong>'+w.empty+'</strong><p>'+w.foot+'</p></section>';
 }
 if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class="cover"><small>AVAILABLE EGGS</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>≈ '+(s.eggs*.0001).toFixed(4)+' GRAM</p></section><section class="panel"><div class="between"><b>'+names[7]+'</b><span class="badge">DEMO ONLY</span></div><p>Minimum: <b>50 eggs</b> = 0.005 GRAM</p><p>Withdrawal frequency: once every 24 hours</p><label class="muted">Eggs to withdraw</label><input id="qty" type="number" value="50" min="50"><p class="warning">Payouts and deposits are disabled until a secure, funded payment backend is configured.</p><button class="primary" disabled>Withdraw • Coming soon</button></section>';
 if(tab===0)prepareFarmArtwork();
