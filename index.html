@@ -671,6 +671,31 @@ main.farm-mode .farm-v3 .farm-hen.hen-a img{width:100%;animation:henovaStepPeck 
 .farm-v3 .v3-windmill .v3-rotor{animation:windspin 9s linear infinite!important}
 main.farm-mode .farm-v3 .farm-hen.hen-a{animation-duration:22s!important}
 @media(prefers-reduced-motion:reduce){.farm-v3 .v3-lantern,.farm-v3 .v3-windmill .v3-rotor{animation:none!important}}
+
+/* HENOVA V6: fix screenshot cropping and keep moving character inside gameplay area */
+main.farm-mode #farm-scene.farm-v3{background-position:center center!important;background-size:100% 100%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{top:0!important;bottom:auto!important;left:0!important;width:clamp(65px,16vw,100px)!important;animation:henovaSafeRoam 18s linear infinite!important}
+@keyframes henovaSafeRoam{
+0%{transform:translate(57vw,65dvh) scaleX(-1)}
+20%{transform:translate(69vw,67dvh) scaleX(-1)}
+33%{transform:translate(69vw,67dvh) scaleX(1)}
+52%{transform:translate(48vw,70dvh) scaleX(1)}
+70%{transform:translate(38vw,66dvh) scaleX(1)}
+77%{transform:translate(38vw,66dvh) scaleX(-1)}
+100%{transform:translate(57vw,65dvh) scaleX(-1)}
+}
+.farm-v3 .v3-hay-bales{top:65%!important;left:2%!important;width:21%!important;height:8%!important;border:4px solid #a56b2a!important;border-radius:30% 27% 24% 22%!important;background:repeating-linear-gradient(12deg,#c78e31 0 3px,#e2b958 4px 9px,#f5d87d 10px 14px)!important;box-shadow:8px 8px 0 #c7953b,13px 10px 0 #8c642e!important;transform:rotate(-7deg)}
+.farm-v3 .v3-feeder{top:45%!important;left:43%!important;width:26%!important;height:19px!important}
+.farm-v3 .v3-nest{top:49%!important;left:4%!important}
+.farm-v3 .v3-pond{right:2%!important;width:34%!important;top:66%!important;height:11%!important}
+.farm-v3 .v3-barn{top:29%!important;left:6%!important;width:41%!important;height:22%!important}
+.farm-v3 .v3-windmill{top:28%!important;right:6%!important;width:28%!important;height:23%!important}
+main.farm-mode .farm-user{max-width:42%!important;min-width:0!important}
+main.farm-mode .farm-user-copy{min-width:0!important}
+main.farm-mode #farm-user-name{font-size:clamp(12px,3.5vw,17px)!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main.farm-mode .farm-tools{gap:4px!important}
+main.farm-mode .farm-tools button{width:clamp(35px,10vw,48px)!important;min-width:0!important;padding:7px!important}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important;transform:translate(58vw,67dvh)!important}}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
