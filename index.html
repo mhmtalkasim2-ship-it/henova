@@ -733,7 +733,92 @@ radial-gradient(ellipse at 74% 19%,#557d43 0 3px,transparent 4px);
 background-size:135px 125px,170px 145px,215px 170px,90px 100px;opacity:.8}
 .farm-v3 .v3-stones{position:absolute;left:56%;top:66%;width:10%;height:4%;z-index:5;background:linear-gradient(120deg,#d4d7c9,#788b7b);border:3px solid #596d5a;border-radius:56% 48% 40% 45%;box-shadow:18px 8px 0 -7px #b9bfaf}
 @media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important;left:67%!important;top:73%!important;transform:none!important}}
-main.farm-mode .farm-v3 .v3-feeder{background:transparent url('./assets/henova-feeder-v2.svg') center/contain no-repeat!important;border:0!important;box-shadow:none!important;top:45%!important;left:40%!important;width:31%!important;height:10%!important}main.farm-mode .farm-v3 .v3-feeder span{display:none!important}main.farm-mode .farm-v3 .v3-lantern{left:75%!important;top:40%!important}</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+main.farm-mode .farm-v3 .v3-feeder{background:transparent url('./assets/henova-feeder-v2.svg') center/contain no-repeat!important;border:0!important;box-shadow:none!important;top:45%!important;left:40%!important;width:31%!important;height:10%!important}main.farm-mode .farm-v3 .v3-feeder span{display:none!important}main.farm-mode .farm-v3 .v3-lantern{left:75%!important;top:40%!important}
+/* HENOVA 2026 REFERENCE REBUILD: one cohesive illustrated scene + independent animated gameplay */
+main.farm-mode #farm-scene.farm-v3{
+ background:#7fba51 url('./assets/henova-game-scene-v1.svg') center center/100% 100% no-repeat!important;
+ isolation:isolate;overflow:hidden!important;
+}
+main.farm-mode #farm-scene.farm-v3::before,
+main.farm-mode #farm-scene.farm-v3::after{content:none!important;display:none!important}
+main.farm-mode .farm-v3 .v3-sun,
+main.farm-mode .farm-v3 .v3-hills,
+main.farm-mode .farm-v3 .v3-field,
+main.farm-mode .farm-v3 .v3-fence,
+main.farm-mode .farm-v3 .v3-lane,
+main.farm-mode .farm-v3 .v3-tree,
+main.farm-mode .farm-v3 .v3-barn,
+main.farm-mode .farm-v3 .v3-nest,
+main.farm-mode .farm-v3 .v3-feeder,
+main.farm-mode .farm-v3 .v3-hay,
+main.farm-mode .farm-v3 .v3-pond,
+main.farm-mode .farm-v3 .v3-grain,
+main.farm-mode .farm-v3 .v3-lantern,
+main.farm-mode .farm-v3 .v3-hay-bales,
+main.farm-mode .farm-v3 .v3-rock,
+main.farm-mode .farm-v3 .v3-ground-details,
+main.farm-mode .farm-v3 .v3-stones{display:none!important}
+main.farm-mode .farm-v3 .v3-windmill{
+ display:block!important;position:absolute!important;left:69%!important;top:24.1%!important;
+ width:31%!important;height:16.7%!important;right:auto!important;bottom:auto!important;
+ background:transparent url('./assets/henova-rotor-v1.svg') center/contain no-repeat!important;
+ transform-origin:50% 50%!important;transform:none!important;
+ animation:henovaWindmillReference 8s linear infinite!important;
+ box-shadow:none!important;filter:drop-shadow(2px 3px 1px #46382644)!important;z-index:4!important;
+}
+main.farm-mode .farm-v3 .v3-windmill *{display:none!important}
+@keyframes henovaWindmillReference{to{transform:rotate(360deg)}}
+main.farm-mode .farm-v3 .farm-hen.hen-a{
+ display:block!important;position:absolute!important;top:72%!important;left:69%!important;
+ width:clamp(68px,15.5vw,110px)!important;right:auto!important;bottom:auto!important;
+ height:auto!important;opacity:1!important;visibility:visible!important;
+ z-index:12!important;animation:henovaHenReference 18s ease-in-out infinite!important;
+ filter:drop-shadow(1px 7px 2px #38562c66)!important;
+}
+main.farm-mode .farm-v3 .farm-hen.hen-a img{
+ width:100%!important;height:auto!important;display:block!important;
+ animation:henovaReferencePeck 3.4s ease-in-out infinite!important;
+ transform-origin:66% 77%!important
+}
+@keyframes henovaHenReference{
+ 0%,12%{left:69%;top:72%;transform:scaleX(-1)}
+ 25%{left:60%;top:71%;transform:scaleX(-1)}
+ 43%{left:48%;top:74%;transform:scaleX(-1)}
+ 49%{left:48%;top:74%;transform:scaleX(1)}
+ 70%{left:59%;top:73%;transform:scaleX(1)}
+ 86%{left:71%;top:72%;transform:scaleX(1)}
+ 91%,100%{left:69%;top:72%;transform:scaleX(-1)}
+}
+@keyframes henovaReferencePeck{
+ 0%,18%,67%,100%{transform:rotate(0) translateY(0)}
+ 26%,38%{transform:rotate(11deg) translateY(4px)}
+ 32%,44%{transform:rotate(4deg) translateY(1px)}
+}
+main.farm-mode .farm-v3 .farm-hen.hen-b,
+main.farm-mode .farm-v3 .farm-hen.hen-c{display:none!important}
+main.farm-mode .collect-dock{
+ background:linear-gradient(115deg,#eaf4d4f0,#ecf4d2ee)!important;
+ border:3px solid #fff8df!important;border-radius:28px!important;
+ box-shadow:0 5px 0 #87a85566,0 8px 18px #33562a44!important;
+ padding:7px!important;min-height:72px!important
+}
+main.farm-mode .collect-action button{
+ background:linear-gradient(#ffe67a,#ffd04c 67%,#f0a92a)!important;
+ color:#5e3d18!important;border:2px solid #fff2b6!important;
+ box-shadow:0 5px 0 #ad7c24!important;border-radius:23px!important;
+ font-size:clamp(17px,5.4vw,25px)!important;min-height:59px!important
+}
+main.farm-mode .stats>div{background:#ecf4dceb!important;border:2px solid #fffbec!important}
+main.farm-mode .farm-user{background:#eef4dfea!important}
+main.farm-mode nav,nav{background:linear-gradient(#edf4df,#dbe9ca)!important}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode .farm-v3 .v3-windmill,
+ main.farm-mode .farm-v3 .farm-hen.hen-a,
+ main.farm-mode .farm-v3 .farm-hen.hen-a img{animation:none!important}
+ main.farm-mode .farm-v3 .farm-hen.hen-a{left:69%!important;top:72%!important;transform:none!important}
+}
+
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],['red','🐓','Red Hen',30,1000],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
@@ -742,7 +827,7 @@ let s;try{s=JSON.parse(localStorage.getItem(K))||{}}catch{s={}}s={eggs:0,coins:0
 const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem(K,JSON.stringify(s)),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const rate=()=>H.reduce((a,h)=>a+h[3]*(s.hen[h[0]]||0),0)*(1+[0,.10,.20,.35,.50,.75][Math.min(5,s.fan||0)]),prod=()=>Math.min(60,Math.floor(Math.max(0,Date.now()-s.start)*rate()/hr));
 function toast(m){let n=document.getElementById('notice');n.textContent=m;n.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>n.classList.add('hidden'),2700)}
-function collect(){let q=prod();if(!q)return toast('No eggs available yet');let hens=[...document.querySelectorAll('#farm-scene .farm-hen')].map(e=>e.getBoundingClientRect());s.eggs+=q;s.start=Date.now();save();render();playCollectEggs(hens,q);toast('+'+q+' eggs collected!')}
+function collect(){let q=prod();if(!q)return toast('No eggs available yet');let hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());s.eggs+=q;s.start=Date.now();save();render();playCollectEggs(hens,q);toast('+'+q+' eggs collected!')}
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;if(s.coins<h[4])return toast('Not enough Coins');s.coins-=h[4];s.hen[id]=(s.hen[id]||0)+1;save();render();toast('New hen added!')}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');/* Close elapsed cycle before changing rate to avoid retroactive gains */let pending=prod();s.coins-=prices[lv];s.fan=lv+1;s.start=Date.now()-Math.floor(pending*hr/rate());save();render();toast('Power upgraded to level '+s.fan+'!')}
