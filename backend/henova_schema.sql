@@ -109,7 +109,11 @@ BEGIN
       RETURN jsonb_build_object('ok',false,'error','insufficient_coins');
     END IF;
     v_coin_delta := -v_price;
+    -- A purchased hen must not multiply production already accrued before purchase.
+    v_after_rate := v_rate + (CASE p_item WHEN 'red' THEN 30 WHEN 'gold' THEN 60
+       WHEN 'royal' THEN 120 WHEN 'legend' THEN 250 ELSE 0 END) * v_fan_multiplier;
     UPDATE public.henova_players SET coin_balance=coin_balance-v_price,
+      production_started_at=v_now - make_interval(secs => (v_pending*3600/v_after_rate)::double precision),
       red_hens=red_hens+CASE WHEN p_item='red' THEN 1 ELSE 0 END,
       gold_hens=gold_hens+CASE WHEN p_item='gold' THEN 1 ELSE 0 END,
       royal_hens=royal_hens+CASE WHEN p_item='royal' THEN 1 ELSE 0 END,
