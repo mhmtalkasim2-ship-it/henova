@@ -290,6 +290,27 @@ main.farm-mode .scene.realistic-ready{
  image-rendering:auto;
 }
 main.farm-mode .scene.realistic-ready .farm-hen{opacity:.84;filter:drop-shadow(0 5px 3px #224b2455)}
+
+/* HENOVA naturalistic farm — replace photographic screenshot & flat cartoon look */
+main.farm-mode .scene,main.farm-mode .scene:not(.realistic-ready){
+ background:radial-gradient(ellipse at 52% 62%,#b7a16b28 0 11%,transparent 54%),linear-gradient(180deg,#afcfb8 0%,#93bca5 30%,#79985b 31%,#426b32 100%)!important;
+}
+main.farm-mode .scene::after{content:"";position:absolute;inset:28% 0 0;pointer-events:none;z-index:0;background:repeating-linear-gradient(103deg,transparent 0 21px,#d9d2990a 23px 25px),radial-gradient(ellipse at 25% 60%,#2c532d44,transparent 45%),radial-gradient(ellipse at 85% 70%,#284f2d48,transparent 47%)}
+main.farm-mode .scene:not(.realistic-ready) .orchard{display:block!important;z-index:2}
+main.farm-mode .scene .orchard .tree-art{font-size:0!important;filter:none!important;opacity:1}
+main.farm-mode .scene .orchard .tree-art::before{content:"";display:block;width:clamp(105px,29vw,190px);height:clamp(140px,35vw,240px);background:radial-gradient(ellipse at 35% 20%,#9cb36b88,transparent 41%),radial-gradient(ellipse at 65% 38%,#6f9349 0 22%,transparent 35%),radial-gradient(ellipse at 37% 36%,#476e37 0 32%,transparent 58%),radial-gradient(ellipse at 55% 68%,#2e5a34 0 28%,transparent 56%);border-radius:46% 53% 43% 49%;filter:drop-shadow(4px 12px 5px #1d3c264c)}
+main.farm-mode .scene .orchard .tree-art::after{content:"";display:block;position:absolute;width:16px;height:65px;background:linear-gradient(90deg,#553b2b,#99704a 53%,#473426);left:44%;top:73%;z-index:-1}
+main.farm-mode .scene:not(.realistic-ready) .farm-path{display:block!important;z-index:1;left:34%;width:35%;height:59%;bottom:-15%;border:0;border-radius:60% 42% 0 0;background:repeating-linear-gradient(167deg,transparent 0 11px,#86613e15 13px 15px),linear-gradient(90deg,#806844,#bbaa81 18%,#d5c29c 52%,#a48b63 89%,#765b3d);transform:perspective(160px) rotateX(13deg);box-shadow:0 0 12px #213c1c40}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{background:repeating-linear-gradient(90deg,#613725 0 6px,#885336 7px 18px,#aa7650 19px 22px,#70432f 23px 27px)!important;border:7px solid #b5936e!important;box-shadow:inset 10px 0 16px #1d140e55,12px 16px 18px #172f2066!important;filter:saturate(.78);border-radius:3px!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before{border-bottom-color:#533d32!important;filter:drop-shadow(0 -8px 0 #73564a) drop-shadow(2px 8px 3px #21190f88)!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::after{background:linear-gradient(90deg,#241a16,#53372a 45%,#1f1714)!important;border-color:#b39470!important}
+main.farm-mode .scene:not(.realistic-ready) .tower{background:linear-gradient(90deg,#716958,#d7ccb5 44%,#8d826f);border-color:#756a55}
+main.farm-mode .scene:not(.realistic-ready) .blade{background:linear-gradient(90deg,#a5a08b,#e0d5b6 50%,#776f60);border-color:#807c65}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{filter:saturate(.68) drop-shadow(5px 8px 5px #263c2288);opacity:.95}
+main.farm-mode .scene:not(.realistic-ready) .pond{filter:saturate(.65) drop-shadow(0 8px 5px #294d3277)}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{filter:saturate(.75) drop-shadow(3px 5px 5px #243f2960)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen img{filter:saturate(.7) contrast(1.07) drop-shadow(4px 8px 6px #192d2388)}
+main.farm-mode .scene:not(.realistic-ready) .cloud{display:none!important}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
@@ -308,7 +329,7 @@ function settings(){document.getElementById('lang').value=s.lang;document.getEle
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){s.lang=x;save();render()}
 function openTab(i){tab=i;render()}
-function prepareFarmArtwork(){let el=document.getElementById('farm-scene');if(!el)return;let im=new Image();im.onload=()=>el.classList.add('realistic-ready');im.onerror=()=>el.classList.remove('realistic-ready');im.src='./assets/henova-farm-scene.jpg'}
+function prepareFarmArtwork(){/* Art-directed farm: no baked background image. Keep all motion interactive. */}
 function render(){
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
 const names=t(),icons=['🏡','🐣','📋','👥','💰'];document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
