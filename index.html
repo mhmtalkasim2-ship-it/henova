@@ -1697,13 +1697,13 @@ const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Wit
 // Balances are now server-authoritative. Only the visual language setting stays local.
 let preference={};try{preference=JSON.parse(localStorage.getItem('henova-display-preferences-v1'))||{}}catch{}
 let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:'en',fan:0};
-let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0;
+let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0;
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
 function henovaApplyState(st){
   if(!st || !Number.isFinite(st.eggs) || !Number.isFinite(st.coins))throw Error('invalid_server_state');
   s.eggs=st.eggs;s.coins=st.coins;s.hen=st.hen||{starter:1};s.fan=st.fan||0;
-  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);
+  s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);henovaReferralCoins=Math.max(0,Number(st.referral_coins_earned)||0);
 }
 async function henovaCall(action,details={}){
   const initData=window.Telegram?.WebApp?.initData;
@@ -1881,18 +1881,18 @@ if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted
 if(tab===2){let claimed=s.daily===new Date().toLocaleDateString('en-CA');el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>Daily Login</h3><p>+100 Coins / day</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?'Claimed':'Claim')+'</button></article><article class="panel"><h3>More tasks are coming soon</h3><p class="muted">Ad, channel, and partner rewards will be added with server-side verification.</p></article>'}
 if(tab===3){
 const w=s.lang==='ar'?
-{heading:'دعوة الأصدقاء',sub:'ادع أصدقاءك واربح المكافآت',reward:'مكافآت الإحالات',rewardSub:'اربح 10% من البيض الذي يجمعه أصدقاؤك',link:'رابط إحالتك',share:'مشاركة عبر تيليجرام',friends:'إحالاتك',eggs:'بيض الإحالات',joined:'الأصدقاء المسجلون',empty:'لا يوجد أصدقاء بعد. شارك رابطك!',foot:'اربح 10% من البيض الذي يجمعه أصدقاؤك.'}:
+{heading:'دعوة الأصدقاء',sub:'ادع أصدقاءك واربح المكافآت',reward:'مكافآت الإحالات',rewardSub:'100 عملة لكل صديق جديد + 10% من البيض الذي يجمعه',link:'رابط إحالتك',share:'مشاركة عبر تيليجرام',friends:'إحالاتك',eggs:'بيض الإحالات',joined:'الأصدقاء المسجلون',coins:'عملات الإحالات',empty:'لا يوجد أصدقاء بعد. شارك رابطك!',foot:'اربح 10% من البيض الذي يجمعه أصدقاؤك.'}:
 s.lang==='tr'?
-{heading:'Arkadaşlarını Davet Et',sub:'Arkadaşlarını davet et ve ödüller kazan',reward:'Davet Ödülleri',rewardSub:'Arkadaşlarının topladığı yumurtalardan %10 kazan',link:'Davet Bağlantın',share:'Telegram ile Paylaş',friends:'Davetlerin',eggs:'Davet Yumurtaları',joined:'Kayıtlı Arkadaşlar',empty:'Henüz arkadaş yok. Bağlantını paylaş!',foot:'Arkadaşlarının topladığı yumurtalardan %10 kazan.'}:
-{heading:'Invite Friends',sub:'Invite friends and earn rewards',reward:'Referral rewards',rewardSub:'Earn 10% of the eggs your friends collect',link:'Your Referral Link',share:'Share on Telegram',friends:'Your Referrals',eggs:'Referral Eggs',joined:'Registered friends',empty:'No friends yet. Share your link!',foot:'You earn 10% of the eggs your invited friends collect.'};
+{heading:'Arkadaşlarını Davet Et',sub:'Arkadaşlarını davet et ve ödüller kazan',reward:'Davet Ödülleri',rewardSub:'Her yeni arkadaş için 100 jeton ve topladığı yumurtalardan %10',link:'Davet Bağlantın',share:'Telegram ile Paylaş',friends:'Davetlerin',eggs:'Davet Yumurtaları',joined:'Kayıtlı Arkadaşlar',coins:'Davet Jetonları',empty:'Henüz arkadaş yok. Bağlantını paylaş!',foot:'Arkadaşlarının topladığı yumurtalardan %10 kazan.'}:
+{heading:'Invite Friends',sub:'Invite friends and earn rewards',reward:'Referral rewards',rewardSub:'100 coins per new friend + 10% of their collected eggs',link:'Your Referral Link',share:'Share on Telegram',friends:'Your Referrals',eggs:'Referral Eggs',joined:'Registered friends',coins:'Referral Coins',empty:'No friends yet. Share your link!',foot:'You earn 10% of the eggs your invited friends collect.'};
 const url=henovaReferralLink();
 el.innerHTML='<section class="hv-friends-hero"><h1>'+w.heading+'</h1><p>'+w.sub+'</p><div class="hv-friends-icons"><span>🎁</span><span>🐔</span><span>🎁</span></div></section>'+
 '<article class="hv-friends-reward"><span>🧰</span><div><b>'+w.reward+'</b><p>'+w.rewardSub+'</p></div></article>'+
 '<section class="hv-friends-link"><small>'+w.link+'</small><div class="hv-friends-linkrow"><span class="hv-friends-url">'+(url||'Open inside Telegram')+'</span><button onclick="invite()" aria-label="Copy referral link">▢</button></div></section>'+
-'<section class="hv-friends-benefits"><div><strong>🥚 10%</strong><small>'+w.rewardSub+'</small></div><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.joined+'</small></div></section>'+
+'<section class="hv-friends-benefits"><div><strong>🥚 10%</strong><small>'+w.eggs+'</small></div><div><strong>🪙 100</strong><small>'+w.rewardSub+'</small></div></section>'+
 '<button class="hv-friends-share" onclick="shareInvite()">✈ '+w.share+'</button>'+
 '<div class="hv-friends-heading"><strong>'+w.friends+'</strong><span>'+num(henovaReferralCount)+'</span></div>'+
-'<section class="hv-friends-stats"><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.eggs+'</small></div><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.joined+'</small></div></section>'+
+'<section class="hv-friends-stats"><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.eggs+'</small></div><div><strong>🪙 '+num(henovaReferralCoins)+'</strong><small>'+w.coins+'</small></div></section>'+
 '<section class="hv-friends-empty"><span>🎁</span><strong>'+w.empty+'</strong><p>'+w.foot+'</p></section>';
 }
 if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class="cover"><small>AVAILABLE EGGS</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>≈ '+(s.eggs*.0001).toFixed(4)+' GRAM</p></section><section class="panel"><div class="between"><b>'+names[7]+'</b><span class="badge">DEMO ONLY</span></div><p>Minimum: <b>50 eggs</b> = 0.005 GRAM</p><p>Withdrawal frequency: once every 24 hours</p><label class="muted">Eggs to withdraw</label><input id="qty" type="number" value="50" min="50"><p class="warning">Payouts and deposits are disabled until a secure, funded payment backend is configured.</p><button class="primary" disabled>Withdraw • Coming soon</button></section>';
