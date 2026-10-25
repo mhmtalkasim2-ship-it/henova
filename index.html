@@ -1690,38 +1690,114 @@ main.farm-mode .collect-meter{display:none!important}
 .hv-friends-empty strong{display:block;font-size:17px}
 .hv-friends-empty p{font-size:12px;line-height:1.5;color:#84917d}
 
-/* Color-coded owned hens. Layout-only: all prices, rewards and inventory are server authoritative. */
+/* HENOVA V16: truly roaming colored hens; separate the travelling body, facing,
+   and peck so the bird never shrinks while turning. Prevent mobile WebView highlights. */
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
  position:absolute!important;
- width:clamp(36px,8vw,53px)!important;
+ width:clamp(36px,7.8vw,51px)!important;
  height:auto!important;
+ display:block!important;
+ overflow:visible!important;
  z-index:11!important;
  pointer-events:auto!important;
  cursor:pointer!important;
- touch-action:manipulation;
- animation:henovaOwnedIdleV15 4.2s ease-in-out infinite!important;
+ touch-action:manipulation!important;
+ user-select:none!important;
+ -webkit-user-select:none!important;
+ -webkit-touch-callout:none!important;
+ -webkit-tap-highlight-color:transparent!important;
+ outline:none!important;
+ background:none!important;
+ box-shadow:none!important;
  transform-origin:center bottom!important;
+ animation:henovaOwnedWalkV16 var(--wander-duration,16s) linear infinite!important;
+ animation-delay:var(--wander-delay,-2s)!important;
 }
-main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action,
-main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *,
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *::before,
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *::after{
+ -webkit-tap-highlight-color:transparent!important;
+ -webkit-touch-callout:none!important;
+ user-select:none!important;
+ -webkit-user-select:none!important;
+ -webkit-user-drag:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen::selection,
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *::selection{
+ background:transparent!important;
+ color:inherit!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
  width:100%!important;
  display:block!important;
+ transform-origin:50% 60%!important;
+ animation:henovaOwnedFacingV16 var(--wander-duration,16s) steps(1,end) infinite!important;
+ animation-delay:var(--wander-delay,-2s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+ display:block!important;
+ width:100%!important;
+ transform-origin:70% 75%!important;
+ animation:henovaOwnedPeckV16 var(--wander-duration,16s) ease-in-out infinite!important;
+ animation-delay:var(--wander-delay,-2s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
+ width:100%!important;
  height:auto!important;
+ display:block!important;
+ -webkit-user-drag:none!important;
+ pointer-events:none!important;
+ filter:drop-shadow(1px 3px 2px rgba(37,62,29,.3))!important;
 }
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action.hen-tap-v11{
  animation:henovaHenTapV11 .48s ease-out 1!important;
+ animation-delay:0s!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:focus:not(:focus-visible){
+ outline:none!important;
+ box-shadow:none!important;
+ background:transparent!important;
 }
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:focus-visible{
- outline:2px solid #ffe092;
- border-radius:30px;
+ outline:2px solid #ffe092!important;
+ outline-offset:3px!important;
+ border-radius:26px;
 }
-@keyframes henovaOwnedIdleV15{
- 0%,100%{transform:translateY(0)}
- 45%{transform:translateY(-3px)}
+/* Pause, walk across the nearby grass, stop to feed, then walk home. */
+@keyframes henovaOwnedWalkV16{
+ 0%,8%{transform:translate(0,0)}
+ 19%{transform:translate(var(--wander-mid-x,10px),var(--wander-mid-y,-2px))}
+ 35%,60%{transform:translate(var(--wander-x,24px),var(--wander-y,-5px))}
+ 76%{transform:translate(var(--wander-mid-x,10px),var(--wander-mid-y,-2px))}
+ 89%,100%{transform:translate(0,0)}
+}
+/* Steps(1,end) switches the entire full silhouette instantly, with no thin frame. */
+@keyframes henovaOwnedFacingV16{
+ 0%,59.9%{transform:scaleX(var(--wander-facing,1))}
+ 60%,100%{transform:scaleX(var(--wander-home-facing,-1))}
+}
+@keyframes henovaOwnedPeckV16{
+ 0%,9%,19%,35%,37%,60%,62%,76%,89%,100%{transform:rotate(0deg) translateY(0)}
+ 12%,25%,81%{transform:rotate(-2deg) translateY(-2px)}
+ 41%,48%,55%{transform:rotate(12deg) translateY(5px)}
+ 44%,51%,58%{transform:rotate(1deg) translateY(0)}
 }
 .hv-breed-face img{width:62px;height:57px;object-fit:contain;max-width:100%;}
 @media(prefers-reduced-motion:reduce){
- main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{animation:none!important}
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing,
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+   animation:none!important;
+   transform:none!important;
+ }
+}
+/* Keep a harmless touch response on the main hen as well. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *{
+ -webkit-tap-highlight-color:transparent!important;
+ -webkit-touch-callout:none!important;
+ -webkit-user-select:none!important;
+ user-select:none!important;
 }
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="toast('Leaderboard coming soon')" title="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
@@ -1949,11 +2025,11 @@ const HENOVA_BREED_ART={
 };
 const henovaBreedImage=breed=>HENOVA_BREED_ART[breed]||HENOVA_BREED_ART.starter;
 const HENOVA_HEN_SPOTS={
- starter:[[9,65],[20,66],[9,76],[22,79]],
- red:[[62,54],[74,55],[86,56],[60,63],[88,68]],
- gold:[[60,71],[73,73],[86,75],[67,79],[89,81]],
- royal:[[10,81],[20,84],[7,87],[32,80],[41,84]],
- legend:[[51,80],[59,85],[72,85],[81,87],[92,76]]
+ starter:[[9,70],[23,74],[8,81],[24,88]],
+ red:[[62,52],[75,54],[85,52],[66,60],[87,61]],
+ gold:[[56,79],[69,83],[85,83],[59,88],[78,89]],
+ royal:[[10,79],[23,83],[7,88],[27,91],[43,83]],
+ legend:[[48,74],[58,77],[71,91],[89,77],[91,89]]
 };
 function henovaOwnedHensMarkup(){
  return H.map(h=>{
@@ -1962,7 +2038,15 @@ function henovaOwnedHensMarkup(){
    const points=HENOVA_HEN_SPOTS[breed];
    return Array.from({length:count},(_,i)=>{
      const point=points[i];
-     return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;animation-delay:-'+(i*.7)+'s" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div>';
+     const breedIndex=H.findIndex(t=>t[0]===breed);
+     const towardCenter=point[0]>65?-1:1;
+     const dx=towardCenter*(17+((i*7+breedIndex*4)%16));
+     const dy=-3-((i+breedIndex)%4)*3;
+     const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
+     const duration=13+((i*3+breedIndex*2)%8);
+     const delay=-((i*3+breedIndex*4)%duration);
+     const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;';
+     return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
 }
