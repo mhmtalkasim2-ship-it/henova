@@ -153,6 +153,10 @@ main.farm-mode .scene .farm-basket,main.farm-mode .scene .hen-characters,main.fa
 @keyframes lilyDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
 @media(prefers-reduced-motion:reduce){.farm-hen,.pond .ripple,.pond .lily{animation:none}}
 @media(max-height:740px){main.farm-mode .scene .hen-barn{bottom:50%}main.farm-mode .scene .windmill{bottom:51%}.pond{bottom:29%}.farm-hen.hen-a,.farm-hen.hen-b{bottom:39%}}
+
+/* Hide only the two overlay cards in Farm view; gameplay remains unchanged. */
+main.farm-mode #view > .power-panel,
+main.farm-mode #view > .panel:not(.between) {display:none!important}
 </style></head><body><main><header><div>🥚 <strong>HENOVA</strong><small>CHICKEN FARM</small></div><button onclick="settings()">⚙️</button></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <script>
