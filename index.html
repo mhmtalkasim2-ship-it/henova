@@ -1758,7 +1758,7 @@ async function henovaAction(action,item){
     else if(action==='boost')toast('Power upgraded!');
   }catch(error){
     console.warn('HENOVA action not confirmed',error);
-    toast('Action not confirmed: '+String(error.message||'server_error').slice(0,36));
+    toast(hvError(error.message));
     if(['no_eggs','already_claimed','insufficient_coins','invalid_hen','max_boost','invalid_request_id'].includes(error.message)){
       localStorage.removeItem('henova-pending-action-v1');
     }
@@ -1777,12 +1777,12 @@ function henovaTaskClock(n){return [Math.floor(n/3600),Math.floor(n%3600/60),n%6
 function henovaOpenChannel(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_FARM')}
 async function henovaJoinReward(){
 const app=window.Telegram?.WebApp;
-if(!app?.initData)return toast('Open in Telegram');
+if(!app?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
 try{
 const data=await henovaCall('join_channel',{requestId:crypto.randomUUID()});
 if(data.ok){const state=await henovaCall('state');henovaApplyState(state.state);render();toast('+20 Coins!')}
-else toast(data.error||'Please join channel first');
-}catch(e){toast('Join @HENOVA_FARM then try again')}
+else toast(hvError(data.error));
+}catch(e){toast(hvError(e.message))}
 }
 function henovaReferralLink(){const id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;return id?'https://t.me/HenovaEggsBot?startapp=ref_'+id:''}
 function invite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
@@ -1882,6 +1882,17 @@ if(typeof window.addEventListener==='function'){
 function toggleFarmSound(){window.henovaMuted=!window.henovaMuted;let b=document.getElementById('sound-toggle');if(b)b.textContent=window.henovaMuted?'🔇':'🔊';toast(hvText(window.henovaMuted?'soundOff':'soundOn'))}
 function updateFarmIdentity(){const u=window.Telegram?.WebApp?.initDataUnsafe?.user;let name=u?.first_name||'HENOVA',handle=u?.username?'@'+u.username:'CHICKEN FARM';document.getElementById('farm-user-name').textContent=name.toUpperCase();document.getElementById('farm-user-handle').textContent=handle;document.getElementById('farm-avatar').textContent=name.slice(0,1).toUpperCase()}
 const HV_TEXT={"en":{"daily":"Daily Login","dailyDesc":"+100 Coins / day","claimed":"Claimed","claim":"Claim","taskDesc":"20 Coins / 6 hours","ready":"Ready","open":"Open Channel","verify":"Verify & Claim","packInfo":"Additional hens increase your eggs per hour during each 6-hour production session.","eggsHour":"eggs/hour","owned":"Owned","free":"FREE","packWarning":"Pack prices are provisional demo settings.","avail":"AVAILABLE EGGS","demo":"DEMO ONLY","min":"Minimum","freq":"Withdrawal frequency: once every 24 hours","qty":"Eggs to withdraw","warn":"Payouts and deposits are disabled until a secure, funded payment backend is configured.","withdraw":"Withdraw • Coming soon","soundOn":"Sound on","soundOff":"Sound off","unit":"eggs/h","remain":"Remaining: ","done":"6 hours completed — collect eggs","collect":"Collect","join":"Join the channel first","unavailable":"Channel verification unavailable"},"ar":{"daily":"تسجيل الدخول اليومي","dailyDesc":"+100 عملة يومياً","claimed":"تم الاستلام","claim":"استلام","taskDesc":"20 عملة كل 6 ساعات","ready":"جاهزة","open":"فتح القناة","verify":"تحقق واستلم","packInfo":"زيادة عدد الدجاج ترفع إنتاج البيض كل ساعة خلال جلسة مدتها 6 ساعات.","eggsHour":"بيضة/ساعة","owned":"تمتلك","free":"مجاني","packWarning":"أسعار الحزم تجريبية وقابلة للتغيير.","avail":"البيض المتاح","demo":"تجريبي فقط","min":"الحد الأدنى","freq":"السحب مرة واحدة كل 24 ساعة","qty":"كمية البيض للسحب","warn":"الإيداع والسحب معطّلان حتى تجهيز نظام دفع آمن وممول.","withdraw":"السحب • قريباً","soundOn":"الصوت مفعّل","soundOff":"الصوت مغلق","unit":"بيضة/س","remain":"المتبقي: ","done":"اكتملت 6 ساعات — اجمع البيض","collect":"اجمع","join":"اشترك بالقناة أولاً","unavailable":"تعذر التحقق من القناة"},"tr":{"daily":"Günlük Giriş","dailyDesc":"Günde +100 Jeton","claimed":"Alındı","claim":"Al","taskDesc":"6 saatte 20 Jeton","ready":"Hazır","open":"Kanalı Aç","verify":"Doğrula ve Al","packInfo":"Daha fazla tavuk, 6 saatlik üretim süresinde saatlik yumurta üretimini artırır.","eggsHour":"yumurta/saat","owned":"Sahip olunan","free":"ÜCRETSİZ","packWarning":"Paket fiyatları geçici deneme değerleridir.","avail":"MEVCUT YUMURTALAR","demo":"SADECE DEMO","min":"Minimum","freq":"Para çekme sıklığı: 24 saatte bir","qty":"Çekilecek yumurta","warn":"Güvenli ve fonlanmış ödeme sistemi kurulana kadar ödemeler devre dışıdır.","withdraw":"Çekim • Yakında","soundOn":"Ses açık","soundOff":"Ses kapalı","unit":"yumurta/sa","remain":"Kalan: ","done":"6 saat tamamlandı — yumurtaları topla","collect":"Topla","join":"Önce kanala katıl","unavailable":"Kanal doğrulanamadı"}};
+function hvError(code){
+ const errors={
+ already_claimed:{en:'Daily reward already claimed today',ar:'استلمت المكافأة اليومية بالفعل، ارجع غداً',tr:'Günlük ödülünü bugün zaten aldın'},
+ no_eggs:{en:'No eggs ready to collect',ar:'لا يوجد بيض جاهز للجمع',tr:'Toplanacak yumurta yok'},
+ insufficient_coins:{en:'Not enough coins',ar:'رصيد العملات غير كافٍ',tr:'Yeterli jeton yok'},
+ not_joined:{en:'Join the channel first',ar:'اشترك في القناة أولاً',tr:'Önce kanala katıl'},
+ cooldown:{en:'Wait for the reward countdown',ar:'انتظر انتهاء عداد المكافأة',tr:'Ödül sayacının bitmesini bekle'},
+ verification_unavailable:{en:'Channel verification unavailable, try later',ar:'تعذر التحقق من الاشتراك، حاول لاحقاً',tr:'Kanal doğrulanamadı, daha sonra tekrar dene'}
+ };
+ return errors[code]?.[s.lang]||errors[code]?.en||({ar:'تعذرت العملية، حاول لاحقاً',tr:'İşlem başarısız, tekrar dene',en:'Action failed, please try again'}[s.lang]||'Action failed');
+}
 function hvText(key){return (HV_TEXT[s.lang]||HV_TEXT.en)[key]||HV_TEXT.en[key]||key}
 function render(){
 updateFarmIdentity();
