@@ -1696,7 +1696,12 @@ const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,0],[
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الحزم','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
 // Balances are now server-authoritative. Only the visual language setting stays local.
 let preference={};try{preference=JSON.parse(localStorage.getItem('henova-display-preferences-v1'))||{}}catch{}
-let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:'en',fan:0};
+function henovaTelegramLanguage(){
+  const code=window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code||navigator.language||'en';
+  const lang=String(code).toLowerCase().split(/[-_]/)[0];
+  return ['ar','tr','en'].includes(lang)?lang:'en';
+}
+let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:henovaTelegramLanguage(),fan:0};
 let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0;
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
@@ -1789,7 +1794,7 @@ function invite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA f
 function shareInvite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');const url='https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Join my HENOVA chicken farm!');const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink(url);else window.open(url,'_blank')}
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
-function changeLang(x){s.lang=x;save();render()}
+function changeLang(x){if(!['en','ar','tr'].includes(x))return;s.lang=x;save();render()}
 function openTab(i){tab=i;render()}
 
 /* One click / tap gives a short synthesized chicken-like cluck, without external audio. */
