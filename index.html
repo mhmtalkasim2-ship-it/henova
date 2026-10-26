@@ -2109,10 +2109,27 @@ async function henovaShowAdminPayouts(){
   for(const item of data.items){
    const card=document.createElement('section');card.className='henova-wallet-card';
    const header=document.createElement('h3');header.textContent='#'+item.id+' · '+item.status;card.append(header);
+   if(item.status==='confirmed'){
+     const confirmed=document.createElement('p');confirmed.style.color='#216f43';
+     confirmed.style.fontWeight='800';confirmed.textContent='✅ Confirmed on TON · Paid';
+     card.append(confirmed);
+   }
    const details=document.createElement('p');
    details.style.overflowWrap='anywhere';
    details.textContent=item.eggs_amount+' eggs → '+item.gram_amount+' GRAM · '+item.destination_address;
    card.append(details);
+   if(item.status==='confirmed'){
+     const proof=document.createElement('p');
+     proof.textContent=item.notice_message_id
+       ?'✅ Withdrawal channel proof recorded · message #'+item.notice_message_id
+       :'⚠️ Channel proof not recorded yet — check the withdrawals channel.';
+     card.append(proof);
+     if(item.payout_tx_hash){
+       const link=document.createElement('a');link.href='https://tonviewer.com/transaction/'+encodeURIComponent(item.payout_tx_hash);
+       link.target='_blank';link.rel='noopener noreferrer';link.textContent='🔎 View confirmed TON transaction';
+       card.append(link);
+     }
+   }
    const samePayoutWallet=String(item.destination_address||'')===String(data.payout_wallet_address||'');
    if(samePayoutWallet){
     const warning=document.createElement('p');
