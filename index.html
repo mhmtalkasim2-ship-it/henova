@@ -2109,8 +2109,7 @@ async function henovaShowAdminPayouts(){
 }
 async function henovaSignAdminPayout(id){
  try{
-  // Native sendTransaction messages send TON, not the GRAM jetton.
-  // Keep real signing locked until an audited GRAM jetton transfer is provided.
+  // GRAM is native TON. Never equate a wallet signature or BOC receipt with confirmed settlement.
   // Signing requires a server-authorized intent; payouts stay locked server-side until independently verified.
   const {intent}=await henovaCall('admin_payout_intent',{withdrawalId:id});
   if(!henovaTonUI){henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
@@ -2129,12 +2128,22 @@ async function henovaSignAdminPayout(id){
   if(henovaSignAdminPayout.inProgress)throw Error('Signature request already in progress');
   henovaSignAdminPayout.inProgress=true;
   try{
-  await henovaTonUI.sendTransaction({
+  const transaction=await henovaTonUI.sendTransaction({
     validUntil:Math.floor(Date.now()/1000)+300,
     network:'-239',from:expected,
     messages:[{address:intent.destination,amount:intent.amountNanograms}]
   });
-  toast('Transaction submitted to wallet. Waiting for independent TON confirmation; do not sign it twice.');
+  if(!transaction?.boc)throw Error('Wallet returned no signed transaction receipt. Do not sign again; check the blockchain.');
+  const bocBytes=Uint8Array.from(atob(transaction.boc.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+  const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bocBytes));
+  const signedBocHash=Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
+  const receipt=await henovaCall('admin_record_signed_payout',{
+    withdrawalId:id,signedBocHash,destination:intent.destination,
+    amountNanograms:intent.amountNanograms
+  });
+  if(!receipt?.ok)throw Error('Signed transfer receipt was not stored. Do NOT approve it again.');
+  toast('Signed message recorded. This is NOT payment confirmation. Verify its TON transaction before Paid.');
+  await henovaShowAdminPayouts();
   }finally{henovaSignAdminPayout.inProgress=false;}
  }catch(e){toast('Payment not confirmed: '+String(e.message||e).slice(0,130))}
 }
