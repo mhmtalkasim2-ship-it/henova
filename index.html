@@ -1975,12 +1975,30 @@ async function henovaCheckWithdrawals(){
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
 }
 // Staff-only payout panel. Every request is checked again by the server.
+async function henovaCreateAdminTest(){
+ try{
+  const eggs=Number(document.getElementById('henova-test-eggs')?.value||500);
+  await henovaCall('admin_test_submit',{eggs,requestId:crypto.randomUUID()});
+  await henovaShowAdminPayouts();
+  toast('TEST request saved. No eggs were deducted.');
+ }catch(e){toast(hvError(e.message));}
+}
+async function henovaApproveAdminTest(id){
+ try{
+  await henovaCall('admin_test_approve',{withdrawalId:id});
+  await henovaShowAdminPayouts();
+  toast('TEST approved. No GRAM was sent.');
+ }catch(e){toast(hvError(e.message));}
+}
 async function henovaShowAdminPayouts(){
  const root=document.getElementById('view');
  if(!root)return;
  root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  try{
-  const data=await henovaCall('admin_payout_queue');
+  const [data,testData]=await Promise.all([
+   henovaCall('admin_payout_queue'),
+   henovaCall('admin_test_queue')
+  ]);
   const status=document.getElementById('henova-admin-state');
   if(status){
     const c=data.checks||{};
@@ -1993,7 +2011,24 @@ async function henovaShowAdminPayouts(){
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
-  if(!data.items?.length){list.innerHTML='<div class="henova-admin-empty">📋 No withdrawal requests yet.<small>New requests will appear here after the withdrawal service is enabled.</small></div>';return;}
+  const simulator=document.createElement('section');
+  simulator.className='henova-wallet-card';
+  simulator.innerHTML='<h3>🧪 Admin withdrawal test — NO REAL PAYMENT</h3><p>This simulation does not debit eggs, create a real payout or send GRAM.</p><label for="henova-test-eggs">Eggs (500–10000)</label><input id="henova-test-eggs" type="number" min="500" max="10000" step="100" value="500" class="henova-wallet-input"><button class="henova-wallet-save" onclick="henovaCreateAdminTest()">Create TEST withdrawal</button>';
+  list.append(simulator);
+  for(const t of testData.items||[]){
+   const card=document.createElement('section');card.className='henova-wallet-card';
+   const title=document.createElement('h3');title.textContent='🧪 TEST #'+t.id+' · '+t.status;
+   const info=document.createElement('p');info.textContent=t.eggs_amount+' eggs → '+t.gram_amount+' GRAM (simulation only)';
+   card.append(title,info);
+   if(t.status==='pending'){
+    const approve=document.createElement('button');approve.className='henova-wallet-save';
+    approve.textContent='✅ Approve TEST (no transfer)';
+    approve.onclick=()=>henovaApproveAdminTest(t.id);
+    card.append(approve);
+   }
+   list.append(card);
+  }
+  if(!data.items?.length){const empty=document.createElement('div');empty.className='henova-admin-empty';empty.textContent='No real withdrawal requests yet. Real payments remain disabled.';list.append(empty);return;}
   for(const item of data.items){
    const card=document.createElement('section');card.className='henova-wallet-card';
    const header=document.createElement('h3');header.textContent='#'+item.id+' · '+item.status;card.append(header);
