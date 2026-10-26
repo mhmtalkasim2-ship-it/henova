@@ -2139,9 +2139,10 @@ function henovaRenderTonConnect(){
         try{
           const r=await henovaCall('wallet_proof_inspect',{address,proof:proof.proof,walletStateInit:wallet.account.walletStateInit,network:wallet.account.chain,publicKey:wallet.account.publicKey});
           const st=document.getElementById('henova-tonconnect-status');
-          if(st)st.textContent=r.challenge_valid
-            ?'TON Proof challenge accepted. Cryptographic ownership verification is still pending.'
-            :'TON Proof not accepted.';
+          if(st)st.textContent=r.ownership_verified===true
+            ?'✅ Wallet ownership cryptographically verified.'
+            :'TON Proof has not been verified.';
+          if(r.ownership_verified===true){await henovaRefreshPayoutSetup();return;}
         }catch(error){console.warn('TON proof inspection incomplete',String(error?.message||error).slice(0,100));}
       }
     }
