@@ -2187,7 +2187,9 @@ async function henovaRefreshPayoutSetup(){
   if(tab!==4||request!==henovaWalletPageSeq)return;
   const input=document.getElementById('henova-ton-wallet'),info=document.getElementById('henova-wallet-info'),history=document.getElementById('henova-payout-history');
   if(input&&data.wallet?.wallet_address)input.value=data.wallet.wallet_address;
-  if(info&&data.wallet)info.textContent=s.lang==='ar'?'العنوان محفوظ، ولم يتم إثبات ملكيته بعد':s.lang==='tr'?'Adres kayıtlı; sahiplik doğrulanmadı':'Address saved; ownership not verified';
+  if(info&&data.wallet)info.textContent=data.wallet.verified_owner===true
+   ?(s.lang==='ar'?'✅ تم التحقق من ملكية المحفظة':s.lang==='tr'?'✅ Cüzdan sahipliği doğrulandı':'✅ Wallet ownership verified')
+   :(s.lang==='ar'?'العنوان محفوظ، ولم يتم إثبات ملكيته بعد':s.lang==='tr'?'Adres kayıtlı; sahiplik doğrulanmadı':'Address saved; ownership not verified');
   if(history&&data.withdrawals?.length)history.textContent=data.withdrawals.map(x=>'#'+x.id+' · '+x.status+' · '+x.eggs_amount+' 🥚').join(' | ');
  }catch(e){console.warn('Payout setup unavailable',e)}
 }
