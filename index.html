@@ -2041,6 +2041,8 @@ async function henovaShowAdminPayouts(){
  root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  try{
   const data=await henovaCall('admin_payout_queue');
+  if(data.channel_notice?.stored)toast('✅ Withdrawal proof published to @HENOVA_WITHDRAWALS');
+  else if(data.channel_notice?.error)toast('Channel: '+String(data.channel_notice.description||data.channel_notice.error).slice(0,95));
   const status=document.getElementById('henova-admin-state');
   if(status){
     const c=data.checks||{};
@@ -2122,8 +2124,29 @@ async function henovaShowAdminPayouts(){
      const proof=document.createElement('p');
      proof.textContent=item.notice_message_id
        ?'✅ Withdrawal channel proof recorded · message #'+item.notice_message_id
-       :'⚠️ Channel proof not recorded yet — check the withdrawals channel.';
+       :item.notice_claimed_at
+         ?'⚠️ Publication outcome uncertain. Check the channel before retrying.'
+         :'⚠️ Channel proof not recorded yet — check the withdrawals channel.';
      card.append(proof);
+     if(item.notice_message_id){
+       const post=document.createElement('a');
+       post.href='https://t.me/HENOVA_WITHDRAWALS/'+item.notice_message_id;
+       post.target='_blank';post.rel='noopener noreferrer';
+       post.textContent='📢 View published withdrawal proof';card.append(post);
+     }else if(!item.notice_claimed_at){
+       const post=document.createElement('button');post.className='henova-wallet-save';
+       post.textContent='📢 Publish confirmed payout proof';
+       post.onclick=async()=>{
+         post.disabled=true;
+         try{
+           const r=await henovaCall('admin_post_payout_notice',{withdrawalId:item.id});
+           if(r.notice?.stored)toast('✅ Proof posted to withdrawals channel');
+           else toast('Channel: '+String(r.notice?.description||r.notice?.error||'not available').slice(0,110));
+           await henovaShowAdminPayouts();
+         }catch(e){toast('Channel publishing failed: '+String(e.message||e).slice(0,90));post.disabled=false;}
+       };
+       card.append(post);
+     }
      if(item.payout_tx_hash){
        const link=document.createElement('a');link.href='https://tonviewer.com/transaction/'+encodeURIComponent(item.payout_tx_hash);
        link.target='_blank';link.rel='noopener noreferrer';link.textContent='🔎 View confirmed TON transaction';
