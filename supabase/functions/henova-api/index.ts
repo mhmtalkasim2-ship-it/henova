@@ -352,7 +352,7 @@ Deno.serve(async (request) => {
       if(testError)return reply({ok:false,error:"database_unavailable"},503);
       if(!test||test.status!=="approved")return reply({ok:false,error:"test_not_approved"},409);
       const normalized=(a)=>{
-        if(/^-?\\d+:[0-9a-fA-F]{64}$/.test(String(a)))return String(a).toLowerCase();
+        if(/^-?\d+:[0-9a-fA-F]{64}$/.test(String(a)))return String(a).toLowerCase();
         try{
           const b=Uint8Array.from(atob(String(a).replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
           if(b.length!==36)return null;
@@ -395,7 +395,7 @@ Deno.serve(async (request) => {
         return reply({ok:true,found:true,verified:false,test_only:true,
           sender_matches:normalized(tx.account)===expectedSender,
           recipient_and_amount_matches:matching.length===1,transaction_success:txSuccess,
-          hash:inputHash,matched_messages:matching.length,
+          hash:inputHash,matched_messages:matching.length,diagnostics:{tx_account:String(tx.account||""),expected_sender:expectedSender,expected_recipient:expectedRecipient,expected_nano:expectedNano,outbound:outgoing.slice(0,5).map(m=>({source:String(m.source||""),destination:String(m.destination||""),value:String(m.value||""),bounced:m.bounced===true}))},
           note:"Read-only audit; recipient-side settlement and unique payment correlation not established. No Paid status assigned."});
       }catch{return reply({ok:false,error:"chain_provider_unavailable"},503);}
     }
