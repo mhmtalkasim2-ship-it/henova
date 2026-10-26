@@ -2162,7 +2162,7 @@ async function henovaPrepareWalletProof(){
   const address=document.getElementById('henova-ton-wallet')?.value.trim();
   if(!address)throw Error('Save your withdrawal wallet address first.');
   // Refuse a proof challenge for a payout address that differs from the connected account.
-  const connected=String(henovaTonUI.wallet.account.address||'').toLowerCase();
+  const connected=String(henovaTonUI.wallet.account.address||'');
   function walletRaw(a){
    if(/^-?\d+:[0-9a-fA-F]{64}$/.test(a))return a.toLowerCase();
    const raw=Uint8Array.from(atob(a.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
@@ -2176,7 +2176,7 @@ async function henovaPrepareWalletProof(){
   henovaTonUI.setConnectRequestParameters({state:'ready',value:{tonProof:challenge.payload}});
   if(status)status.textContent='Challenge prepared. Reconnect Tonkeeper to request a proof. Withdrawals remain disabled until server verification is completed.';
   toast('Verification challenge prepared. Reconnect Tonkeeper. No payout was initiated.');
- }catch(e){toast(hvError(e.message));}
+ }catch(e){const message=String(e?.message||'unknown_error');if(status)status.textContent='Wallet verification: '+message;toast(message.length>110?message.slice(0,110):message);}
 }
 let henovaWalletPageSeq=0;
 async function henovaRefreshPayoutSetup(){
