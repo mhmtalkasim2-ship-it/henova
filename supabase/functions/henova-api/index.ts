@@ -195,6 +195,171 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent"].includes(action)) {
+    // Only existing HENOVA channel administrators can read or approve payouts.
+    const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:"@HENOVA_FARM",user_id:telegram.id}),
+      signal:AbortSignal.timeout(8000)
+    }).catch(()=>null);
+    const membership=await adminResponse?.json().catch(()=>null);
+    if(!membership?.ok||!["creator","administrator"].includes(membership.result?.status))
+      return reply({ok:false,error:"admin_only"},403);
+    const settings=await admin.from("henova_payout_settings")
+      .select("payout_wallet_address,enabled,gram_per_egg,min_eggs,max_eggs").eq("singleton",true).single();
+    if(settings.error)return reply({ok:false,error:"database_unavailable"},503);
+    if(action==="admin_payout_queue"){
+      const result=await admin.from("henova_gram_withdrawals")
+        .select("id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash")
+        .in("status",["pending","approved","broadcast"]).order("id",{ascending:true}).limit(50);
+      if(result.error)return reply({ok:false,error:"database_unavailable"},503);
+      return reply({ok:true,items:result.data||[],payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:false});
+    }
+    const id=Number(body?.withdrawalId);
+    if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
+    if(action==="admin_payout_approve"){
+      // Status approval is NOT a payment and cannot trigger 'PAID' notices.
+      const result=await admin.from("henova_gram_withdrawals")
+        .update({status:"approved",updated_at:new Date().toISOString()})
+        .eq("id",id).eq("status","pending").select("id,status").maybeSingle();
+      if(result.error)return reply({ok:false,error:"database_unavailable"},503);
+      if(!result.data)return reply({ok:false,error:"not_pending"},409);
+      return reply({ok:true,request:result.data});
+    }
+    const result=await admin.from("henova_gram_withdrawals")
+      .select("id,status,destination_address,gram_amount,eggs_amount")
+      .eq("id",id).eq("status","approved").maybeSingle();
+    if(result.error||!result.data)return reply({ok:false,error:"not_approved"},409);
+    if(!settings.data.payout_wallet_address)return reply({ok:false,error:"treasury_unset"},503);
+    // The amount is server-side; never accept the amount or destination from the client.
+    const nanograms=Math.round(Number(result.data.gram_amount)*1e9);
+    if(!Number.isSafeInteger(nanograms)||nanograms<=0||nanograms>1e9)
+      return reply({ok:false,error:"invalid_amount"},409);
+    return reply({ok:true,intent:{
+      id:result.data.id,destination:result.data.destination_address,
+      amountNanograms:String(nanograms),amountGram:String(result.data.gram_amount),
+      sender:settings.data.payout_wallet_address,network:"-239"
+    },requires_manual_tonkeeper_signature:true,not_chain_confirmed:true});
+  }
+  if (action === "verify_withdrawals_channel") {
+    // Verification only: do not grant coins until a separate audited reward
+    // policy and idempotent reward ledger are configured.
+    const result = await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",user_id:telegram.id}),
+      signal:AbortSignal.timeout(8000)
+    }).catch(()=>null);
+    const member = await result?.json().catch(()=>null);
+    if(!member?.ok)return reply({ok:false,error:"verification_unavailable"},503);
+    const status=member.result?.status;
+    const joined=["creator","administrator","member"].includes(status) ||
+      (status==="restricted" && member.result?.is_member===true);
+    return reply({ok:true,joined,channel:"@HENOVA_WITHDRAWALS"});
+  }
+  if (action === "payout_setup") {
+    const [settings,wallet,withdrawals] = await Promise.all([
+      admin.from("henova_payout_settings").select("asset,network,enabled,min_eggs,max_eggs,cooldown_hours,gram_per_egg").eq("singleton",true).single(),
+      admin.from("henova_ton_wallets").select("wallet_address,verified_owner").eq("telegram_id",telegram.id).maybeSingle(),
+      admin.from("henova_gram_withdrawals").select("id,eggs_amount,gram_amount,status,payout_tx_hash,created_at").eq("telegram_id",telegram.id).order("created_at",{ascending:false}).limit(10)
+    ]);
+    if(settings.error||wallet.error||withdrawals.error)return reply({ok:false,error:"database_unavailable"},503);
+    // Notify only for confirmed payments, never for pending submissions.
+    // Conditional claim prevents parallel requests from double-posting.
+    const due=await admin.from("henova_gram_withdrawals")
+      .select("id,telegram_id,destination_address,eggs_amount,gram_amount,payout_tx_hash,blockchain_verified_at")
+      .eq("telegram_id",telegram.id).eq("status","confirmed").is("notice_message_id",null)
+      .not("payout_tx_hash","is",null).not("blockchain_verified_at","is",null)
+      .order("id",{ascending:true}).limit(1);
+    if(!due.error && due.data?.length){
+      const wd=due.data[0];
+      const claim=await admin.from("henova_gram_withdrawals").update({notice_message_id:-1})
+        .eq("id",wd.id).eq("status","confirmed").is("notice_message_id",null)
+        .select("id").maybeSingle();
+      if(!claim.error&&claim.data){
+        try{
+          const mask=wd.destination_address.slice(0,6)+"..."+wd.destination_address.slice(-5);
+          const hash=String(wd.payout_tx_hash);
+          if(!/^[a-zA-Z0-9_+\/-]{32,100}={0,2}$/.test(hash))throw Error("invalid_payment_hash");
+          const explorer="https://tonviewer.com/transaction/"+encodeURIComponent(hash);
+          const bodyText="✅ WITHDRAWAL PAID · #"+wd.id+
+            "\n\n👤 Farmer: Player #"+wd.telegram_id+
+            "\n💎 Amount: "+wd.gram_amount+" GRAM"+
+            "\n🥚 Eggs: "+wd.eggs_amount+
+            "\n👛 Wallet: "+mask+
+            "\n⚡ Network: TON"+
+            "\n🕒 "+new Date(wd.blockchain_verified_at).toISOString().replace("T"," ").replace(".000Z"," UTC")+
+            "\n\n🐔 HENOVA Chicken Farm";
+          const sent=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+            method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:bodyText,
+              reply_markup:{inline_keyboard:[
+                [{text:"🔎 View transaction",url:explorer}],
+                [{text:"🐔 Play & earn GRAM",url:"https://t.me/HenovaEggsBot/farm"}]
+              ]}}),signal:AbortSignal.timeout(9000)});
+          const payload=await sent.json().catch(()=>null);
+          if(!sent.ok||!payload?.ok||!payload.result?.message_id)throw Error("telegram_send_failed");
+          const saved=await admin.from("henova_gram_withdrawals")
+            .update({notice_message_id:payload.result.message_id}).eq("id",wd.id).eq("notice_message_id",-1);
+          if(saved.error)console.error("HENOVA notice message id persist failed",saved.error.code);
+        }catch(err){
+          console.warn("HENOVA notice delayed",String(err).slice(0,100));
+          // Retry is safe only when the send definitely failed; avoid duplicate paid posts
+          // after ambiguous network failures by leaving -1 pending manual reconciliation.
+        }
+      }
+    }
+    return reply({ok:true,payout:{...settings.data,enabled:false},wallet:wallet.data||null,withdrawals:withdrawals.data||[]});
+  }
+  // Issue a short-lived, server-generated TON Proof nonce after Telegram authentication.
+  // This action does not mark any wallet as verified.
+  if (action === "wallet_proof_challenge") {
+    const address=String(body?.address||"");
+    const saved=await admin.from("henova_ton_wallets").select("wallet_address")
+      .eq("telegram_id",telegram.id).maybeSingle();
+    if(saved.error)return reply({ok:false,error:"database_unavailable"},503);
+    if(!saved.data || saved.data.wallet_address!==address)
+      return reply({ok:false,error:"save_wallet_first"},403);
+    const {data,error}=await admin.rpc("henova_issue_wallet_proof_challenge",{
+      p_telegram_id:telegram.id,p_wallet_address:address
+    });
+    if(error)return reply({ok:false,error:"challenge_unavailable"},503);
+    return reply(data,data?.ok?200:400);
+  }
+  if (action === "save_payout_wallet") {
+    const address=String(body?.address||"");
+    if(!/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(address))
+      return reply({ok:false,error:"invalid_ton_wallet"},400);
+    const normalized=address.replace(/-/g,"+").replace(/_/g,"/");
+    let raw;
+    try { raw=Uint8Array.from(atob(normalized),ch=>ch.charCodeAt(0)); }
+    catch{return reply({ok:false,error:"invalid_ton_wallet"},400)}
+    if(raw.length!==36 || raw[1]!==0 || (raw[0]!==0x11 && raw[0]!==0x51))
+      return reply({ok:false,error:"invalid_ton_wallet"},400);
+    let crc=0;
+    for(let i=0;i<34;i++){
+      crc ^= raw[i]<<8;
+      for(let bit=0;bit<8;bit++)crc=(crc&0x8000)?((crc<<1)^0x1021)&65535:(crc<<1)&65535;
+    }
+    if(crc!==((raw[34]<<8)|raw[35]))return reply({ok:false,error:"invalid_ton_wallet"},400);
+    const {error}=await admin.from("henova_ton_wallets").upsert({
+      telegram_id:telegram.id,wallet_address:address,verified_owner:false,updated_at:new Date().toISOString()
+    },{onConflict:"telegram_id"});
+    if(error)return reply({ok:false,error:"wallet_save_failed"},503);
+    return reply({ok:true,wallet:{wallet_address:address,verified_owner:false},
+      note:"Address saved; ownership not yet cryptographically verified"});
+  }
+  if (action === "request_gram_withdrawal") {
+    const requestId=body?.requestId;
+    const eggs=body?.eggs;
+    if(typeof requestId!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)
+      ||!Number.isSafeInteger(eggs)||eggs<=0)return reply({ok:false,error:"invalid_request"},400);
+    const {data,error}=await admin.rpc("henova_prepare_gram_withdrawal",{
+      p_telegram_id:telegram.id,p_request_id:requestId,p_eggs:eggs
+    });
+    if(error){console.error("HENOVA reserve withdrawal failed",error.code);return reply({ok:false,error:"withdrawal_unavailable"},503)}
+    return reply(data,data?.ok?200:403);
+  }
   if (action === "leaderboard") {
     const { data, error } = await admin.rpc("henova_leaderboard", {
       p_telegram_id: telegram.id,
