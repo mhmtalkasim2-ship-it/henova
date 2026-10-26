@@ -199,7 +199,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_track_signed_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -215,7 +215,7 @@ Deno.serve(async (request) => {
     // No server-generated real payment intent until independent on-chain verification
     // and the controlled live transfer test are explicitly completed.
     if(action==="admin_payout_intent" &&
-       (!settings.data.enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified || !settings.data.signer_configured))
+       (!settings.data.enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified))
       return reply({ok:false,error:"payout_safety_gate_closed"},403);
     if(action==="admin_chain_audit"){
       // Read-only mainnet inspection, never authorizes a payout or changes its status.
@@ -281,17 +281,37 @@ Deno.serve(async (request) => {
       if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
       return reply({ok:true,notice:await notifyVerifiedPayout(id)});
     }
-    if(action==="admin_verify_payout"){
+    if(action==="admin_verify_payout" || action==="admin_track_signed_payout"){
       // Read authoritative ledger evidence on demand; no client-provided match booleans.
       const id=Number(body?.withdrawalId);
-      const claimedHash=String(body?.txHash||"").toLowerCase();
-      if(!Number.isSafeInteger(id)||id<=0||!/^[a-f0-9]{64}$/.test(claimedHash))
+      let claimedHash=String(body?.txHash||"").toLowerCase();
+      if(!Number.isSafeInteger(id)||id<=0||(action==="admin_verify_payout"&&!/^[a-f0-9]{64}$/.test(claimedHash)))
         return reply({ok:false,error:"invalid_request"},400);
       const {data:req,error:reqError}=await admin.from("henova_gram_withdrawals")
-        .select("id,status,created_at,destination_address,gram_amount,payout_sender_address,payout_tx_hash")
+        .select("id,status,created_at,destination_address,gram_amount,payout_sender_address,payout_tx_hash,signed_boc_hash")
         .eq("id",id).maybeSingle();
       if(reqError)return reply({ok:false,error:"database_unavailable"},503);
       if(!req)return reply({ok:false,error:"not_found"},404);
+      if(action==="admin_track_signed_payout"){
+        if(req.status!=="broadcast" || !/^[a-f0-9]{64}$/.test(String(req.signed_boc_hash||"")))
+          return reply({ok:false,error:"signed_payment_not_recorded"},409);
+        try{
+          const searchUrl=new URL("https://toncenter.com/api/v3/transactionsByMessage");
+          searchUrl.searchParams.set("msg_hash",req.signed_boc_hash);
+          searchUrl.searchParams.set("direction","in");
+          searchUrl.searchParams.set("limit","10");
+          const hdr={Accept:"application/json"};
+          const apiKey=Deno.env.get("TONCENTER_API_KEY");if(apiKey)hdr["X-API-Key"]=apiKey;
+          const resp=await fetch(searchUrl,{headers:hdr,signal:AbortSignal.timeout(12000)});
+          if(!resp.ok)return reply({ok:false,error:"chain_provider_unavailable"},503);
+          const json=await resp.json();
+          const transactions=Array.isArray(json?.transactions)?json.transactions:[];
+          const found=transactions.filter(tx=>!tx?.emulated && tx?.description?.aborted!==true
+            && typeof tx?.hash==="string" && /^[a-fA-F0-9]{64}$/.test(tx.hash));
+          if(found.length!==1)return reply({ok:false,error:"transaction_not_final_or_ambiguous"},409);
+          claimedHash=found[0].hash.toLowerCase();
+        }catch{return reply({ok:false,error:"chain_lookup_unavailable"},503);}
+      }
       if(req.status==="confirmed")return reply({ok:req.payout_tx_hash===claimedHash,confirmed:req.payout_tx_hash===claimedHash,already_confirmed:true});
       if(!["approved","broadcast"].includes(req.status))
         return reply({ok:false,error:"not_approved"},409);
@@ -540,12 +560,18 @@ Deno.serve(async (request) => {
     if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
     if(action==="admin_record_signed_payout"){
       // The BOC proves a wallet returned a signed external message, NOT chain settlement.
-      const hash=String(body?.signedBocHash||"").toLowerCase();
+      const signedBoc=String(body?.signedBoc||"");
+      let hash="";
+      try{
+        if(signedBoc.length>15000)throw Error("boc_too_large");
+        const cells=Cell.fromBase64(signedBoc);
+        hash=cells.hash().toString("hex");
+      }catch{return reply({ok:false,error:"invalid_signed_message"},400);}
       const address=String(body?.destination||"");
       const amount=String(body?.amountNanograms||"");
       const sender=String(settings.data.payout_wallet_address||"");
       if(!settings.data.enabled || !settings.data.chain_verifier_configured ||
-         !settings.data.test_transfer_verified || !settings.data.signer_configured)
+         !settings.data.test_transfer_verified)
         return reply({ok:false,error:"payout_safety_gate_closed"},403);
       if(!/^[a-f0-9]{64}$/.test(hash)||!/^[0-9]+$/.test(amount)||
          amount.length>22 || !/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(address))
