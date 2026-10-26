@@ -557,6 +557,8 @@ Deno.serve(async (request) => {
       if(error)return reply({ok:false,error:"signing_receipt_unavailable"},503);
       return reply(data,data?.ok?200:409);
     }
+    if(action==="admin_payout_approve" && String(telegram.id)!=="1035565575")
+      return reply({ok:false,error:"owner_approval_only"},403);
     if(action==="admin_payout_approve"){
       // Status approval is NOT a payment and cannot trigger 'PAID' notices.
       const result=await admin.from("henova_gram_withdrawals")
