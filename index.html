@@ -2014,6 +2014,9 @@ async function henovaShowAdminPayouts(){
 }
 async function henovaSignAdminPayout(id){
  try{
+  // Native sendTransaction messages send TON, not the GRAM jetton.
+  // Keep real signing locked until an audited GRAM jetton transfer is provided.
+  throw Error('GRAM jetton transfer is not configured. Signing is locked to prevent sending TON instead of GRAM.');
   const {intent}=await henovaCall('admin_payout_intent',{withdrawalId:id});
   if(!henovaTonUI){henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
     manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
