@@ -1927,6 +1927,16 @@ if(data.ok){const state=await henovaCall('state');henovaApplyState(state.state);
 else toast(hvError(data.error));
 }catch(e){toast(hvError(e.message))}
 }
+function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS')}
+async function henovaCheckWithdrawals(){
+ const field=document.getElementById('withdraw-channel-status');
+ try{
+  const result=await henovaCall('verify_withdrawals_channel');
+  const message=result.joined?(s.lang==='ar'?'تم تأكيد الاشتراك ✅':s.lang==='tr'?'Üyelik onaylandı ✅':'Membership verified ✅'):hvError('not_joined');
+  if(field)field.textContent=message;
+  toast(message);
+ }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
+}
 function henovaReferralLink(){const id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;return id?'https://t.me/HenovaEggsBot?startapp=ref_'+id:''}
 function invite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
 function shareInvite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');const url='https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Join my HENOVA chicken farm!');const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink(url);else window.open(url,'_blank')}
@@ -2132,7 +2142,8 @@ if(tab===2){
 const claimed=s.daily===new Date().toLocaleDateString('en-CA');
 const name=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join Us';
 el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1><article class="item"><span class="face">🎁</span><div class="grow"><h3>'+hvText('daily')+'</h3><p>'+hvText('dailyDesc')+'</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?hvText('claimed'):hvText('claim'))+'</button></article>'+
-'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 '+hvText('taskDesc')+'</p><small id="join-timer">'+(Date.now()<henovaChannelNext?henovaTaskClock(Math.ceil((henovaChannelNext-Date.now())/1000)):hvText('ready'))+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">'+hvText('open')+'</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>'+hvText('verify')+'</button></div></article>';
+'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 '+hvText('taskDesc')+'</p><small id="join-timer">'+(Date.now()<henovaChannelNext?henovaTaskClock(Math.ceil((henovaChannelNext-Date.now())/1000)):hvText('ready'))+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">'+hvText('open')+'</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>'+hvText('verify')+'</button></div></article>'+
+'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_WITHDRAWALS.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:14px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'قناة السحب':s.lang==='tr'?'Çekim Kanalı':'Withdrawals Channel')+'</h3><p>HENOVA Withdrawals</p><small id="withdraw-channel-status">'+(s.lang==='ar'?'تحقق من اشتراكك':s.lang==='tr'?'Üyeliğini doğrula':'Verify membership')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenWithdrawals()">'+hvText('open')+'</button><button onclick="henovaCheckWithdrawals()">'+hvText('verify')+'</button></div></article>';
 }
 if(tab===3){
 const w=s.lang==='ar'?
