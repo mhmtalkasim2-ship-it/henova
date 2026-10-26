@@ -2079,11 +2079,13 @@ async function henovaShowAdminPayouts(){
      catch(e){toast(hvError(e.message));approve.disabled=false;}
     };
     card.append(approve);
-   }else if(item.status==='approved'){
-    const sign=document.createElement('button');sign.className='henova-wallet-save';
-    sign.textContent='🔐 Sign payment in Tonkeeper';
-    sign.onclick=()=>henovaSignAdminPayout(item.id);
-    card.append(sign);
+   }else if(item.status==='approved'||item.status==='broadcast'){
+    if(item.status==='approved'){
+      const sign=document.createElement('button');sign.className='henova-wallet-save';
+      sign.textContent='🔐 Sign payment in Tonkeeper';
+      sign.onclick=()=>henovaSignAdminPayout(item.id);
+      card.append(sign);
+    }
     const hash=document.createElement('input');hash.className='henova-wallet-input';
     hash.placeholder='Confirmed sender transaction hash (64 hex characters)';
     hash.maxLength=64;hash.autocomplete='off';hash.spellcheck=false;
