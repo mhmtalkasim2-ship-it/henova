@@ -2050,6 +2050,18 @@ async function henovaShowAdminPayouts(){
        ' · Mainnet test: '+(c.test_transfer_verified?'verified':'pending')+
        ' · Treasury signature required';
   }
+  const audit=document.createElement('button');
+  audit.type='button';audit.className='henova-admin-refresh';audit.textContent='🔎 Inspect TON treasury (read only)';
+  audit.onclick=async()=>{
+   audit.disabled=true;
+   try{
+    const info=await henovaCall('admin_chain_audit');
+    const details=(info.entries||[]).slice(0,5).map(x=>String(x.hash).slice(0,20)+'… · '+(x.action_success?'success':'not verified')).join(' | ');
+    toast(details||'No recent chain transactions found');
+   }catch(error){toast('TON audit unavailable: '+String(error.message||error).slice(0,75))}
+   finally{audit.disabled=false}
+  };
+  document.querySelector('.henova-admin-head')?.append(audit);
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
