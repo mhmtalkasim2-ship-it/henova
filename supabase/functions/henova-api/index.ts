@@ -465,6 +465,10 @@ Deno.serve(async (request) => {
         .eq("id",testId).eq("telegram_id",telegram.id).maybeSingle();
       if(error||!test)return reply({ok:false,error:"test_missing"},404);
       if(test.status!=="approved")return reply({ok:false,error:"approve_test_first"},409);
+      const {data:existingProof,error:proofError}=await admin.schema("henova_private").from("payout_proof_claims")
+        .select("tx_hash").eq("test_id",testId).limit(1).maybeSingle();
+      if(proofError)return reply({ok:false,error:"test_proof_check_unavailable"},503);
+      if(existingProof)return reply({ok:false,error:"test_already_transferred_do_not_sign_again"},409);
       const sender=String(settings.data.payout_wallet_address||"");
       const toRaw=(address)=>{
         try{
