@@ -2131,7 +2131,20 @@ function henovaRenderTonConnect(){
   });
   henovaTonUI.uiOptions={buttonRootId:'henova-tonconnect-button'};
   if(!window.henovaTonSubscription){
-   window.henovaTonSubscription=henovaTonUI.onStatusChange(wallet=>{
+   window.henovaTonSubscription=henovaTonUI.onStatusChange(async wallet=>{
+    const proof=wallet?.connectItems?.tonProof;
+    if(wallet && proof && 'proof' in proof){
+      const address=document.getElementById('henova-ton-wallet')?.value.trim();
+      if(address){
+        try{
+          const r=await henovaCall('wallet_proof_inspect',{address,proof:proof.proof});
+          const st=document.getElementById('henova-tonconnect-status');
+          if(st)st.textContent=r.challenge_valid
+            ?'TON Proof challenge accepted. Cryptographic ownership verification is still pending.'
+            :'TON Proof not accepted.';
+        }catch(error){console.warn('TON proof inspection incomplete',String(error?.message||error).slice(0,100));}
+      }
+    }
     const element=document.getElementById('henova-tonconnect-status');
     if(element)element.textContent=wallet?.account?.address
       ?(s.lang==='ar'?'تم الاتصال بالمحفظة (تأكيد ملكية السحب قيد التجهيز): ':s.lang==='tr'?'Cüzdan bağlı: ':'Wallet connected: ')+wallet.account.address.slice(0,7)+'…'
