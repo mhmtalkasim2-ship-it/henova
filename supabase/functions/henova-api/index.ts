@@ -199,7 +199,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_track_signed_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_track_signed_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_intent","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -455,6 +455,31 @@ Deno.serve(async (request) => {
       .select("id,status,eggs_amount,gram_amount").maybeSingle();
       if(error)return reply({ok:false,error:"test_submission_failed"},503);
       return reply({ok:true,test_only:true,item:data||null,no_balance_deduction:true});
+    }
+    if(action==="admin_test_intent"){
+      if(String(telegram.id)!=="1035565575")return reply({ok:false,error:"owner_only"},403);
+      const testId=Number(body?.testId);
+      if(testId!==3)return reply({ok:false,error:"test_not_authorized"},403);
+      const {data:test,error}=await admin.from("henova_payout_dry_runs")
+        .select("id,telegram_id,status,destination_address,gram_amount")
+        .eq("id",testId).eq("telegram_id",telegram.id).maybeSingle();
+      if(error||!test)return reply({ok:false,error:"test_missing"},404);
+      if(test.status!=="approved")return reply({ok:false,error:"approve_test_first"},409);
+      const sender=String(settings.data.payout_wallet_address||"");
+      const toRaw=(address)=>{
+        try{
+          const a=Uint8Array.from(atob(String(address).replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+          if(a.length!==36)return null;
+          return (a[1]>127?a[1]-256:a[1])+":"+Array.from(a.slice(2,34),b=>b.toString(16).padStart(2,"0")).join("");
+        }catch{return null;}
+      };
+      if(!toRaw(sender)||!toRaw(test.destination_address)||toRaw(sender)===toRaw(test.destination_address))
+        return reply({ok:false,error:"invalid_test_wallets"},409);
+      if(Number(test.gram_amount)!==0.05)return reply({ok:false,error:"unexpected_test_amount"},409);
+      return reply({ok:true,test_only:true,intent:{
+        id:test.id,sender,destination:test.destination_address,
+        amountNanograms:"50000000",amountGram:"0.05",network:"-239"
+      },requires_manual_tonkeeper_signature:true,not_chain_confirmed:true});
     }
     if(action==="admin_test_queue"){
       const {data,error}=await admin.from("henova_payout_dry_runs")
