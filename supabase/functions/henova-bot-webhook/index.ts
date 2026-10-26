@@ -55,9 +55,9 @@ Deno.serve(async(request:Request)=>{
       }
       const posted=await telegramPost(token,"sendMessage",{
         chat_id:channel,
-        text:"🐔 HENOVA Chicken Farm\n🥚 Raise chickens, collect eggs, and grow your farm!\n\nTap the button below to start playing.",
+        text:"🐔 HENOVA Chicken Farm\nhttps://t.me/HenovaEggsBot/farm\n\n🥚 Raise chickens, collect eggs, and grow your farm!\nTap the button below to start playing.",
         reply_markup:{inline_keyboard:[[{text:"🐔 PLAY HENOVA",url:"https://t.me/HenovaEggsBot/farm"}]]},
-        link_preview_options:{is_disabled:true}
+        link_preview_options:{is_disabled:false,url:"https://t.me/HenovaEggsBot/farm",prefer_large_media:true,show_above_text:true}
       });
       let pinned=false;
       try{
