@@ -45,6 +45,35 @@ Deno.serve(async(request:Request)=>{
   if(!message || message.chat?.type!=="private" || !message.from?.id ||
       message.from.id!==message.chat.id)return response({ok:true,ignored:true});
   const msg=String(message.text||"");
+  if(/^\/publish(?:@[a-zA-Z0-9_]+)?(?:\s|$)/i.test(msg)){
+    const channel="@HENOVA_FARM";
+    try{
+      const membership=await telegramPost(token,"getChatMember",{chat_id:channel,user_id:message.from.id});
+      if(!["creator","administrator"].includes(membership?.status)){
+        await telegramPost(token,"sendMessage",{chat_id:message.chat.id,text:"⛔ Only HENOVA channel admins can publish the Play card."});
+        return response({ok:true,denied:true});
+      }
+      const posted=await telegramPost(token,"sendMessage",{
+        chat_id:channel,
+        text:"🐔 HENOVA Chicken Farm\n🥚 Raise chickens, collect eggs, and grow your farm!\n\nTap the button below to start playing.",
+        reply_markup:{inline_keyboard:[[{text:"🐔 PLAY HENOVA",url:"https://t.me/HenovaEggsBot/farm"}]]},
+        link_preview_options:{is_disabled:true}
+      });
+      let pinned=false;
+      try{
+        await telegramPost(token,"pinChatMessage",{chat_id:channel,message_id:posted.message_id,disable_notification:true});
+        pinned=true;
+      }catch(e){console.warn("HENOVA pin skipped",String(e).slice(0,120))}
+      await telegramPost(token,"sendMessage",{chat_id:message.chat.id,
+        text:pinned?"✅ HENOVA Play post published and pinned!":"✅ HENOVA Play post published. Pin it manually in the channel if needed."});
+      return response({ok:true,published:true,pinned});
+    }catch(e){
+      console.error("HENOVA channel publication failed",String(e).slice(0,130));
+      await telegramPost(token,"sendMessage",{chat_id:message.chat.id,
+        text:"⚠️ Could not publish to HENOVA. Please add @HenovaEggsBot as an administrator with posting and pinning permissions."}).catch(()=>{});
+      return response({ok:false,error:"publish_failed"},502);
+    }
+  }
   if(!/^\/(start|help)(?:@[a-zA-Z0-9_]+)?(?:\s|$)/i.test(msg))
     return response({ok:true,ignored:true});
   const {button,text}=welcomeFor(message.from.language_code||"en");
