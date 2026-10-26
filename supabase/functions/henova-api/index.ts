@@ -649,11 +649,16 @@ Deno.serve(async (request) => {
       }catch{return reply({ok:false,error:"chain_provider_unavailable"},503);}
     }
     if(action==="admin_payout_queue"){
-      const result=await admin.from("henova_gram_withdrawals")
-        .select("id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash,signing_claimed_at,signed_boc_hash")
-        .in("status",["pending","approved","broadcast"]).order("id",{ascending:true}).limit(50);
-      if(result.error)return reply({ok:false,error:"database_unavailable"},503);
-      return reply({ok:true,items:result.data||[],payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:settings.data.manual_tonkeeper_enabled===true &&
+      const fields="id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash,signing_claimed_at,signed_boc_hash,notice_message_id";
+      const [active,confirmed]=await Promise.all([
+        admin.from("henova_gram_withdrawals").select(fields)
+          .in("status",["pending","approved","broadcast"]).order("id",{ascending:true}).limit(50),
+        admin.from("henova_gram_withdrawals").select(fields)
+          .eq("status","confirmed").order("id",{ascending:false}).limit(10)
+      ]);
+      if(active.error||confirmed.error)return reply({ok:false,error:"database_unavailable"},503);
+      const items=[...(active.data||[]),...(confirmed.data||[])];
+      return reply({ok:true,items,payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:settings.data.manual_tonkeeper_enabled===true &&
         settings.data.chain_verifier_configured===true &&
         settings.data.test_transfer_verified===true,
         checks:{withdrawals_enabled:settings.data.manual_tonkeeper_enabled===true,
