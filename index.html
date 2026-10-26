@@ -1884,6 +1884,7 @@ async function henovaLoad(){
     henovaApplyState(data.state);
     henovaReady=true;
     render();
+    if(new URLSearchParams(location.search).get('admin')==='payouts')henovaShowAdminPayouts();
   }catch(error){
     henovaReady=false;
     console.warn('HENOVA initial sync failed',error);
@@ -2005,8 +2006,6 @@ async function henovaSignAdminPayout(id){
   if(!henovaTonUI.wallet){await henovaTonUI.openModal();toast('Connect HENOVA Payouts, then press Sign again.');return;}
   // Sender restriction prevents signing with a different connected wallet.
   const raw=henovaTonUI.wallet.account.address;
-  const signer=window.TON_CONNECT_UI.toUserFriendlyAddress(raw,false);
-  const rawSigner=raw.toLowerCase();
   const expected=intent.sender;
   // Normalize the expected address with the SDK when possible.
   // TonConnect's 'from' further binds the sender to the configured address.
