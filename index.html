@@ -2083,6 +2083,15 @@ async function henovaShowAdminPayouts(){
     }else if(test.status==='approved'){
       const a=document.createElement('button');a.className='henova-wallet-save';a.textContent='🔐 Sign TEST #3 in Tonkeeper';
       a.onclick=()=>henovaSignTestThree();t.append(a);
+      const proof=document.createElement('input');proof.className='henova-wallet-input';
+      proof.placeholder='TON transaction hash (64 hex)';proof.maxLength=64;t.append(proof);
+      const verify=document.createElement('button');verify.className='henova-wallet-save';
+      verify.textContent='🔎 Verify TEST #3 on TON';
+      verify.onclick=async()=>{verify.disabled=true;try{
+       const r=await henovaCall('admin_verify_test_transfer',{testId:3,txHash:proof.value.trim()});
+       toast(!r.found?'Not indexed yet. Do not send again.':r.transaction_success&&r.recipient_and_amount_matches?'Transfer matches TEST #3; final settlement check still needed.':'Hash found but payment not matched. Do not send again.');
+      }catch(e){toast('Verification unavailable: '+String(e.message||e).slice(0,75));}finally{verify.disabled=false;}};
+      t.append(verify);
     }
     const note=document.createElement('p');note.textContent='⚠️ Sign once only. A wallet receipt is not proof of chain settlement. Do not repeat signing if confirmation is uncertain.';t.append(note);
     list.append(t);
