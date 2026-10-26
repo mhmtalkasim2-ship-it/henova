@@ -206,8 +206,13 @@ Deno.serve(async (request) => {
     if(!membership?.ok||!["creator","administrator"].includes(membership.result?.status))
       return reply({ok:false,error:"admin_only"},403);
     const settings=await admin.from("henova_payout_settings")
-      .select("payout_wallet_address,enabled,gram_per_egg,min_eggs,max_eggs").eq("singleton",true).single();
+      .select("payout_wallet_address,enabled,gram_per_egg,min_eggs,max_eggs,chain_verifier_configured,test_transfer_verified").eq("singleton",true).single();
     if(settings.error)return reply({ok:false,error:"database_unavailable"},503);
+    // No server-generated real payment intent until independent on-chain verification
+    // and the controlled live transfer test are explicitly completed.
+    if(action==="admin_payout_intent" &&
+       (!settings.data.enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified))
+      return reply({ok:false,error:"payout_safety_gate_closed"},403);
     if(action==="admin_payout_queue"){
       const result=await admin.from("henova_gram_withdrawals")
         .select("id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash")
