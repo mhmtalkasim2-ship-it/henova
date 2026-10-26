@@ -199,7 +199,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -247,6 +247,80 @@ Deno.serve(async (request) => {
           warning:"Transactions viewed only. No withdrawal was matched, verified or paid."});
       }catch{
         return reply({ok:false,error:"chain_provider_unavailable"},503);
+      }
+    }
+    if(action==="admin_verify_payout"){
+      // Read authoritative ledger evidence on demand; no client-provided match booleans.
+      const id=Number(body?.withdrawalId);
+      const claimedHash=String(body?.txHash||"").toLowerCase();
+      if(!Number.isSafeInteger(id)||id<=0||!/^[a-f0-9]{64}$/.test(claimedHash))
+        return reply({ok:false,error:"invalid_request"},400);
+      const {data:req,error:reqError}=await admin.from("henova_gram_withdrawals")
+        .select("id,status,created_at,destination_address,gram_amount,payout_sender_address,payout_tx_hash")
+        .eq("id",id).maybeSingle();
+      if(reqError)return reply({ok:false,error:"database_unavailable"},503);
+      if(!req)return reply({ok:false,error:"not_found"},404);
+      if(req.status==="confirmed")return reply({ok:req.payout_tx_hash===claimedHash,confirmed:req.payout_tx_hash===claimedHash,already_confirmed:true});
+      if(!["approved","broadcast"].includes(req.status))
+        return reply({ok:false,error:"not_approved"},409);
+      const treasury=String(settings.data.payout_wallet_address||"");
+      const raw=(value)=>{
+        try{return Address.parse(String(value||"")).toRawString().toLowerCase();}
+        catch{return null;}
+      };
+      const senderRaw=raw(treasury),destinationRaw=raw(req.destination_address);
+      if(!senderRaw||!destinationRaw||senderRaw===destinationRaw||
+        (req.payout_sender_address && raw(req.payout_sender_address)!==senderRaw))
+        return reply({ok:false,error:"wallet_mismatch"},409);
+      const amount=String(req.gram_amount);
+      if(!/^\\d+(?:\\.\\d{1,9})?$/.test(amount))return reply({ok:false,error:"amount_invalid"},409);
+      const [whole,fraction=""]=amount.split(".");
+      const nano=(BigInt(whole)*1000000000n+BigInt((fraction+"000000000").slice(0,9))).toString();
+      try{
+        const headers={Accept:"application/json"};
+        const key=Deno.env.get("TONCENTER_API_KEY");
+        if(key)headers["X-API-Key"]=key;
+        const url=new URL("https://toncenter.com/api/v3/transactions");
+        url.searchParams.set("hash",claimedHash);
+        url.searchParams.set("limit","10");
+        const response=await fetch(url,{headers,signal:AbortSignal.timeout(12000)});
+        if(!response.ok)return reply({ok:false,error:"chain_provider_unavailable"},503);
+        const json=await response.json();
+        const rows=Array.isArray(json?.transactions)?json.transactions:[];
+        const tx=rows.find(t=>String(t?.hash||"").toLowerCase()===claimedHash &&
+          raw(t?.account)===senderRaw && !t?.emulated && t?.description?.aborted!==true &&
+          t?.description?.action?.success===true && Number(t?.now)>=Math.floor(Date.parse(req.created_at)/1000));
+        if(!tx)return reply({ok:false,error:"sender_transaction_unverified"},409);
+        const matches=(Array.isArray(tx.out_msgs)?tx.out_msgs:[]).filter(x=>
+          x?.bounced!==true && raw(x?.source)===senderRaw &&
+          raw(x?.destination)===destinationRaw && String(x?.value)===nano &&
+          typeof x?.hash==="string" && x.hash.length>0);
+        if(matches.length!==1)return reply({ok:false,error:"recipient_message_unverified"},409);
+        const recipientUrl=new URL("https://toncenter.com/api/v3/transactions");
+        recipientUrl.searchParams.set("account",req.destination_address);
+        recipientUrl.searchParams.set("limit","100");
+        recipientUrl.searchParams.set("start_utime",String(Math.max(0,Number(tx.now)-90)));
+        const recipientResponse=await fetch(recipientUrl,{headers,signal:AbortSignal.timeout(12000)});
+        if(!recipientResponse.ok)return reply({ok:false,error:"recipient_chain_unavailable"},503);
+        const recipientJson=await recipientResponse.json();
+        const credited=(Array.isArray(recipientJson?.transactions)?recipientJson.transactions:[]).some(t=>
+          !t?.emulated && raw(t?.account)===destinationRaw &&
+          t?.description?.aborted!==true &&
+          t?.in_msg?.bounced!==true && raw(t?.in_msg?.source)===senderRaw &&
+          raw(t?.in_msg?.destination||t?.account)===destinationRaw &&
+          String(t?.in_msg?.value)===nano &&
+          String(t?.in_msg?.hash||"")===matches[0].hash
+        );
+        if(!credited)return reply({ok:false,error:"recipient_credit_not_verified"},409);
+        const {data:done,error:commitError}=await admin.rpc("henova_finalize_verified_gram_payout",{
+          p_withdrawal_id:id,p_tx_hash:claimedHash,p_sender:treasury,
+          p_destination:req.destination_address,p_amount_nano:nano,p_tx_lt:Number(tx.lt)
+        });
+        if(commitError)return reply({ok:false,error:"settlement_commit_unavailable"},503);
+        return reply(done,done?.ok?200:409);
+      }catch(error){
+        console.warn("HENOVA chain settlement check",String(error).slice(0,110));
+        return reply({ok:false,error:"chain_verification_unavailable"},503);
       }
     }
     if(action==="admin_match_payout"){
