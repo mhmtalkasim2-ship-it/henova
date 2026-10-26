@@ -1983,6 +1983,21 @@ async function henovaCreateAdminTest(){
   toast('TEST request saved. No eggs were deducted.');
  }catch(e){toast(hvError(e.message));}
 }
+async function henovaVerifyAdminTest(id){
+ const hash=document.getElementById('henova-test-hash-'+id)?.value.trim();
+ const output=document.getElementById('henova-test-result-'+id);
+ if(!/^[a-fA-F0-9]{64}$/.test(hash||'')){if(output)output.textContent='Enter a 64-character transaction hash.';return;}
+ if(output)output.textContent='Checking TON mainnet…';
+ try{
+  const result=await henovaCall('admin_verify_test_transfer',{testId:id,txHash:hash});
+  if(output)output.textContent=result.found
+   ?'Chain lookup: '+(result.transaction_success?'transaction succeeded':'success not confirmed')+
+    ' · Sender: '+(result.sender_matches?'matched':'not matched')+
+    ' · Recipient and amount: '+(result.recipient_and_amount_matches?'matched':'not matched')+
+    ' · Final settlement: NOT verified'
+   :'Transaction not found by chain provider. No payment status changed.';
+ }catch(e){if(output)output.textContent='Verification unavailable: '+String(e.message||e);}
+}
 async function henovaApproveAdminTest(id){
  try{
   await henovaCall('admin_test_approve',{withdrawalId:id});
@@ -2025,6 +2040,18 @@ async function henovaShowAdminPayouts(){
     approve.textContent='✅ Approve TEST (no transfer)';
     approve.onclick=()=>henovaApproveAdminTest(t.id);
     card.append(approve);
+   }
+   if(t.status==='approved'){
+    const hashInput=document.createElement('input');hashInput.className='henova-wallet-input';
+    hashInput.id='henova-test-hash-'+t.id;
+    hashInput.placeholder='TON transaction hash (64 hex)';
+    if(t.id===1)hashInput.value='293be748285f479a20baaf43b3d90fc597113afaf5ba2e701176f0a44ad05d62';
+    const verify=document.createElement('button');verify.className='henova-wallet-save';
+    verify.textContent='🔎 Check on-chain (read only)';
+    verify.onclick=()=>henovaVerifyAdminTest(t.id);
+    const result=document.createElement('p');result.id='henova-test-result-'+t.id;
+    result.className='henova-wallet-note';result.textContent='No payment is marked Paid by this check.';
+    card.append(hashInput,verify,result);
    }
    list.append(card);
   }
