@@ -2225,11 +2225,11 @@ function henovaUpdateSimpleWithdrawal(){
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+hvMaxEggs+' 🥚';
- button.disabled=!valid||!hvPayoutReady||!hvWalletVerified;
+ button.disabled=!valid||!hvPayoutReady||!Boolean(document.getElementById('henova-ton-wallet')?.value.trim());
 }
 async function henovaSubmitSimpleWithdrawal(){
  const amount=Number(document.getElementById('hv-withdraw-eggs')?.value);
- if(!hvPayoutReady||!hvWalletVerified)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
+ if(!hvPayoutReady)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
  if(!Number.isSafeInteger(amount)||amount<hvMinEggs||amount>hvMaxEggs||amount>Number(s.eggs))return henovaUpdateSimpleWithdrawal();
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
@@ -2251,9 +2251,7 @@ async function henovaRefreshPayoutSetup(){
   if(tab!==4||request!==henovaWalletPageSeq)return;
   const input=document.getElementById('henova-ton-wallet'),info=document.getElementById('henova-wallet-info'),history=document.getElementById('henova-payout-history');
   if(input&&data.wallet?.wallet_address)input.value=data.wallet.wallet_address;
-  if(info&&data.wallet)info.textContent=data.wallet.verified_owner===true
-   ?(s.lang==='ar'?'✅ تم التحقق من ملكية المحفظة':s.lang==='tr'?'✅ Cüzdan sahipliği doğrulandı':'✅ Wallet ownership verified')
-   :(s.lang==='ar'?'العنوان محفوظ، ولم يتم إثبات ملكيته بعد':s.lang==='tr'?'Adres kayıtlı; sahiplik doğrulanmadı':'Address saved; ownership not verified');
+  if(info&&data.wallet)info.textContent=s.lang==='ar'?'العنوان محفوظ، تأكد أنه صحيح قبل السحب':s.lang==='tr'?'Adres kaydedildi, çekimden önce doğruluğunu kontrol edin':'Address saved. Double-check it before withdrawing.';
   hvPayoutReady=data.payout?.enabled===true;
   hvWalletVerified=data.wallet?.verified_owner===true;
   hvMinEggs=Number(data.payout?.min_eggs)||500;
@@ -2273,7 +2271,7 @@ async function henovaSaveTonWallet(){
  if(!value)return;
  try{
   const data=await henovaCall('save_payout_wallet',{address:value});
-  const message=s.lang==='ar'?'تم حفظ العنوان، ويلزم إثبات ملكية المحفظة قبل السحب':s.lang==='tr'?'Adres kaydedildi; çekimden önce sahiplik kanıtı gerekli':'Address saved; wallet ownership proof required before withdrawal';
+  const message=s.lang==='ar'?'تم حفظ العنوان، تأكد من صحته قبل السحب':s.lang==='tr'?'Adres kaydedildi; çekimden önce doğruluğunu kontrol edin':'Address saved. Double-check it before withdrawal.';
   if(info)info.textContent=message;toast(message);
  }catch(e){const message=e.message==='invalid_ton_wallet'?(s.lang==='ar'?'عنوان TON غير صالح':s.lang==='tr'?'Geçersiz TON adresi':'Invalid TON address'):hvError(e.message);if(info)info.textContent=message;toast(message)}
 }
@@ -2578,7 +2576,7 @@ el.innerHTML='<div class="henova-wallet-page hv-simple-withdraw">'+
 '<section class="hv-withdraw-summary"><small>'+hvText('avail')+'</small><strong>🥚 '+num(s.eggs)+'</strong><p>≈ <span id="hv-withdraw-balance-gram">'+(s.eggs/10000).toFixed(6)+'</span> GRAM</p><div class="hv-withdraw-pill">💎 GRAM · TON</div></section>'+
 '<section class="henova-wallet-card"><label class="henova-wallet-label" for="henova-ton-wallet">'+word.wallet+'</label><input class="henova-wallet-input" id="henova-ton-wallet" type="text" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="EQ... / UQ..." maxlength="48"><button class="henova-wallet-save" onclick="henovaSaveTonWallet()">'+word.save+'</button><p id="henova-wallet-info" class="henova-wallet-note"></p></section>'+
 '<section class="henova-wallet-card hv-withdraw-form"><label class="henova-wallet-label" for="hv-withdraw-eggs">'+(s.lang==='ar'?'المبلغ بالبيض':s.lang==='tr'?'Yumurta miktarı':'Egg amount')+'</label><div class="hv-amount-line">🥚 <input id="hv-withdraw-eggs" type="number" inputmode="numeric" min="500" step="1" value="'+Math.min(s.eggs,10000)+'" oninput="henovaUpdateSimpleWithdrawal()"><strong id="hv-withdraw-gram">0 GRAM</strong></div><div class="hv-withdraw-percent">'+[25,50,75,100].map(x=>'<button type="button" onclick="henovaSetWithdrawalPercent('+x+')">'+(x===100?'Max':x+'%')+'</button>').join('')+'</div><div class="hv-withdraw-total"><span>'+(s.lang==='ar'?'ستستلم':s.lang==='tr'?'Alacağınız':'You receive')+'</span><strong id="hv-withdraw-net">0 GRAM</strong></div><small id="hv-withdraw-rule"></small><button id="hv-withdraw-submit" class="henova-wallet-save" onclick="henovaSubmitSimpleWithdrawal()" disabled>↑ '+(s.lang==='ar'?'سحب':s.lang==='tr'?'Çek':'Withdraw')+'</button><p id="hv-withdraw-state" class="henova-wallet-note">'+word.info+'</p></section>'+
-'<details class="henova-wallet-card hv-withdraw-advanced"><summary>🔐 '+(s.lang==='ar'?'توثيق المحفظة':s.lang==='tr'?'Cüzdan doğrulama':'Wallet verification')+'</summary><h3>🔗 TON Connect</h3><div id="henova-tonconnect-button"></div><button class="henova-wallet-save" onclick="henovaPrepareWalletProof()">🔐 Prepare wallet verification</button><p id="henova-tonconnect-status" class="henova-wallet-note"></p></details>'+
+
 '<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div></section></div>';
 
 henovaRefreshPayoutSetup();
