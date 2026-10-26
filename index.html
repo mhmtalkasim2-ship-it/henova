@@ -2019,17 +2019,25 @@ async function henovaSignAdminPayout(id){
     manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
   });}
   if(!henovaTonUI.wallet){await henovaTonUI.openModal();toast('Connect HENOVA Payouts, then press Sign again.');return;}
-  // Sender restriction prevents signing with a different connected wallet.
-  const raw=henovaTonUI.wallet.account.address;
-  const expected=intent.sender;
-  // Normalize the expected address with the SDK when possible.
-  // TonConnect's 'from' further binds the sender to the configured address.
-  const res=await henovaTonUI.sendTransaction({
+  // TON Connect exposes a raw address; the treasury setting is user-friendly.
+  // Compare the same account format before asking Tonkeeper to sign.
+  const raw=String(henovaTonUI.wallet.account.address||'').toLowerCase();
+  const expected=String(intent.sender||'');
+  const bytes=Uint8Array.from(atob(expected.replace(/-/g,'+').replace(/_/g,'/')),ch=>ch.charCodeAt(0));
+  if(bytes.length!==36)throw Error('Invalid configured treasury address');
+  const workchain=bytes[1]>127?bytes[1]-256:bytes[1];
+  const expectedRaw=workchain+':'+Array.from(bytes.slice(2,34),b=>b.toString(16).padStart(2,'0')).join('');
+  if(raw!==expectedRaw)throw Error('Wrong wallet connected. Connect HENOVA Payouts before signing.');
+  if(henovaSignAdminPayout.inProgress)throw Error('Signature request already in progress');
+  henovaSignAdminPayout.inProgress=true;
+  try{
+  await henovaTonUI.sendTransaction({
     validUntil:Math.floor(Date.now()/1000)+300,
     network:'-239',from:expected,
     messages:[{address:intent.destination,amount:intent.amountNanograms}]
   });
   toast('Transaction submitted to wallet. Waiting for independent TON confirmation; do not sign it twice.');
+  }finally{henovaSignAdminPayout.inProgress=false;}
  }catch(e){toast('Payment not confirmed: '+String(e.message||e).slice(0,130))}
 }
 let henovaTonUI=null;
