@@ -2188,19 +2188,26 @@ async function henovaShowAdminPayouts(){
         card.append(recover);
       }
     }
-    const track=document.createElement('button');track.className='henova-wallet-save';
-    track.textContent='🔎 Check payment automatically';
-    track.onclick=async()=>{
-      track.disabled=true;
-      try{
-        const r=await henovaCall('admin_track_signed_payout',{withdrawalId:item.id});
-        toast(r.confirmed?'✅ Paid and recorded on TON':'Payment verification pending');
-        await henovaShowAdminPayouts();
-      }catch(error){toast('Awaiting TON confirmation: '+String(error.message||error).slice(0,75));track.disabled=false;}
-    };
-    card.append(track);
+    if(item.status==='broadcast'&&item.signed_boc_hash){
+      const track=document.createElement('button');track.className='henova-wallet-save';
+      track.textContent='🔎 Check payment automatically';
+      track.onclick=async()=>{
+        track.disabled=true;
+        try{
+          const r=await henovaCall('admin_track_signed_payout',{withdrawalId:item.id});
+          toast(r.confirmed?'✅ Paid and recorded on TON':'Payment verification pending');
+          await henovaShowAdminPayouts();
+        }catch(error){toast('Awaiting TON confirmation: '+String(error.message||error).slice(0,75));track.disabled=false;}
+      };
+      card.append(track);
+    }else if(item.signing_claimed_at&&!item.signed_boc_hash){
+      const help=document.createElement('p');
+      help.style.color='#9d4b0b';
+      help.textContent='⚠️ No signed wallet receipt saved. If Tonkeeper actually sent GRAM, paste the full 64-character SENDER transaction hash below and press Verify. This checks TON only; do NOT sign again.';
+      card.append(help);
+    }
     const hash=document.createElement('input');hash.className='henova-wallet-input';
-    hash.placeholder='Confirmed sender transaction hash (64 hex characters)';
+    hash.placeholder='Paste 64-character sender TON transaction hash';
     hash.maxLength=64;hash.autocomplete='off';hash.spellcheck=false;
     card.append(hash);
     const verify=document.createElement('button');verify.className='henova-wallet-save';
