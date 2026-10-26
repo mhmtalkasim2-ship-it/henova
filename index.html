@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#347b48"><title>HENOVA • Chicken Farm</title>
 <script src="https://sad.adsgram.ai/js/sad.min.js" async></script>
+<script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js" defer></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#e6f3df;color:#284a30;font:700 15px system-ui,-apple-system,sans-serif}button{font:inherit;cursor:pointer}main{max-width:520px;margin:auto;min-height:100vh;padding:20px 16px 90px;background:linear-gradient(#ecffe1,#fffdf2)}header,.stats,.between,.item,nav{display:flex;align-items:center;justify-content:space-between;gap:10px}header{margin-bottom:14px}header strong{font-size:27px;color:#267641;letter-spacing:2px}header small{display:block;font-size:10px;letter-spacing:2px;color:#92a287}header button,.small{border:0;border-radius:14px;background:#fff;padding:10px;color:#38763f}.stats>div{flex:1;background:white;border-radius:15px;padding:13px;text-align:center;box-shadow:0 5px 18px #294e2012}.stats b{display:block;font-size:21px}.stats small{font-size:10px;color:#93a38e}.title{margin:23px 0 12px;font-size:22px}.scene{height:265px;border:5px solid white;border-radius:26px;overflow:hidden;position:relative;background:linear-gradient(#83ceee 0 53%,#8ed16a 53% 100%);box-shadow:0 8px 24px #294e2033}.cloud{position:absolute;top:7px;font-size:38px}.house{position:absolute;top:38px;left:50%;transform:translateX(-50%);font-size:110px}.chickens{position:absolute;bottom:26px;left:0;right:0;display:flex;justify-content:space-evenly;font-size:42px}.flowers{position:absolute;bottom:3px;width:100%;text-align:center}.panel,.item{border-radius:19px;background:#fff;border:1px solid #d9e9cf;padding:17px;margin:13px 0;box-shadow:0 3px 12px #314d2110}.bar{height:15px;background:#e7f3e1;border-radius:20px;overflow:hidden;margin:13px 0}.bar>div{background:linear-gradient(90deg,#93ce63,#ffcc52);height:100%;transition:width .3s}.muted{color:#829b80;font-size:12px}.primary{width:100%;padding:14px;border:0;border-radius:14px;background:linear-gradient(#ffe17d,#f0af3e);box-shadow:0 4px #c48a32;color:#523d11;font-weight:900;margin-top:10px}.primary:disabled{opacity:.5}.item .face{font-size:39px;background:#e6f4d8;border-radius:13px;padding:10px}.item .grow{flex:1}.item h3{font-size:15px;margin:0}.item p{margin:5px 0;font-size:12px;color:#6b9c67}.item button{border:0;background:#f5c253;padding:10px;border-radius:12px;font-size:12px;font-weight:900}nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);height:78px;padding-bottom:env(safe-area-inset-bottom);max-width:520px;width:100%;background:white;box-shadow:0 -3px 18px #38632d19;border-radius:18px 18px 0 0}nav button{flex:1;background:none;border:0;color:#9eae99;font-size:10px;padding:8px 0}nav button span{display:block;font-size:23px}nav button.active{color:#368950;font-weight:900}.badge{font-size:11px;background:#fff3cb;border-radius:9px;padding:6px}.cover{background:#266a4a;color:white;border-radius:22px;padding:26px;text-align:center}.cover strong{font-size:35px}.cover p{color:#d0edcf}select,input[type=number]{width:100%;padding:12px;border-radius:12px;border:1px solid #c6dfc3;background:white;font:inherit}.overlay{position:fixed;inset:0;background:#102e1e99;display:grid;place-items:center;padding:18px;z-index:10}.modal{width:min(420px,100%);background:white;border-radius:20px;padding:22px}.hidden{display:none!important}.notice{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#24593e;color:white;padding:13px 20px;border-radius:14px;z-index:12;white-space:nowrap;max-width:95vw;overflow:hidden}.warning{font-size:12px;color:#9b662c;margin:10px 0}
 
@@ -1957,6 +1958,26 @@ async function henovaCheckWithdrawals(){
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
 }
+let henovaTonUI=null;
+function henovaRenderTonConnect(){
+ const root=document.getElementById('henova-tonconnect-button');
+ if(!root||!window.TON_CONNECT_UI?.TonConnectUI)return;
+ try{
+  // Reuse a single TonConnectUI instance and its persistent session.
+  if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
+   manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
+  });
+  henovaTonUI.uiOptions={buttonRootId:'henova-tonconnect-button'};
+  if(!window.henovaTonSubscription){
+   window.henovaTonSubscription=henovaTonUI.onStatusChange(wallet=>{
+    const element=document.getElementById('henova-tonconnect-status');
+    if(element)element.textContent=wallet?.account?.address
+      ?(s.lang==='ar'?'تم الاتصال بالمحفظة (تأكيد ملكية السحب قيد التجهيز): ':s.lang==='tr'?'Cüzdan bağlı: ':'Wallet connected: ')+wallet.account.address.slice(0,7)+'…'
+      :(s.lang==='ar'?'لم يتم ربط المحفظة':'Wallet not connected');
+   });
+  }
+ }catch(error){console.warn('TON Connect unavailable',error)}
+}
 let henovaWalletPageSeq=0;
 async function henovaRefreshPayoutSetup(){
  const request=++henovaWalletPageSeq;
@@ -2277,8 +2298,9 @@ if(tab===4){
 const word=s.lang==='ar'?{title:'سحب GRAM',status:'السحب قيد التجهيز',wallet:'عنوان محفظة TON',save:'حفظ العنوان',saved:'العنوان المحفوظ',pending:'العنوان محفوظ، لكن ملكية المحفظة لم تُتحقق بعد',info:'يتم تجهيز السحب الآمن عبر شبكة TON. التحويلات المالية متوقفة حالياً لحين انتهاء اختبارات الأمان.',history:'طلبات السحب',empty:'لا توجد طلبات سحب',button:'السحب غير متاح الآن'}:s.lang==='tr'?{title:'GRAM çekimi',status:'Çekimler hazırlanıyor',wallet:'TON cüzdan adresi',save:'Adresi kaydet',saved:'Kayıtlı adres',pending:'Adres kaydedildi; cüzdan sahipliği henüz doğrulanmadı',info:'TON üzerinden güvenli çekim hazırlanıyor. Ödemeler güvenlik testleri tamamlanana kadar kapalı.',history:'Çekim geçmişi',empty:'Çekim talebi yok',button:'Çekimler şu anda kapalı'}:{title:'GRAM withdrawal',status:'Withdrawals in preparation',wallet:'TON wallet address',save:'Save address',saved:'Saved address',pending:'Address saved; wallet ownership not yet verified',info:'Secure TON payouts are being prepared. Payments are disabled until security checks are complete.',history:'Withdrawal history',empty:'No withdrawal requests',button:'Withdrawals unavailable'};
 el.innerHTML='<div class="henova-wallet-page"><h1 class="henova-wallet-heading">💰 '+word.title+'</h1><section class="henova-wallet-balance"><small>'+hvText('avail')+'</small><strong>🥚 '+num(s.eggs)+'</strong><p>GRAM · TON</p></section>'+
 '<section class="henova-wallet-card"><h3>🔐 '+word.status+'</h3><p class="henova-wallet-info">'+word.info+'</p><label class="henova-wallet-label" for="henova-ton-wallet">'+word.wallet+'</label><input class="henova-wallet-input" id="henova-ton-wallet" type="text" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="EQ... / UQ..." maxlength="48"><button class="henova-wallet-save" onclick="henovaSaveTonWallet()">'+word.save+'</button><p id="henova-wallet-info" class="henova-wallet-note"></p></section>'+
-'<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div><button class="henova-wallet-disabled" disabled>'+word.button+'</button></section></div>';
+'<section class="henova-wallet-card"><h3>🔗 TON Connect</h3><div id="henova-tonconnect-button"></div><p id="henova-tonconnect-status" class="henova-wallet-note">'+(s.lang==='ar'?'اربط Tonkeeper لإظهار عنوان المحفظة. إثبات الملكية للسحب ما زال قيد التجهيز.':s.lang==='tr'?'Tonkeeper bağla. Para çekme için sahiplik doğrulaması henüz hazır değil.':'Connect Tonkeeper to view your wallet. Withdrawal ownership verification is still being prepared.')+'</p></section>'+'<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div><button class="henova-wallet-disabled" disabled>'+word.button+'</button></section></div>';
 henovaRefreshPayoutSetup();
+setTimeout(henovaRenderTonConnect,0);
 }
 if(tab===0)prepareFarmArtwork();
 }
