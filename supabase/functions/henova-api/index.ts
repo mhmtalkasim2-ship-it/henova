@@ -2,6 +2,10 @@
 // Never accept client-provided balances, Telegram user IDs, prices or egg counts.
 // Requires private secrets: HENOVA_TELEGRAM_BOT_TOKEN and SUPABASE_SERVICE_ROLE_KEY.
 import { createClient } from "npm:@supabase/supabase-js@2.95.0";
+import { Address, Cell, loadStateInit, contractAddress } from "npm:@ton/core@0.63.1";
+import { WalletContractV4, WalletContractV5R1 } from "npm:@ton/ton@15.4.0";
+import nacl from "npm:tweetnacl@1.0.3";
+import { Buffer } from "node:buffer";
 
 const encoder = new TextEncoder();
 // Bot start button bootstrap: runs only after verified Telegram Mini App initData.
@@ -565,8 +569,55 @@ Deno.serve(async (request) => {
     });
     if(challengeError)return reply({ok:false,error:"proof_challenge_unavailable"},503);
     if(!challenge?.ok)return reply({ok:false,error:"challenge_expired_or_mismatched"},403);
-    return reply({ok:true,challenge_valid:true,signature_verified:false,
-      ownership_verified:false,next_step:"verify_signed_digest_and_wallet_state_init"});
+    // TON Proof signature is accepted ONLY when stateInit hashes to this wallet,
+    // its code matches an audited standard wallet version, and Ed25519 verifies.
+    if(body?.network!=="-239" || typeof body?.walletStateInit!=="string" ||
+       body.walletStateInit.length>25000)return reply({ok:false,error:"invalid_wallet_network_or_state"},400);
+    try{
+      const parsed=Address.parse(address);
+      const init=loadStateInit(Cell.fromBase64(body.walletStateInit).beginParse());
+      if(!contractAddress(parsed.workChain,init).equals(parsed))
+        return reply({ok:false,error:"wallet_state_address_mismatch"},403);
+      if(!init.code||!init.data)return reply({ok:false,error:"invalid_wallet_state"},403);
+      const known=[
+        {factory:WalletContractV4,load:(cell)=>{cell.loadUint(32);cell.loadUint(32);return cell.loadBuffer(32);}},
+        {factory:WalletContractV5R1,load:(cell)=>{cell.loadBoolean();cell.loadUint(32);cell.loadUint(32);return cell.loadBuffer(32);}}
+      ];
+      let trustedKey=null;
+      for(const k of known){
+        const knownCode=k.factory.create({workchain:0,publicKey:Buffer.alloc(32)}).init.code;
+        if(knownCode?.equals(init.code)){trustedKey=k.load(init.data.beginParse());break;}
+      }
+      if(!trustedKey||trustedKey.length!==32)return reply({ok:false,error:"unsupported_wallet_contract"},403);
+      if(body.publicKey!==undefined &&
+        (!/^[a-f0-9]{64}$/i.test(String(body.publicKey)) ||
+         Buffer.from(body.publicKey,"hex").compare(trustedKey)!==0))
+        return reply({ok:false,error:"wallet_public_key_mismatch"},403);
+      const signature=Buffer.from(proof.signature,"base64");
+      if(signature.length!==64)return reply({ok:false,error:"invalid_signature"},403);
+      const wc=Buffer.alloc(4);wc.writeInt32BE(parsed.workChain);
+      const domainBytes=Buffer.from(proof.domain.value,"utf8");
+      const domainLen=Buffer.alloc(4);domainLen.writeUInt32LE(domainBytes.length);
+      const timestamp=Buffer.alloc(8);timestamp.writeBigUInt64LE(BigInt(proof.timestamp));
+      const message=Buffer.concat([
+        Buffer.from("ton-proof-item-v2/"),wc,parsed.hash,domainLen,domainBytes,
+        timestamp,Buffer.from(proof.payload,"utf8")
+      ]);
+      const hash1=new Uint8Array(await crypto.subtle.digest("SHA-256",message));
+      const hash2=new Uint8Array(await crypto.subtle.digest("SHA-256",
+        Buffer.concat([Buffer.from([255,255]),Buffer.from("ton-connect"),Buffer.from(hash1)])));
+      if(!nacl.sign.detached.verify(hash2,signature,trustedKey))
+        return reply({ok:false,error:"invalid_wallet_signature"},403);
+      // Atomic nonce consumption and wallet update. Never accept a reused proof.
+      const {data:verified,error:verifiedError}=await admin.rpc("henova_consume_verified_wallet_proof",{
+        p_telegram_id:telegram.id,p_wallet_address:address,p_nonce:proof.payload
+      });
+      if(verifiedError)return reply({ok:false,error:"wallet_proof_commit_failed"},503);
+      return reply(verified,verified?.ok?200:409);
+    }catch(err){
+      console.warn("HENOVA TON proof verification rejected",String(err).slice(0,90));
+      return reply({ok:false,error:"wallet_proof_verification_failed"},403);
+    }
   }
   if (action === "save_payout_wallet") {
     const address=String(body?.address||"");
