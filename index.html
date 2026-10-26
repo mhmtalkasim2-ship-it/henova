@@ -1958,6 +1958,66 @@ async function henovaCheckWithdrawals(){
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
 }
+// Staff-only payout panel. Every request is checked again by the server.
+async function henovaShowAdminPayouts(){
+ const root=document.getElementById('view');
+ if(!root)return;
+ root.innerHTML='<h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p><div id="henova-admin-list"></div><button onclick="henovaShowAdminPayouts()">↻ Refresh</button>';
+ try{
+  const data=await henovaCall('admin_payout_queue');
+  const status=document.getElementById('henova-admin-state');
+  if(status)status.textContent='Wallet approvals · Payment confirmation requires TON verification';
+  const list=document.getElementById('henova-admin-list');
+  if(!list)return;
+  list.replaceChildren();
+  if(!data.items?.length){list.textContent='No withdrawal requests.';return;}
+  for(const item of data.items){
+   const card=document.createElement('section');card.className='henova-wallet-card';
+   const header=document.createElement('h3');header.textContent='#'+item.id+' · '+item.status;card.append(header);
+   const details=document.createElement('p');
+   details.style.overflowWrap='anywhere';
+   details.textContent=item.eggs_amount+' eggs → '+item.gram_amount+' GRAM · '+item.destination_address;
+   card.append(details);
+   if(item.status==='pending'){
+    const approve=document.createElement('button');approve.className='henova-wallet-save';approve.textContent='✅ Approve';
+    approve.onclick=async()=>{
+     approve.disabled=true;
+     try{await henovaCall('admin_payout_approve',{withdrawalId:item.id});await henovaShowAdminPayouts()}
+     catch(e){toast(hvError(e.message));approve.disabled=false;}
+    };
+    card.append(approve);
+   }else if(item.status==='approved'){
+    const sign=document.createElement('button');sign.className='henova-wallet-save';
+    sign.textContent='🔐 Sign payment in Tonkeeper';
+    sign.onclick=()=>henovaSignAdminPayout(item.id);
+    card.append(sign);
+   }
+   list.append(card);
+  }
+ }catch(e){const target=document.getElementById('henova-admin-state');if(target)target.textContent='Admin access required · '+String(e.message)}
+}
+async function henovaSignAdminPayout(id){
+ try{
+  const {intent}=await henovaCall('admin_payout_intent',{withdrawalId:id});
+  if(!henovaTonUI){henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
+    manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
+  });}
+  if(!henovaTonUI.wallet){await henovaTonUI.openModal();toast('Connect HENOVA Payouts, then press Sign again.');return;}
+  // Sender restriction prevents signing with a different connected wallet.
+  const raw=henovaTonUI.wallet.account.address;
+  const signer=window.TON_CONNECT_UI.toUserFriendlyAddress(raw,false);
+  const rawSigner=raw.toLowerCase();
+  const expected=intent.sender;
+  // Normalize the expected address with the SDK when possible.
+  // TonConnect's 'from' further binds the sender to the configured address.
+  const res=await henovaTonUI.sendTransaction({
+    validUntil:Math.floor(Date.now()/1000)+300,
+    network:'-239',from:expected,
+    messages:[{address:intent.destination,amount:intent.amountNanograms}]
+  });
+  toast('Transaction submitted to wallet. Waiting for independent TON confirmation; do not sign it twice.');
+ }catch(e){toast('Payment not confirmed: '+String(e.message||e).slice(0,130))}
+}
 let henovaTonUI=null;
 function henovaRenderTonConnect(){
  const root=document.getElementById('henova-tonconnect-button');
@@ -2373,6 +2433,10 @@ function setupTelegram(){
   }
 }
 setupTelegram();
+if(new URLSearchParams(location.search).get('admin')==='payouts'){
+  // Render after Telegram initialization; no server access without valid initData.
+  setTimeout(henovaShowAdminPayouts,100);
+}
 if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.textContent='🔇';}
 // One non-rewarded interstitial 5 seconds after entry, never block the farm.
 function henovaLaunchInterstitial(){
