@@ -215,7 +215,7 @@ Deno.serve(async (request) => {
     // No server-generated real payment intent until independent on-chain verification
     // and the controlled live transfer test are explicitly completed.
     if(action==="admin_payout_intent" &&
-       (!settings.data.enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified))
+       (!settings.data.enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified || !settings.data.signer_configured))
       return reply({ok:false,error:"payout_safety_gate_closed"},403);
     if(action==="admin_chain_audit"){
       // Read-only mainnet inspection, never authorizes a payout or changes its status.
@@ -547,7 +547,7 @@ Deno.serve(async (request) => {
       if(!settings.data.enabled || !settings.data.chain_verifier_configured ||
          !settings.data.test_transfer_verified || !settings.data.signer_configured)
         return reply({ok:false,error:"payout_safety_gate_closed"},403);
-      if(!/^[a-f0-9]{64}$/.test(hash)||!/^\\d+$/.test(amount)||
+      if(!/^[a-f0-9]{64}$/.test(hash)||!/^[0-9]+$/.test(amount)||
          amount.length>22 || !/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(address))
         return reply({ok:false,error:"invalid_signed_receipt"},400);
       const {data,error}=await admin.rpc("henova_record_signed_gram_payout",{
