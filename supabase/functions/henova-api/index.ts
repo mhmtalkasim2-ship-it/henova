@@ -363,6 +363,18 @@ Deno.serve(async (request) => {
       .eq("id",id).eq("status","approved").maybeSingle();
     if(result.error||!result.data)return reply({ok:false,error:"not_approved"},409);
     if(!settings.data.payout_wallet_address)return reply({ok:false,error:"treasury_unset"},503);
+    // Prevent accidental self-transfers, including differing TON friendly flags.
+    const rawTon=(address)=>{
+      try{
+        const b=Uint8Array.from(atob(String(address).replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+        if(b.length!==36)return null;
+        return b[1]+":"+Array.from(b.slice(2,34),x=>x.toString(16).padStart(2,"0")).join("");
+      }catch{return null;}
+    };
+    const senderRaw=rawTon(settings.data.payout_wallet_address);
+    const receiverRaw=rawTon(result.data.destination_address);
+    if(!senderRaw||!receiverRaw)return reply({ok:false,error:"invalid_payout_address"},409);
+    if(senderRaw===receiverRaw)return reply({ok:false,error:"recipient_matches_treasury"},409);
     // The amount is server-side; never accept the amount or destination from the client.
     const nanograms=Math.round(Number(result.data.gram_amount)*1e9);
     if(!Number.isSafeInteger(nanograms)||nanograms<=0||nanograms>1e9)
