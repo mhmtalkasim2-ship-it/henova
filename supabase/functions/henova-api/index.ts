@@ -375,7 +375,7 @@ Deno.serve(async (request) => {
         (req.payout_sender_address && raw(req.payout_sender_address)!==senderRaw))
         return reply({ok:false,error:"wallet_mismatch"},409);
       const amount=String(req.gram_amount);
-      if(!/^[0-9]+(?:[.][0-9]{1,9})?$/.test(amount))return reply({ok:false,error:"amount_invalid"},409);
+      if(!/^[0-9]+(?:[.][0-9]+)?$/.test(amount) || (amount.split(".")[1]||"").slice(9).replace(/0/g,"")!=="")return reply({ok:false,error:"amount_invalid"},409);
       const [whole,fraction=""]=amount.split(".");
       const nano=(BigInt(whole)*1000000000n+BigInt((fraction+"000000000").slice(0,9))).toString();
       try{
@@ -445,7 +445,7 @@ Deno.serve(async (request) => {
       const treasury=String(settings.data.payout_wallet_address||"");
       const rawAddress=(address)=>{
         const a=String(address||"");
-        if(/^-?\\d+:[a-fA-F0-9]{64}$/.test(a))return a.toLowerCase();
+        if(/^-?[0-9]+:[a-fA-F0-9]{64}$/.test(a))return a.toLowerCase();
         if(!/^(EQ|UQ)[a-zA-Z0-9_-]{46}$/.test(a))return null;
         try{
           const bytes=Uint8Array.from(atob(a.replace(/-/g,"+").replace(/_/g,"/")),x=>x.charCodeAt(0));
@@ -457,7 +457,9 @@ Deno.serve(async (request) => {
       const target=rawAddress(req.destination_address);
       if(!target||!rawAddress(treasury))return reply({ok:false,error:"wallet_address_invalid"},409);
       const decimal=String(req.gram_amount);
-      if(!/^\\d+(?:\\.\\d{1,9})?$/.test(decimal))return reply({ok:false,error:"invalid_amount"},409);
+      if(!/^[0-9]+(?:[.][0-9]+)?$/.test(decimal) ||
+         (decimal.split(".")[1]||"").slice(9).replace(/0/g,"")!=="")
+        return reply({ok:false,error:"invalid_amount"},409);
       const [units,frac=""]=decimal.split(".");
       const nano=(BigInt(units)*1000000000n+BigInt((frac+"000000000").slice(0,9))).toString();
       const createdAt=Math.floor(Date.parse(req.created_at)/1000);
