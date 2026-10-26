@@ -567,7 +567,37 @@ Deno.serve(async (request) => {
           if(c.error)return reply({ok:false,error:"proof_claim_unavailable"},503);
           claim=c.data;
         }
-        return reply({ok:true,found:true,verified:false,test_only:true,proof_claim:claim,
+        // Follow the outgoing transfer into the recipient account transaction.
+        // An executed sender action by itself is insufficient to establish credit.
+        let recipientCredited=false;
+        let recipientTxHash=null;
+        if(paymentMatch && txSuccess){
+          if(incomingMatch && normalized(tx.account)===expectedRecipient &&
+             tx.description?.aborted===false &&
+             String(tx.description?.credit_ph?.credit||"")===expectedNano){
+            recipientCredited=true;recipientTxHash=inputHash;
+          }else if(matching.length===1 && /^[0-9a-fA-F]{64}$/.test(String(matching[0].hash||""))){
+            try{
+              const follow=new URL("https://toncenter.com/api/v3/transactionsByMessage");
+              follow.searchParams.set("msg_hash",matching[0].hash);
+              follow.searchParams.set("direction","in");
+              follow.searchParams.set("limit","10");
+              const followResp=await fetch(follow,{headers,signal:AbortSignal.timeout(9000)});
+              if(followResp.ok){
+                const followData=await followResp.json();
+                const rec=(followData.transactions||[]).find(r=>
+                  r.emulated!==true && normalized(r.account)===expectedRecipient &&
+                  normalized(r.in_msg?.source)===expectedSender &&
+                  normalized(r.in_msg?.destination||r.account)===expectedRecipient &&
+                  String(r.in_msg?.value)===expectedNano && r.in_msg?.bounced!==true &&
+                  r.description?.aborted===false &&
+                  String(r.description?.credit_ph?.credit||"")===expectedNano);
+                if(rec){recipientCredited=true;recipientTxHash=String(rec.hash||"");}
+              }
+            }catch{}
+          }
+        }
+        return reply({ok:true,found:true,verified:recipientCredited,test_only:true,recipient_credited:recipientCredited,recipient_tx_hash:recipientTxHash,proof_claim:claim,
           sender_matches:normalized(tx.account)===expectedSender || incomingMatch || matching.length===1,
           recipient_and_amount_matches:paymentMatch,transaction_success:txSuccess,
           hash:inputHash,matched_messages:matching.length+(incomingMatch?1:0),diagnostics:{tx_account:String(tx.account||""),expected_sender:expectedSender,expected_recipient:expectedRecipient,expected_nano:expectedNano,outbound:outgoing.slice(0,5).map(m=>({source:String(m.source||""),destination:String(m.destination||""),value:String(m.value||""),bounced:m.bounced===true}))},
