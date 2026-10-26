@@ -2121,6 +2121,11 @@ async function henovaShowAdminPayouts(){
    details.textContent=item.eggs_amount+' eggs → '+item.gram_amount+' GRAM · '+item.destination_address;
    card.append(details);
    if(item.status==='confirmed'){
+     if(data.channel_notice?.error&&!item.notice_message_id){
+       const reason=document.createElement('p');reason.style.color='#a52619';
+       reason.textContent='📢 Proof publishing: '+String(data.channel_notice.description||data.channel_notice.error).slice(0,150);
+       card.append(reason);
+     }
      const proof=document.createElement('p');
      proof.textContent=item.notice_message_id
        ?'✅ Withdrawal channel proof recorded · message #'+item.notice_message_id
