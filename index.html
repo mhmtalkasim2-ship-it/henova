@@ -1982,7 +1982,14 @@ async function henovaShowAdminPayouts(){
  try{
   const data=await henovaCall('admin_payout_queue');
   const status=document.getElementById('henova-admin-state');
-  if(status)status.textContent='Wallet approvals · Payment confirmation requires TON verification';
+  if(status){
+    const c=data.checks||{};
+    status.textContent=data.payments_enabled===true
+      ?'Payment checks passed. Review each withdrawal carefully before signing.'
+      :'Payments locked · TON verification: '+(c.chain_verifier_ready?'ready':'pending')+
+       ' · Mainnet test: '+(c.test_transfer_verified?'verified':'pending')+
+       ' · Treasury signature required';
+  }
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
