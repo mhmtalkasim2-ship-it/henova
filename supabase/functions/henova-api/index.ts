@@ -195,7 +195,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout","admin_test_submit","admin_test_queue","admin_test_approve"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -302,6 +302,43 @@ Deno.serve(async (request) => {
           payment_verified:false,mode:"read_only",
           note:"Candidate matches only; check full trace, recipient transaction, finality and unique payment correlation before confirming."});
       }catch{return reply({ok:false,error:"chain_provider_unavailable"},503);}
+    }
+    // Non-financial admin workflow test. The production payout and player balances are untouched.
+    if(action==="admin_test_submit"){
+      const amount=Number(body?.eggs);
+      const requestId=String(body?.requestId||"");
+      if(!Number.isSafeInteger(amount)||amount<500||amount>10000 ||
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId))
+        return reply({ok:false,error:"invalid_test_request"},400);
+      const wallet=await admin.from("henova_ton_wallets").select("wallet_address")
+        .eq("telegram_id",telegram.id).maybeSingle();
+      if(wallet.error)return reply({ok:false,error:"database_unavailable"},503);
+      if(!wallet.data?.wallet_address)return reply({ok:false,error:"save_wallet_first"},409);
+      const {data,error}=await admin.from("henova_payout_dry_runs").upsert({
+        telegram_id:telegram.id,request_id:requestId,eggs_amount:amount,
+        gram_amount:Number((amount/10000).toFixed(9)),destination_address:wallet.data.wallet_address
+      },{onConflict:"request_id",ignoreDuplicates:true})
+      .select("id,status,eggs_amount,gram_amount").maybeSingle();
+      if(error)return reply({ok:false,error:"test_submission_failed"},503);
+      return reply({ok:true,test_only:true,item:data||null,no_balance_deduction:true});
+    }
+    if(action==="admin_test_queue"){
+      const {data,error}=await admin.from("henova_payout_dry_runs")
+        .select("id,telegram_id,eggs_amount,gram_amount,destination_address,status,created_at")
+        .eq("telegram_id",telegram.id).order("id",{ascending:false}).limit(10);
+      if(error)return reply({ok:false,error:"database_unavailable"},503);
+      return reply({ok:true,test_only:true,items:data||[]});
+    }
+    if(action==="admin_test_approve"){
+      const id=Number(body?.withdrawalId);
+      if(!Number.isSafeInteger(id)||id<1)return reply({ok:false,error:"invalid_request"},400);
+      const {data,error}=await admin.from("henova_payout_dry_runs")
+        .update({status:"approved",updated_at:new Date().toISOString()})
+        .eq("id",id).eq("telegram_id",telegram.id).eq("status","pending")
+        .select("id,status").maybeSingle();
+      if(error)return reply({ok:false,error:"database_unavailable"},503);
+      if(!data)return reply({ok:false,error:"already_approved_or_not_found"},409);
+      return reply({ok:true,test_only:true,item:data,payment_sent:false});
     }
     if(action==="admin_payout_queue"){
       const result=await admin.from("henova_gram_withdrawals")
