@@ -2084,6 +2084,24 @@ async function henovaShowAdminPayouts(){
     sign.textContent='🔐 Sign payment in Tonkeeper';
     sign.onclick=()=>henovaSignAdminPayout(item.id);
     card.append(sign);
+    const hash=document.createElement('input');hash.className='henova-wallet-input';
+    hash.placeholder='Confirmed sender transaction hash (64 hex characters)';
+    hash.maxLength=64;hash.autocomplete='off';hash.spellcheck=false;
+    card.append(hash);
+    const verify=document.createElement('button');verify.className='henova-wallet-save';
+    verify.textContent='🔎 Verify TON payout and publish proof';
+    verify.onclick=async()=>{
+      verify.disabled=true;
+      try{
+        const result=await henovaCall('admin_verify_payout',{withdrawalId:item.id,txHash:hash.value.trim()});
+        toast(result.confirmed?'TON payment verified. Channel notice: '+(result.notice?.sent?'sent':'pending'):'Payment not verified');
+        await henovaShowAdminPayouts();
+      }catch(error){
+        toast('NOT PAID: '+String(error?.message||error).slice(0,95));
+        verify.disabled=false;
+      }
+    };
+    card.append(verify);
    }
    list.append(card);
   }
