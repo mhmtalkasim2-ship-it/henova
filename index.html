@@ -2164,7 +2164,7 @@ async function henovaPrepareWalletProof(){
   // Refuse a proof challenge for a payout address that differs from the connected account.
   const connected=String(henovaTonUI.wallet.account.address||'').toLowerCase();
   function walletRaw(a){
-   if(/^-?\\d+:[0-9a-fA-F]{64}$/.test(a))return a.toLowerCase();
+   if(/^-?\d+:[0-9a-fA-F]{64}$/.test(a))return a.toLowerCase();
    const raw=Uint8Array.from(atob(a.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
    if(raw.length!==36)throw Error('Invalid TON wallet address');
    const wc=raw[1]>127?raw[1]-256:raw[1];
