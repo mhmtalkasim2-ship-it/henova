@@ -256,31 +256,43 @@ Deno.serve(async (request) => {
     const notifyVerifiedPayout=async(paymentId)=>{
       const {data:claim,error:claimError}=await admin.rpc("henova_claim_verified_payout_notice",{p_id:paymentId});
       if(claimError||!claim?.ok)return {sent:false,error:claimError?"notice_claim_failed":"notice_already_sent_or_locked"};
+      const message="✅ HENOVA GRAM WITHDRAWAL CONFIRMED\n"+
+        "Withdrawal #"+claim.id+"\nAmount: "+claim.gram_amount+" GRAM\n"+
+        "TON transaction: https://tonviewer.com/transaction/"+claim.tx_hash;
+      let response;
       try{
-        const message="✅ HENOVA GRAM WITHDRAWAL CONFIRMED\\n"+
-          "Withdrawal #"+claim.id+"\\nAmount: "+claim.gram_amount+" GRAM\\n"+
-          "TON transaction: https://tonviewer.com/transaction/"+claim.tx_hash;
-        const sent=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+        response=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
           method:"POST",headers:{"Content-Type":"application/json"},
           body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:message,
-            disable_web_page_preview:true}),signal:AbortSignal.timeout(8000)
+            disable_web_page_preview:true}),signal:AbortSignal.timeout(12000)
         });
-        const body=await sent.json().catch(()=>null);
-        if(!sent.ok||!body?.ok||!body.result?.message_id)
-          throw Error("telegram_notice_failed");
-        const {data:finished,error:finishError}=await admin.rpc("henova_finish_verified_payout_notice",{
-          p_id:paymentId,p_message_id:body.result.message_id,p_success:true
-        });
-        if(finishError||!finished?.ok)return {sent:true,stored:false,error:"notice_record_failed"};
-        return {sent:true,stored:true};
       }catch{
-        await admin.rpc("henova_finish_verified_payout_notice",{
-          p_id:paymentId,p_message_id:null,p_success:false
-        });
-        return {sent:false,error:"telegram_notice_unavailable"};
+        // A timed-out Telegram request MAY already have delivered the message.
+        // Keep the claim locked; never blindly send the same proof twice.
+        return {sent:false,error:"telegram_delivery_uncertain_check_channel",manual_review:true};
       }
+      const replyBody=await response.json().catch(()=>null);
+      if(!replyBody?.ok||!replyBody?.result?.message_id){
+        if(replyBody?.ok===false){
+          // Telegram explicitly rejected this message: safe to unlock so it
+          // can be retried after fixing bot permissions/channel access.
+          await admin.rpc("henova_finish_verified_payout_notice",{
+            p_id:paymentId,p_message_id:null,p_success:false
+          });
+          return {sent:false,error:"telegram_rejected_"+String(replyBody.error_code||response.status),
+            description:String(replyBody.description||"").slice(0,140)};
+        }
+        return {sent:false,error:"telegram_response_uncertain_check_channel",manual_review:true};
+      }
+      const messageId=replyBody.result.message_id;
+      const {data:stored,error:storeError}=await admin.rpc("henova_finish_verified_payout_notice",{
+        p_id:paymentId,p_message_id:messageId,p_success:true
+      });
+      if(storeError||!stored?.ok)
+        return {sent:true,stored:false,message_id:messageId,error:"notice_record_failed_manual_reconcile"};
+      return {sent:true,stored:true,message_id:messageId};
     };
-    if(action==="admin_post_payout_notice"){
+        if(action==="admin_post_payout_notice"){
       const id=Number(body?.withdrawalId);
       if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
       return reply({ok:true,notice:await notifyVerifiedPayout(id)});
@@ -649,7 +661,7 @@ Deno.serve(async (request) => {
       }catch{return reply({ok:false,error:"chain_provider_unavailable"},503);}
     }
     if(action==="admin_payout_queue"){
-      const fields="id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash,signing_claimed_at,signed_boc_hash,notice_message_id";
+      const fields="id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash,signing_claimed_at,signed_boc_hash,notice_message_id,notice_claimed_at";
       const [active,confirmed]=await Promise.all([
         admin.from("henova_gram_withdrawals").select(fields)
           .in("status",["pending","approved","broadcast"]).order("id",{ascending:true}).limit(50),
@@ -657,8 +669,26 @@ Deno.serve(async (request) => {
           .eq("status","confirmed").order("id",{ascending:false}).limit(10)
       ]);
       if(active.error||confirmed.error)return reply({ok:false,error:"database_unavailable"},503);
-      const items=[...(active.data||[]),...(confirmed.data||[])];
-      return reply({ok:true,items,payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:settings.data.manual_tonkeeper_enabled===true &&
+      // Automatically publish the proof for one already-confirmed payout when
+      // the owner opens approvals. No payment signing or transfer occurs here.
+      let channelNotice=null;
+      let confirmedItems=confirmed.data||[];
+      if(String(telegram.id)==="1035565575"){
+        const unsent=confirmedItems.find(x=>!x.notice_message_id&&!x.notice_claimed_at
+          && /^[a-f0-9]{64}$/.test(String(x.payout_tx_hash||"")));
+        if(unsent){
+          channelNotice=await notifyVerifiedPayout(unsent.id);
+          if(channelNotice?.stored){
+            confirmedItems=confirmedItems.map(x=>x.id===unsent.id
+              ?{...x,notice_message_id:channelNotice.message_id}:x);
+          }else if(channelNotice?.manual_review){
+            confirmedItems=confirmedItems.map(x=>x.id===unsent.id
+              ?{...x,notice_claimed_at:new Date().toISOString()}:x);
+          }
+        }
+      }
+      const items=[...(active.data||[]),...confirmedItems];
+      return reply({ok:true,items,channel_notice:channelNotice,payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:settings.data.manual_tonkeeper_enabled===true &&
         settings.data.chain_verifier_configured===true &&
         settings.data.test_transfer_verified===true,
         checks:{withdrawals_enabled:settings.data.manual_tonkeeper_enabled===true,
