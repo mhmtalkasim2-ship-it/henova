@@ -874,6 +874,56 @@ Deno.serve(async (request) => {
       p_telegram_id:telegram.id,p_request_id:requestId,p_eggs:eggs
     });
     if(error){console.error("HENOVA reserve withdrawal failed",error.code);return reply({ok:false,error:"withdrawal_unavailable"},503)}
+    // Best-effort private administrator alert; never reverse a valid withdrawal
+    // if Telegram is unavailable. The atomic database claim avoids duplicates.
+    if(data?.ok===true){
+      try{
+        const {data:withdrawal,error:readError}=await admin.from("henova_gram_withdrawals")
+          .select("id,telegram_id,eggs_amount,gram_amount,destination_address")
+          .eq("request_id",requestId).eq("telegram_id",telegram.id).maybeSingle();
+        if(readError)console.warn("HENOVA withdrawal admin alert lookup",readError.code||"unavailable");
+        if(withdrawal){
+          const {data:claim,error:claimError}=await admin.from("henova_gram_withdrawals")
+            .update({admin_alert_attempted_at:new Date().toISOString()})
+            .eq("id",withdrawal.id).is("admin_alert_attempted_at",null)
+            .select("id").maybeSingle();
+          if(claimError)console.warn("HENOVA withdrawal alert claim",claimError.code||"unavailable");
+          if(claim){
+            const address=String(withdrawal.destination_address||"");
+            const masked=address.length>17?address.slice(0,8)+"…"+address.slice(-6):address;
+            const notice="📥 HENOVA — NEW WITHDRAWAL REQUEST\n"+
+              "Request #"+withdrawal.id+" · Pending approval\n"+
+              "👤 Player ID: "+withdrawal.telegram_id+"\n"+
+              "🥚 Eggs: "+withdrawal.eggs_amount+"\n"+
+              "💎 GRAM: "+withdrawal.gram_amount+"\n"+
+              "👛 Recipient: "+masked+"\n\n"+
+              "Approval does not transfer funds. Tonkeeper signature is required.";
+            let messageId=null,alertError=null;
+            try{
+              const response=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+                method:"POST",headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({
+                  chat_id:1035565575,text:notice,disable_web_page_preview:true,
+                  reply_markup:{inline_keyboard:[[{text:"📋 Open HENOVA Approvals",
+                    url:"https://mhmtalkasim2-ship-it.github.io/henova/?admin=payouts"}]]}
+                }),signal:AbortSignal.timeout(7000)
+              });
+              const telegramResult=await response.json().catch(()=>null);
+              if(response.ok&&telegramResult?.ok&&telegramResult?.result?.message_id)
+                messageId=telegramResult.result.message_id;
+              else alertError="telegram_"+String(telegramResult?.error_code||response.status);
+            }catch{alertError="telegram_delivery_unavailable";}
+            const saved=messageId
+              ?{admin_alert_message_id:messageId,admin_alert_error:null}
+              :{admin_alert_error:alertError||"telegram_delivery_unavailable"};
+            const {error:storeError}=await admin.from("henova_gram_withdrawals")
+              .update(saved).eq("id",withdrawal.id).is("admin_alert_message_id",null);
+            if(storeError)console.warn("HENOVA withdrawal alert outcome",storeError.code||"unavailable");
+            if(alertError)console.warn("HENOVA withdrawal admin DM",alertError);
+          }
+        }
+      }catch{console.warn("HENOVA admin alert best-effort failure");}
+    }
     return reply(data,data?.ok?200:403);
   }
   if (action === "leaderboard") {
