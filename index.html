@@ -2245,7 +2245,7 @@ async function henovaShowAdminPayouts(){
         toast(result.confirmed?'TON payment verified. Channel notice: '+(result.notice?.sent?'sent':'pending'):'Payment not verified');
         await henovaShowAdminPayouts();
       }catch(error){
-        toast('NOT PAID: '+String(error?.message||error).slice(0,95));
+        toast('TON proof not verified yet: '+String(error?.message||error).slice(0,95));
         verify.disabled=false;
       }
     };
