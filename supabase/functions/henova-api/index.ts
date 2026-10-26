@@ -400,7 +400,15 @@ Deno.serve(async (request) => {
         const paymentMatch=incomingMatch||matching.length===1;
         const txSuccess=tx.emulated!==true && tx.description?.aborted===false &&
           tx.description?.compute_ph?.success===true && tx.description?.action?.success===true;
-        return reply({ok:true,found:true,verified:false,test_only:true,
+        // Record a candidate test proof only after matching an observed successful
+        // transfer. This is NOT final settlement and does not change payout status.
+        let claim=null;
+        if(paymentMatch && txSuccess){
+          const c=await admin.rpc("henova_claim_test_payment_hash",{p_test_id:testId,p_hash:inputHash});
+          if(c.error)return reply({ok:false,error:"proof_claim_unavailable"},503);
+          claim=c.data;
+        }
+        return reply({ok:true,found:true,verified:false,test_only:true,proof_claim:claim,
           sender_matches:normalized(tx.account)===expectedSender || incomingMatch || matching.length===1,
           recipient_and_amount_matches:paymentMatch,transaction_success:txSuccess,
           hash:inputHash,matched_messages:matching.length+(incomingMatch?1:0),diagnostics:{tx_account:String(tx.account||""),expected_sender:expectedSender,expected_recipient:expectedRecipient,expected_nano:expectedNano,outbound:outgoing.slice(0,5).map(m=>({source:String(m.source||""),destination:String(m.destination||""),value:String(m.value||""),bounced:m.bounced===true}))},
