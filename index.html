@@ -2063,6 +2063,20 @@ function henovaRenderTonConnect(){
   }
  }catch(error){console.warn('TON Connect unavailable',error)}
 }
+// Prepare an expiring TON Proof challenge. Verification on the server is not yet active.
+async function henovaPrepareWalletProof(){
+ const status=document.getElementById('henova-tonconnect-status');
+ try{
+  if(!henovaTonUI?.wallet?.account?.address)throw Error('Connect Tonkeeper first.');
+  const address=document.getElementById('henova-ton-wallet')?.value.trim();
+  if(!address)throw Error('Save your withdrawal wallet address first.');
+  const challenge=await henovaCall('wallet_proof_challenge',{address});
+  if(!challenge?.payload)throw Error('Proof challenge unavailable');
+  henovaTonUI.setConnectRequestParameters({state:'ready',value:{tonProof:challenge.payload}});
+  if(status)status.textContent='Challenge prepared. Reconnect Tonkeeper to request a proof. Withdrawals remain disabled until server verification is completed.';
+  toast('Verification challenge prepared. Reconnect Tonkeeper. No payout was initiated.');
+ }catch(e){toast(hvError(e.message));}
+}
 let henovaWalletPageSeq=0;
 async function henovaRefreshPayoutSetup(){
  const request=++henovaWalletPageSeq;
@@ -2383,7 +2397,7 @@ if(tab===4){
 const word=s.lang==='ar'?{title:'سحب GRAM',status:'السحب قيد التجهيز',wallet:'عنوان محفظة TON',save:'حفظ العنوان',saved:'العنوان المحفوظ',pending:'العنوان محفوظ، لكن ملكية المحفظة لم تُتحقق بعد',info:'يتم تجهيز السحب الآمن عبر شبكة TON. التحويلات المالية متوقفة حالياً لحين انتهاء اختبارات الأمان.',history:'طلبات السحب',empty:'لا توجد طلبات سحب',button:'السحب غير متاح الآن'}:s.lang==='tr'?{title:'GRAM çekimi',status:'Çekimler hazırlanıyor',wallet:'TON cüzdan adresi',save:'Adresi kaydet',saved:'Kayıtlı adres',pending:'Adres kaydedildi; cüzdan sahipliği henüz doğrulanmadı',info:'TON üzerinden güvenli çekim hazırlanıyor. Ödemeler güvenlik testleri tamamlanana kadar kapalı.',history:'Çekim geçmişi',empty:'Çekim talebi yok',button:'Çekimler şu anda kapalı'}:{title:'GRAM withdrawal',status:'Withdrawals in preparation',wallet:'TON wallet address',save:'Save address',saved:'Saved address',pending:'Address saved; wallet ownership not yet verified',info:'Secure TON payouts are being prepared. Payments are disabled until security checks are complete.',history:'Withdrawal history',empty:'No withdrawal requests',button:'Withdrawals unavailable'};
 el.innerHTML='<div class="henova-wallet-page"><h1 class="henova-wallet-heading">💰 '+word.title+'</h1><section class="henova-wallet-balance"><small>'+hvText('avail')+'</small><strong>🥚 '+num(s.eggs)+'</strong><p>GRAM · TON</p></section>'+
 '<section class="henova-wallet-card"><h3>🔐 '+word.status+'</h3><p class="henova-wallet-info">'+word.info+'</p><label class="henova-wallet-label" for="henova-ton-wallet">'+word.wallet+'</label><input class="henova-wallet-input" id="henova-ton-wallet" type="text" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="EQ... / UQ..." maxlength="48"><button class="henova-wallet-save" onclick="henovaSaveTonWallet()">'+word.save+'</button><p id="henova-wallet-info" class="henova-wallet-note"></p></section>'+
-'<section class="henova-wallet-card"><h3>🔗 TON Connect</h3><div id="henova-tonconnect-button"></div><p id="henova-tonconnect-status" class="henova-wallet-note">'+(s.lang==='ar'?'اربط Tonkeeper لإظهار عنوان المحفظة. إثبات الملكية للسحب ما زال قيد التجهيز.':s.lang==='tr'?'Tonkeeper bağla. Para çekme için sahiplik doğrulaması henüz hazır değil.':'Connect Tonkeeper to view your wallet. Withdrawal ownership verification is still being prepared.')+'</p></section>'+'<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div><button class="henova-wallet-disabled" disabled>'+word.button+'</button></section></div>';
+'<section class="henova-wallet-card"><h3>🔗 TON Connect</h3><div id="henova-tonconnect-button"></div><button class="henova-wallet-save" onclick="henovaPrepareWalletProof()">🔐 Prepare wallet verification</button><p id="henova-tonconnect-status" class="henova-wallet-note">'+(s.lang==='ar'?'اربط Tonkeeper لإظهار عنوان المحفظة. إثبات الملكية للسحب ما زال قيد التجهيز.':s.lang==='tr'?'Tonkeeper bağla. Para çekme için sahiplik doğrulaması henüz hazır değil.':'Connect Tonkeeper to view your wallet. Withdrawal ownership verification is still being prepared.')+'</p></section>'+'<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div><button class="henova-wallet-disabled" disabled>'+word.button+'</button></section></div>';
 henovaRefreshPayoutSetup();
 setTimeout(henovaRenderTonConnect,0);
 }
