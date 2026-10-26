@@ -195,7 +195,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -244,6 +244,64 @@ Deno.serve(async (request) => {
       }catch{
         return reply({ok:false,error:"chain_provider_unavailable"},503);
       }
+    }
+    if(action==="admin_match_payout"){
+      // Diagnostic only; an address/amount/time match is NOT definitive settlement proof.
+      // Do not transition to confirmed, and never reuse an observed transaction as payment evidence.
+      const id=Number(body?.withdrawalId);
+      if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
+      const r=await admin.from("henova_gram_withdrawals")
+        .select("id,destination_address,gram_amount,created_at,status,payout_tx_hash")
+        .eq("id",id).maybeSingle();
+      if(r.error)return reply({ok:false,error:"database_unavailable"},503);
+      if(!r.data)return reply({ok:false,error:"not_found"},404);
+      const req=r.data;
+      const treasury=String(settings.data.payout_wallet_address||"");
+      const rawAddress=(address)=>{
+        const a=String(address||"");
+        if(/^-?\\d+:[a-fA-F0-9]{64}$/.test(a))return a.toLowerCase();
+        if(!/^(EQ|UQ)[a-zA-Z0-9_-]{46}$/.test(a))return null;
+        try{
+          const bytes=Uint8Array.from(atob(a.replace(/-/g,"+").replace(/_/g,"/")),x=>x.charCodeAt(0));
+          if(bytes.length!==36)return null;
+          const wc=bytes[1]>127?bytes[1]-256:bytes[1];
+          return wc+":"+Array.from(bytes.slice(2,34),x=>x.toString(16).padStart(2,"0")).join("");
+        }catch{return null;}
+      };
+      const target=rawAddress(req.destination_address);
+      if(!target||!rawAddress(treasury))return reply({ok:false,error:"wallet_address_invalid"},409);
+      const decimal=String(req.gram_amount);
+      if(!/^\\d+(?:\\.\\d{1,9})?$/.test(decimal))return reply({ok:false,error:"invalid_amount"},409);
+      const [units,frac=""]=decimal.split(".");
+      const nano=(BigInt(units)*1000000000n+BigInt((frac+"000000000").slice(0,9))).toString();
+      const createdAt=Math.floor(Date.parse(req.created_at)/1000);
+      if(!Number.isFinite(createdAt))return reply({ok:false,error:"invalid_created_at"},409);
+      try{
+        const url=new URL("https://toncenter.com/api/v3/transactions");
+        url.searchParams.set("account",treasury);
+        url.searchParams.set("limit","100");
+        url.searchParams.set("sort","desc");
+        url.searchParams.set("start_utime",String(Math.max(0,createdAt-60)));
+        const headers={Accept:"application/json"};
+        const key=Deno.env.get("TONCENTER_API_KEY");
+        if(key)headers["X-API-Key"]=key;
+        const response=await fetch(url,{headers,signal:AbortSignal.timeout(12000)});
+        if(!response.ok)return reply({ok:false,error:"chain_provider_unavailable"},503);
+        const data=await response.json();
+        if(!Array.isArray(data?.transactions))return reply({ok:false,error:"chain_response_invalid"},503);
+        const matches=[];
+        for(const tx of data.transactions){
+          if(tx?.emulated||tx?.description?.aborted===true||Number(tx?.now)<createdAt)continue;
+          for(const msg of Array.isArray(tx?.out_msgs)?tx.out_msgs:[]){
+            if(msg?.bounced===true||rawAddress(msg?.destination)!==target||String(msg?.value)!==nano)continue;
+            matches.push({hash:String(tx.hash||""),lt:String(tx.lt||""),timestamp:Number(tx.now),message_hash:String(msg.hash||"")});
+          }
+        }
+        return reply({ok:true,request_id:id,expected_nano:nano,matching_transactions:matches.slice(0,10),
+          inspected_count:data.transactions.length,scan_limit:100,complete_history:false,
+          payment_verified:false,mode:"read_only",
+          note:"Candidate matches only; check full trace, recipient transaction, finality and unique payment correlation before confirming."});
+      }catch{return reply({ok:false,error:"chain_provider_unavailable"},503);}
     }
     if(action==="admin_payout_queue"){
       const result=await admin.from("henova_gram_withdrawals")
