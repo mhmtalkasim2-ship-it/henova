@@ -1989,7 +1989,15 @@ async function henovaVerifyAdminTest(id){
  if(!/^[a-fA-F0-9]{64}$/.test(hash||'')){if(output)output.textContent='Enter a 64-character transaction hash.';return;}
  if(output)output.textContent='Checking TON mainnet…';
  try{
-  const result=await henovaCall('admin_verify_test_transfer',{testId:id,txHash:hash});
+  let result;
+  try{
+   result=await henovaCall('admin_verify_test_transfer',{testId:id,txHash:hash});
+  }catch(firstError){
+   // This endpoint is read-only; a single retry is safe after a network disconnect.
+   if(!/failed to fetch|network|timeout/i.test(String(firstError?.message||firstError)))throw firstError;
+   if(output)output.textContent='Connection interrupted. Retrying once…';
+   result=await henovaCall('admin_verify_test_transfer',{testId:id,txHash:hash});
+  }
   if(output)output.textContent=result.found
    ?'Chain lookup: '+(result.transaction_success?'transaction succeeded':'success not confirmed')+
     ' · Sender: '+(result.sender_matches?'matched':'not matched')+
