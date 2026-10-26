@@ -2130,11 +2130,23 @@ async function henovaShowAdminPayouts(){
     };
     card.append(approve);
    }else if(item.status==='approved'||item.status==='broadcast'){
-    if(item.status==='approved'&&!samePayoutWallet){
+    if(item.status==='approved'&&!samePayoutWallet&&!item.signing_claimed_at&&!item.signed_boc_hash){
       const sign=document.createElement('button');sign.className='henova-wallet-save';
       sign.textContent='🔐 Sign payment in Tonkeeper';
       sign.onclick=()=>henovaSignAdminPayout(item.id);
       card.append(sign);
+    }else if(item.status==='approved' && item.signing_claimed_at){
+      const note=document.createElement('p');note.style.color='#9d4b0b';note.style.fontWeight='800';
+      note.textContent='⚠️ Signing attempt already reserved. Never sign again, even after a network error.';
+      card.append(note);
+      let hasSavedReceipt=false;
+      try{hasSavedReceipt=!!localStorage.getItem('henova-signed-receipt-'+item.id);}catch{}
+      if(hasSavedReceipt){
+        const recover=document.createElement('button');recover.className='henova-wallet-save';
+        recover.textContent='♻️ Recover signed receipt (no new transfer)';
+        recover.onclick=()=>henovaRecoverSignedPayoutReceipt(item.id);
+        card.append(recover);
+      }
     }
     const track=document.createElement('button');track.className='henova-wallet-save';
     track.textContent='🔎 Check payment automatically';
@@ -2209,46 +2221,86 @@ async function henovaSignTestThree(){
  finally{henovaSignTestThree.inProgress=false;}
 }
 async function henovaSignAdminPayout(id){
+ if(henovaSignAdminPayout.inProgress)return toast('Signing request already in progress');
+ henovaSignAdminPayout.inProgress=true;
+ let locked=false;
  try{
-  // GRAM is native TON. Never equate a wallet signature or BOC receipt with confirmed settlement.
-  // Signing requires a server-authorized intent; payouts stay locked server-side until independently verified.
-  const {intent}=await henovaCall('admin_payout_intent',{withdrawalId:id});
-  if(!henovaTonUI){henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
+  if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect not loaded. Reopen HENOVA.');
+  if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
     manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
-  });}
-  if(!henovaTonUI.wallet){await henovaTonUI.openModal();toast('Connect HENOVA Payouts, then press Sign again.');return;}
-  // TON Connect exposes a raw address; the treasury setting is user-friendly.
-  // Compare the same account format before asking Tonkeeper to sign.
-  const raw=String(henovaTonUI.wallet.account.address||'').toLowerCase();
-  const expected=String(intent.sender||'');
+  });
+  // Connect FIRST. Do not reserve the on-chain signing attempt just to connect.
+  if(!henovaTonUI.wallet){
+   await henovaTonUI.openModal();
+   toast('Connect HENOVA Payouts, then press Sign again. No payment was reserved.');
+   return;
+  }
+  const queue=await henovaCall('admin_payout_queue');
+  if(queue.payments_enabled!==true)throw Error('Manual Tonkeeper payout signing is locked');
+  const request=(queue.items||[]).find(x=>Number(x.id)===Number(id));
+  if(!request||request.status!=='approved')throw Error('Withdrawal not approved');
+  if(request.signing_claimed_at||request.signed_boc_hash||request.payout_tx_hash)
+   throw Error('Signing already started. Check TON; never sign the same withdrawal again.');
+  const expected=String(queue.payout_wallet_address||'');
   const bytes=Uint8Array.from(atob(expected.replace(/-/g,'+').replace(/_/g,'/')),ch=>ch.charCodeAt(0));
-  if(bytes.length!==36)throw Error('Invalid configured treasury address');
+  if(bytes.length!==36)throw Error('Invalid configured payout wallet');
   const workchain=bytes[1]>127?bytes[1]-256:bytes[1];
   const expectedRaw=workchain+':'+Array.from(bytes.slice(2,34),b=>b.toString(16).padStart(2,'0')).join('');
-  if(raw!==expectedRaw)throw Error('Wrong wallet connected. Connect HENOVA Payouts before signing.');
-  if(henovaSignAdminPayout.inProgress)throw Error('Signature request already in progress');
-  henovaSignAdminPayout.inProgress=true;
-  try{
-  const transaction=await henovaTonUI.sendTransaction({
+  const raw=String(henovaTonUI.wallet.account.address||'').toLowerCase();
+  if(raw!==expectedRaw)throw Error('Wrong wallet connected. Choose HENOVA Payouts.');
+  if(String(henovaTonUI.wallet.account.chain||'')!=='-239')throw Error('Connect a TON mainnet wallet');
+  const amount=String(request.gram_amount)+' GRAM';
+  const destination=String(request.destination_address||'');
+  if(!confirm('REAL HENOVA withdrawal #'+id+'\nSend '+amount+' to:\n'+destination+
+              '\n\nOnly sign once. Continue to Tonkeeper?'))return;
+  // Server atomically reserves a single attempt BEFORE opening the signing prompt.
+  const {intent}=await henovaCall('admin_payout_intent',{withdrawalId:id});
+  locked=true;
+  if(intent.sender!==expected || intent.destination!==destination)
+   throw Error('Payment details changed. Do not sign; review the request.');
+  let boc='';
+  const result=await henovaTonUI.sendTransaction({
     validUntil:Math.floor(Date.now()/1000)+300,
-    network:'-239',from:expected,
+    network:'-239',from:intent.sender,
     messages:[{address:intent.destination,amount:intent.amountNanograms}]
   });
-  if(!transaction?.boc)throw Error('Wallet returned no signed transaction receipt. Do not sign again; check the blockchain.');
-  const bocBytes=Uint8Array.from(atob(transaction.boc.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
-  const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bocBytes));
-  const signedBocHash=Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
+  boc=String(result?.boc||'');
+  if(!boc)throw Error('No wallet receipt. Do not sign again. Check Tonkeeper history.');
+  // Store a recoverable signed receipt locally before the next network request.
+  try{localStorage.setItem('henova-signed-receipt-'+id,JSON.stringify({
+   signedBoc:boc,destination:intent.destination,amountNanograms:intent.amountNanograms
+  }));}catch{}
   const receipt=await henovaCall('admin_record_signed_payout',{
-    withdrawalId:id,signedBoc:transaction.boc,destination:intent.destination,
+    withdrawalId:id,signedBoc:boc,destination:intent.destination,
     amountNanograms:intent.amountNanograms
   });
-  if(!receipt?.ok)throw Error('Signed transfer receipt was not stored. Do NOT approve it again.');
-  toast('Signed payment saved. Checking TON confirmation automatically.');
-  henovaTrackAdminPayout(id);
+  if(!receipt?.ok)throw Error('Receipt not saved. Use Recover receipt; do not sign again.');
+  try{localStorage.removeItem('henova-signed-receipt-'+id);}catch{}
+  toast('Signed transfer recorded. Checking the TON network automatically.');
+  void henovaTrackAdminPayout(id);
   await henovaShowAdminPayouts();
-  }finally{henovaSignAdminPayout.inProgress=false;}
- }catch(e){toast('Payment not confirmed: '+String(e.message||e).slice(0,130))}
+ }catch(e){
+  toast((locked?'Do NOT sign this request again. ':'')+String(e.message||e).slice(0,118));
+  if(locked)await henovaShowAdminPayouts().catch(()=>{});
+ }finally{henovaSignAdminPayout.inProgress=false;}
 }
+async function henovaRecoverSignedPayoutReceipt(id){
+ let data=null;
+ try{data=JSON.parse(localStorage.getItem('henova-signed-receipt-'+id)||'null');}catch{}
+ if(!data?.signedBoc)return toast('No saved receipt. Do NOT sign again; inspect Tonkeeper history.');
+ try{
+  const result=await henovaCall('admin_record_signed_payout',{
+   withdrawalId:id,signedBoc:data.signedBoc,
+   destination:data.destination,amountNanograms:data.amountNanograms
+  });
+  if(!result?.ok)throw Error('Receipt not accepted');
+  try{localStorage.removeItem('henova-signed-receipt-'+id);}catch{}
+  toast('Signed receipt recovered. Checking TON.');
+  void henovaTrackAdminPayout(id);
+  await henovaShowAdminPayouts();
+ }catch(e){toast('Receipt recovery pending: '+String(e.message||e).slice(0,80));}
+}
+
 let henovaTonUI=null;
 function henovaRenderTonConnect(){
  const root=document.getElementById('henova-tonconnect-button');
