@@ -2087,6 +2087,17 @@ async function henovaShowAdminPayouts(){
       sign.onclick=()=>henovaSignAdminPayout(item.id);
       card.append(sign);
     }
+    const track=document.createElement('button');track.className='henova-wallet-save';
+    track.textContent='🔎 Check payment automatically';
+    track.onclick=async()=>{
+      track.disabled=true;
+      try{
+        const r=await henovaCall('admin_track_signed_payout',{withdrawalId:item.id});
+        toast(r.confirmed?'✅ Paid and recorded on TON':'Payment verification pending');
+        await henovaShowAdminPayouts();
+      }catch(error){toast('Awaiting TON confirmation: '+String(error.message||error).slice(0,75));track.disabled=false;}
+    };
+    card.append(track);
     const hash=document.createElement('input');hash.className='henova-wallet-input';
     hash.placeholder='Confirmed sender transaction hash (64 hex characters)';
     hash.maxLength=64;hash.autocomplete='off';hash.spellcheck=false;
@@ -2109,6 +2120,17 @@ async function henovaShowAdminPayouts(){
    list.append(card);
   }
  }catch(e){const target=document.getElementById('henova-admin-state');if(target)target.textContent='Admin access required · '+String(e.message)}
+}
+async function henovaTrackAdminPayout(id){
+ for(let attempt=0;attempt<6;attempt++){
+  await new Promise(resolve=>setTimeout(resolve,5500));
+  try{
+   const r=await henovaCall('admin_track_signed_payout',{withdrawalId:id});
+   if(r.confirmed){toast('✅ TON payment confirmed and saved');await henovaShowAdminPayouts();return;}
+  }catch(e){if(!['transaction_not_final_or_ambiguous','chain_provider_unavailable','chain_lookup_unavailable','recipient_credit_not_verified'].includes(String(e.message||e)))break;}
+ }
+ toast('TON confirmation pending. Use Check payment automatically later. Do not sign again.');
+ await henovaShowAdminPayouts();
 }
 async function henovaSignAdminPayout(id){
  try{
@@ -2141,11 +2163,12 @@ async function henovaSignAdminPayout(id){
   const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bocBytes));
   const signedBocHash=Array.from(digest,b=>b.toString(16).padStart(2,'0')).join('');
   const receipt=await henovaCall('admin_record_signed_payout',{
-    withdrawalId:id,signedBocHash,destination:intent.destination,
+    withdrawalId:id,signedBoc:transaction.boc,destination:intent.destination,
     amountNanograms:intent.amountNanograms
   });
   if(!receipt?.ok)throw Error('Signed transfer receipt was not stored. Do NOT approve it again.');
-  toast('Signed message recorded. This is NOT payment confirmation. Verify its TON transaction before Paid.');
+  toast('Signed payment saved. Checking TON confirmation automatically.');
+  henovaTrackAdminPayout(id);
   await henovaShowAdminPayouts();
   }finally{henovaSignAdminPayout.inProgress=false;}
  }catch(e){toast('Payment not confirmed: '+String(e.message||e).slice(0,130))}
