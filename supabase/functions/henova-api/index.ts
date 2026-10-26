@@ -298,6 +298,26 @@ Deno.serve(async (request) => {
           return b.length===32?Array.from(b,x=>x.toString(16).padStart(2,"0")).join(""):null;
         }catch{return null;}
       };
+      // TonCenter v3 free access is rate-limited (1 request / second).
+      // Throttle lookups and retry HTTP 429 without weakening the proof checks.
+      let lastTonCallAt=0;
+      const fetchTon=async(url)=>{
+        const key=Deno.env.get("TONCENTER_API_KEY");
+        const headers={Accept:"application/json"};
+        if(key)headers["X-API-Key"]=key;
+        let response;
+        for(let attempt=0;attempt<3;attempt++){
+          if(!key && lastTonCallAt){
+            const delay=1450-(Date.now()-lastTonCallAt);
+            if(delay>0)await new Promise(resolve=>setTimeout(resolve,delay));
+          }
+          lastTonCallAt=Date.now();
+          response=await fetch(url,{headers,signal:AbortSignal.timeout(12000)});
+          if(response.status!==429||attempt===2)return response;
+          await new Promise(resolve=>setTimeout(resolve,1400*(attempt+1)));
+        }
+        return response;
+      };
       let claimedHash=hexHash(body?.txHash)||"";
       if(!Number.isSafeInteger(id)||id<=0||(action==="admin_verify_payout"&&!/^[a-f0-9]{64}$/.test(claimedHash)))
         return reply({ok:false,error:"invalid_request"},400);
@@ -314,9 +334,7 @@ Deno.serve(async (request) => {
           searchUrl.searchParams.set("msg_hash",req.signed_boc_hash);
           searchUrl.searchParams.set("direction","in");
           searchUrl.searchParams.set("limit","10");
-          const hdr={Accept:"application/json"};
-          const apiKey=Deno.env.get("TONCENTER_API_KEY");if(apiKey)hdr["X-API-Key"]=apiKey;
-          const resp=await fetch(searchUrl,{headers:hdr,signal:AbortSignal.timeout(12000)});
+          const resp=await fetchTon(searchUrl);
           if(!resp.ok)return reply({ok:false,error:"chain_provider_unavailable"},503);
           const json=await resp.json();
           const transactions=Array.isArray(json?.transactions)?json.transactions:[];
@@ -349,13 +367,10 @@ Deno.serve(async (request) => {
       const [whole,fraction=""]=amount.split(".");
       const nano=(BigInt(whole)*1000000000n+BigInt((fraction+"000000000").slice(0,9))).toString();
       try{
-        const headers={Accept:"application/json"};
-        const key=Deno.env.get("TONCENTER_API_KEY");
-        if(key)headers["X-API-Key"]=key;
         const url=new URL("https://toncenter.com/api/v3/transactions");
         url.searchParams.set("hash",claimedHash);
         url.searchParams.set("limit","10");
-        const response=await fetch(url,{headers,signal:AbortSignal.timeout(12000)});
+        const response=await fetchTon(url);
         if(!response.ok)return reply({ok:false,error:"chain_provider_unavailable"},503);
         const json=await response.json();
         const rows=Array.isArray(json?.transactions)?json.transactions:[];
@@ -368,16 +383,21 @@ Deno.serve(async (request) => {
           raw(x?.destination)===destinationRaw && String(x?.value)===nano &&
           typeof x?.hash==="string" && x.hash.length>0);
         if(matches.length!==1)return reply({ok:false,error:"recipient_message_unverified"},409);
-        const recipientUrl=new URL("https://toncenter.com/api/v3/transactions");
-        recipientUrl.searchParams.set("account",req.destination_address);
-        recipientUrl.searchParams.set("limit","100");
-        recipientUrl.searchParams.set("start_utime",String(Math.max(0,Number(tx.now)-90)));
-        const recipientResponse=await fetch(recipientUrl,{headers,signal:AbortSignal.timeout(12000)});
-        if(!recipientResponse.ok)return reply({ok:false,error:"recipient_chain_unavailable"},503);
+        // Follow the one verified outgoing message to its actual recipient transaction.
+        // Never scan a wallet's broad history or infer credit from the send alone.
+        const recipientUrl=new URL("https://toncenter.com/api/v3/transactionsByMessage");
+        recipientUrl.searchParams.set("msg_hash",matches[0].hash);
+        recipientUrl.searchParams.set("direction","in");
+        recipientUrl.searchParams.set("limit","10");
+        const recipientResponse=await fetchTon(recipientUrl);
+        if(!recipientResponse.ok)return reply({ok:false,error:"recipient_chain_unavailable",
+          chain_http_status:recipientResponse.status},503);
         const recipientJson=await recipientResponse.json();
-        const credited=(Array.isArray(recipientJson?.transactions)?recipientJson.transactions:[]).some(t=>
+        if(!Array.isArray(recipientJson?.transactions))
+          return reply({ok:false,error:"recipient_chain_invalid_response"},503);
+        const credited=recipientJson.transactions.some(t=>
           !t?.emulated && raw(t?.account)===destinationRaw &&
-          t?.description?.aborted!==true &&
+          t?.description?.aborted===false &&
           t?.in_msg?.bounced!==true && raw(t?.in_msg?.source)===senderRaw &&
           raw(t?.in_msg?.destination||t?.account)===destinationRaw &&
           String(t?.in_msg?.value)===nano &&
