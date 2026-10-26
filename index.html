@@ -2137,7 +2137,7 @@ function henovaRenderTonConnect(){
       const address=document.getElementById('henova-ton-wallet')?.value.trim();
       if(address){
         try{
-          const r=await henovaCall('wallet_proof_inspect',{address,proof:proof.proof});
+          const r=await henovaCall('wallet_proof_inspect',{address,proof:proof.proof,walletStateInit:wallet.account.walletStateInit,network:wallet.account.chain,publicKey:wallet.account.publicKey});
           const st=document.getElementById('henova-tonconnect-status');
           if(st)st.textContent=r.challenge_valid
             ?'TON Proof challenge accepted. Cryptographic ownership verification is still pending.'
