@@ -545,6 +545,29 @@ Deno.serve(async (request) => {
     if(error)return reply({ok:false,error:"challenge_unavailable"},503);
     return reply(data,data?.ok?200:400);
   }
+  // Inspect TON Proof prerequisites; NEVER treat this as signature verification.
+  if (action === "wallet_proof_inspect") {
+    const proof=body?.proof, address=String(body?.address||"");
+    const wallet=await admin.from("henova_ton_wallets").select("wallet_address")
+      .eq("telegram_id",telegram.id).maybeSingle();
+    if(wallet.error)return reply({ok:false,error:"database_unavailable"},503);
+    if(wallet.data?.wallet_address!==address)return reply({ok:false,error:"save_wallet_first"},403);
+    if(!proof || typeof proof!=="object" || typeof proof.payload!=="string" ||
+       !/^[a-f0-9]{64}$/.test(proof.payload) ||
+       typeof proof.signature!=="string" || proof.signature.length>256 ||
+       proof.domain?.value!=="mhmtalkasim2-ship-it.github.io" ||
+       proof.domain?.lengthBytes!==encoder.encode(proof.domain.value).length ||
+       !Number.isSafeInteger(Number(proof.timestamp)) ||
+       Math.abs(Date.now()/1000-Number(proof.timestamp))>600)
+      return reply({ok:false,error:"invalid_proof_envelope"},400);
+    const {data:challenge,error:challengeError}=await admin.rpc("henova_check_wallet_proof_challenge",{
+      p_telegram_id:telegram.id,p_wallet_address:address,p_nonce:proof.payload
+    });
+    if(challengeError)return reply({ok:false,error:"proof_challenge_unavailable"},503);
+    if(!challenge?.ok)return reply({ok:false,error:"challenge_expired_or_mismatched"},403);
+    return reply({ok:true,challenge_valid:true,signature_verified:false,
+      ownership_verified:false,next_step:"verify_signed_digest_and_wallet_state_init"});
+  }
   if (action === "save_payout_wallet") {
     const address=String(body?.address||"");
     if(!/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(address))
