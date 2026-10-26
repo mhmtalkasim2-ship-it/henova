@@ -288,7 +288,17 @@ Deno.serve(async (request) => {
     if(action==="admin_verify_payout" || action==="admin_track_signed_payout"){
       // Read authoritative ledger evidence on demand; no client-provided match booleans.
       const id=Number(body?.withdrawalId);
-      let claimedHash=String(body?.txHash||"").toLowerCase();
+      // TONCenter v3 returns transaction/message hashes in base64 in many responses.
+      // Normalize to canonical 64-character hex before correlating or saving proof.
+      const hexHash=(value)=>{
+        const h=String(value||"").trim();
+        if(/^[0-9a-fA-F]{64}$/.test(h))return h.toLowerCase();
+        try{
+          const b=Uint8Array.from(atob(h.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+          return b.length===32?Array.from(b,x=>x.toString(16).padStart(2,"0")).join(""):null;
+        }catch{return null;}
+      };
+      let claimedHash=hexHash(body?.txHash)||"";
       if(!Number.isSafeInteger(id)||id<=0||(action==="admin_verify_payout"&&!/^[a-f0-9]{64}$/.test(claimedHash)))
         return reply({ok:false,error:"invalid_request"},400);
       const {data:req,error:reqError}=await admin.from("henova_gram_withdrawals")
@@ -311,9 +321,9 @@ Deno.serve(async (request) => {
           const json=await resp.json();
           const transactions=Array.isArray(json?.transactions)?json.transactions:[];
           const found=transactions.filter(tx=>!tx?.emulated && tx?.description?.aborted!==true
-            && typeof tx?.hash==="string" && /^[a-fA-F0-9]{64}$/.test(tx.hash));
+            && typeof tx?.hash==="string" && hexHash(tx.hash));
           if(found.length!==1)return reply({ok:false,error:"transaction_not_final_or_ambiguous"},409);
-          claimedHash=found[0].hash.toLowerCase();
+          claimedHash=hexHash(found[0].hash)||"";
         }catch{return reply({ok:false,error:"chain_lookup_unavailable"},503);}
       }
       if(req.status==="confirmed"){
@@ -349,7 +359,7 @@ Deno.serve(async (request) => {
         if(!response.ok)return reply({ok:false,error:"chain_provider_unavailable"},503);
         const json=await response.json();
         const rows=Array.isArray(json?.transactions)?json.transactions:[];
-        const tx=rows.find(t=>String(t?.hash||"").toLowerCase()===claimedHash &&
+        const tx=rows.find(t=>hexHash(t?.hash)===claimedHash &&
           raw(t?.account)===senderRaw && !t?.emulated && t?.description?.aborted!==true &&
           t?.description?.action?.success===true && Number(t?.now)>=Math.floor(Date.parse(req.created_at)/1000));
         if(!tx)return reply({ok:false,error:"sender_transaction_unverified"},409);
@@ -371,7 +381,7 @@ Deno.serve(async (request) => {
           t?.in_msg?.bounced!==true && raw(t?.in_msg?.source)===senderRaw &&
           raw(t?.in_msg?.destination||t?.account)===destinationRaw &&
           String(t?.in_msg?.value)===nano &&
-          String(t?.in_msg?.hash||"")===matches[0].hash
+          hexHash(t?.in_msg?.hash)===hexHash(matches[0].hash)
         );
         if(!credited)return reply({ok:false,error:"recipient_credit_not_verified"},409);
         const {data:done,error:commitError}=await admin.rpc("henova_finalize_verified_gram_payout",{
