@@ -2089,7 +2089,7 @@ async function henovaShowAdminPayouts(){
       verify.textContent='🔎 Verify TEST #3 on TON';
       verify.onclick=async()=>{verify.disabled=true;try{
        const r=await henovaCall('admin_verify_test_transfer',{testId:3,txHash:proof.value.trim()});
-       toast(!r.found?'Not indexed yet. Do not send again.':r.transaction_success&&r.recipient_and_amount_matches?'Transfer matches TEST #3; final settlement check still needed.':'Hash found but payment not matched. Do not send again.');
+       toast(!r.found?'Not indexed yet. Do not send again.':r.verified===true?'✅ TEST #3: recipient credit confirmed on TON.':'Sender transfer matches; recipient confirmation pending. Do not send again.');
       }catch(e){toast('Verification unavailable: '+String(e.message||e).slice(0,75));}finally{verify.disabled=false;}};
       t.append(verify);
     }
