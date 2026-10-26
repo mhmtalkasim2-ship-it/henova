@@ -2034,11 +2034,41 @@ async function henovaApproveAdminTest(id){
   toast('TEST approved. No GRAM was sent.');
  }catch(e){toast(hvError(e.message));}
 }
+let henovaActivityTimer=null;
+async function henovaRefreshActivity(){
+ const panel=document.getElementById('henova-admin-activity');
+ if(!panel)return;
+ try{
+  const response=await henovaCall('admin_activity_stats');
+  const x=response.stats||{};
+  if(!document.getElementById('henova-admin-activity'))return;
+  panel.textContent='';
+  const heading=document.createElement('strong');heading.textContent='📊 HENOVA — Last 3 minutes';panel.append(heading);
+  const details=document.createElement('p');
+  details.textContent='Recently updated: '+Number(x.recently_updated_3m||0)
+    +' · New users: '+Number(x.newly_registered_3m||0)
+    +' · Action users: '+Number(x.action_users_3m||0)
+    +' · Total users: '+Number(x.registered_total||0);
+  panel.append(details);
+  const note=document.createElement('small');
+  note.textContent='Recent updates are not a live online count. Refreshes every 30 seconds.';
+  panel.append(note);
+ }catch(error){if(document.getElementById('henova-admin-activity'))panel.textContent='Activity stats unavailable: '+String(error.message||error);}
+}
+function henovaStartActivityMonitor(){
+ if(henovaActivityTimer)clearInterval(henovaActivityTimer);
+ henovaRefreshActivity();
+ henovaActivityTimer=setInterval(()=>{
+  if(!document.getElementById('henova-admin-activity')){clearInterval(henovaActivityTimer);henovaActivityTimer=null;return;}
+  henovaRefreshActivity();
+ },30000);
+}
 async function henovaShowAdminPayouts(){
  document.body.classList.add('henova-payout-admin-active');
  const root=document.getElementById('view');
  if(!root)return;
- root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
+ root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
+ henovaStartActivityMonitor();
  try{
   const data=await henovaCall('admin_payout_queue');
   if(data.channel_notice?.stored)toast('✅ Withdrawal proof published to @HENOVA_WITHDRAWALS');
