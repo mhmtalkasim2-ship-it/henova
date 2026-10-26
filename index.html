@@ -1846,6 +1846,11 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *{
 
 
 .hv-simple-withdraw .henova-wallet-heading{text-align:center;margin-bottom:4px}.hv-withdraw-subtitle{text-align:center;color:#68866d;margin:0 0 15px}.hv-simple-withdraw .hv-withdraw-summary{background:linear-gradient(145deg,#35a8eb,#1e67b5);color:white;border-radius:24px;padding:24px;box-shadow:0 10px 25px #28599133}.hv-withdraw-summary small{display:block;opacity:.9}.hv-withdraw-summary strong{display:block;font-size:42px}.hv-withdraw-summary p{font-size:19px;margin:7px 0 13px}.hv-withdraw-pill{display:inline-block;border-radius:30px;padding:8px 14px;background:#ffffff28;border:1px solid #ffffff77}.hv-simple-withdraw .henova-wallet-card{margin-top:18px}.hv-amount-line{display:flex;align-items:center;gap:10px;border:2px solid #b4d4b0;border-radius:16px;padding:10px;background:#f7fbf5}.hv-amount-line input{min-width:0;width:100%;font-size:25px;font-weight:800;border:0;outline:0;background:transparent;color:#2d5334}.hv-amount-line strong{font-size:13px;color:#246294;white-space:nowrap}.hv-withdraw-percent{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.hv-withdraw-percent button{border:1px solid #b5d9bb;border-radius:13px;padding:10px 2px;color:#326a90;background:#e7f1dc}.hv-withdraw-total{display:flex;justify-content:space-between;gap:8px;border-radius:15px;background:#edf5e6;padding:16px;margin:14px 0;font-size:16px}.hv-withdraw-total strong{color:#256b9a}.hv-withdraw-form small{color:#6b876e}.hv-withdraw-form .henova-wallet-save:disabled{opacity:.5;box-shadow:none}.hv-withdraw-advanced summary{cursor:pointer;font-weight:800;color:#376b4b}.hv-withdraw-advanced[open] summary{margin-bottom:15px}
+body.henova-payout-admin-active main>.farm-toolbar,body.henova-payout-admin-active main>.stats,body.henova-payout-admin-active #nav{display:none!important}
+body.henova-payout-admin-active main{background:#f4faed!important;padding:12px 14px 36px!important;min-height:100vh!important;overflow:visible!important}
+body.henova-payout-admin-active #view{display:block!important;position:static!important;transform:none!important;inset:auto!important;width:100%!important;max-width:560px!important;margin:auto!important;overflow:visible!important;z-index:auto!important}
+body.henova-payout-admin-active .henova-admin-payout-page{max-width:560px!important;margin:auto!important;padding:12px 0 60px!important}
+.henova-admin-back{background:#e7f1de;border:1px solid #c4dcc0;border-radius:12px;padding:9px 16px;color:#2f6845;font-weight:800;margin-bottom:13px}
 /* Dedicated payout approvals screen: no farm toolbar, balances, or floating artwork. */
 main:has(.henova-admin-payout-page)>.farm-toolbar,
 main:has(.henova-admin-payout-page)>.stats{display:none!important}
@@ -2030,14 +2035,12 @@ async function henovaApproveAdminTest(id){
  }catch(e){toast(hvError(e.message));}
 }
 async function henovaShowAdminPayouts(){
+ document.body.classList.add('henova-payout-admin-active');
  const root=document.getElementById('view');
  if(!root)return;
- root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
+ root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  try{
-  const [data,testData]=await Promise.all([
-   henovaCall('admin_payout_queue'),
-   henovaCall('admin_test_queue')
-  ]);
+  const data=await henovaCall('admin_payout_queue');
   const status=document.getElementById('henova-admin-state');
   if(status){
     const c=data.checks||{};
@@ -2050,38 +2053,6 @@ async function henovaShowAdminPayouts(){
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
-  const tests=document.createElement('details');tests.className='henova-admin-tests';
-  const testsHeading=document.createElement('summary');testsHeading.textContent='🧪 Previous test withdrawals (tap to expand)';tests.append(testsHeading);
-  const simulator=document.createElement('section');
-  simulator.className='henova-wallet-card';
-  simulator.innerHTML='<h3>🧪 Admin withdrawal test — NO REAL PAYMENT</h3><p>This simulation does not debit eggs, create a real payout or send GRAM.</p><label for="henova-test-eggs">Eggs (500–10000)</label><input id="henova-test-eggs" type="number" min="500" max="10000" step="100" value="500" class="henova-wallet-input"><button class="henova-wallet-save" onclick="henovaCreateAdminTest()">Create TEST withdrawal</button>';
-  tests.append(simulator);
-  for(const t of testData.items||[]){
-   const card=document.createElement('section');card.className='henova-wallet-card';
-   const title=document.createElement('h3');title.textContent='🧪 TEST #'+t.id+' · '+t.status;
-   const info=document.createElement('p');info.textContent=t.eggs_amount+' eggs → '+t.gram_amount+' GRAM (simulation only)';
-   card.append(title,info);
-   if(t.status==='pending'){
-    const approve=document.createElement('button');approve.className='henova-wallet-save';
-    approve.textContent='✅ Approve TEST (no transfer)';
-    approve.onclick=()=>henovaApproveAdminTest(t.id);
-    card.append(approve);
-   }
-   if(t.status==='approved'){
-    const hashInput=document.createElement('input');hashInput.className='henova-wallet-input';
-    hashInput.id='henova-test-hash-'+t.id;
-    hashInput.placeholder='TON transaction hash (64 hex)';
-    if(t.id===1)hashInput.value='293be748285f479a20baaf43b3d90fc597113afaf5ba2e701176f0a44ad05d62';
-    const verify=document.createElement('button');verify.className='henova-wallet-save';
-    verify.textContent='🔎 Check on-chain (read only)';
-    verify.onclick=()=>henovaVerifyAdminTest(t.id);
-    const result=document.createElement('p');result.id='henova-test-result-'+t.id;
-    result.className='henova-wallet-note';result.textContent='No payment is marked Paid by this check.';
-    card.append(hashInput,verify,result);
-   }
-   tests.append(card);
-  }
-  list.append(tests);
   if(!data.items?.length){const empty=document.createElement('div');empty.className='henova-admin-empty';empty.textContent='No real withdrawal requests are currently pending.';list.append(empty);}
   for(const item of data.items){
    const card=document.createElement('section');card.className='henova-wallet-card';
@@ -2322,7 +2293,7 @@ function shareInvite(){const u=henovaReferralLink();if(!u)return toast('Open HEN
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){if(!['en','ar','tr'].includes(x))return;s.lang=x;save();render()}
-function openTab(i){tab=i;render()}
+function openTab(i){document.body.classList.remove('henova-payout-admin-active');tab=i;render()}
 
 /* One click / tap gives a short synthesized chicken-like cluck, without external audio. */
 // Soft morning countryside ambiance: small birdsong notes and a rare quiet real hen.
