@@ -199,7 +199,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -249,6 +249,38 @@ Deno.serve(async (request) => {
         return reply({ok:false,error:"chain_provider_unavailable"},503);
       }
     }
+    const notifyVerifiedPayout=async(paymentId)=>{
+      const {data:claim,error:claimError}=await admin.rpc("henova_claim_verified_payout_notice",{p_id:paymentId});
+      if(claimError||!claim?.ok)return {sent:false,error:claimError?"notice_claim_failed":"notice_already_sent_or_locked"};
+      try{
+        const message="✅ HENOVA GRAM WITHDRAWAL CONFIRMED\\n"+
+          "Withdrawal #"+claim.id+"\\nAmount: "+claim.gram_amount+" GRAM\\n"+
+          "TON transaction: https://tonviewer.com/transaction/"+claim.tx_hash;
+        const sent=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+          method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:message,
+            disable_web_page_preview:true}),signal:AbortSignal.timeout(8000)
+        });
+        const body=await sent.json().catch(()=>null);
+        if(!sent.ok||!body?.ok||!body.result?.message_id)
+          throw Error("telegram_notice_failed");
+        const {data:finished,error:finishError}=await admin.rpc("henova_finish_verified_payout_notice",{
+          p_id:paymentId,p_message_id:body.result.message_id,p_success:true
+        });
+        if(finishError||!finished?.ok)return {sent:true,stored:false,error:"notice_record_failed"};
+        return {sent:true,stored:true};
+      }catch{
+        await admin.rpc("henova_finish_verified_payout_notice",{
+          p_id:paymentId,p_message_id:null,p_success:false
+        });
+        return {sent:false,error:"telegram_notice_unavailable"};
+      }
+    };
+    if(action==="admin_post_payout_notice"){
+      const id=Number(body?.withdrawalId);
+      if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
+      return reply({ok:true,notice:await notifyVerifiedPayout(id)});
+    }
     if(action==="admin_verify_payout"){
       // Read authoritative ledger evidence on demand; no client-provided match booleans.
       const id=Number(body?.withdrawalId);
@@ -273,7 +305,7 @@ Deno.serve(async (request) => {
         (req.payout_sender_address && raw(req.payout_sender_address)!==senderRaw))
         return reply({ok:false,error:"wallet_mismatch"},409);
       const amount=String(req.gram_amount);
-      if(!/^\\d+(?:\\.\\d{1,9})?$/.test(amount))return reply({ok:false,error:"amount_invalid"},409);
+      if(!/^[0-9]+(?:[.][0-9]{1,9})?$/.test(amount))return reply({ok:false,error:"amount_invalid"},409);
       const [whole,fraction=""]=amount.split(".");
       const nano=(BigInt(whole)*1000000000n+BigInt((fraction+"000000000").slice(0,9))).toString();
       try{
@@ -314,9 +346,13 @@ Deno.serve(async (request) => {
         if(!credited)return reply({ok:false,error:"recipient_credit_not_verified"},409);
         const {data:done,error:commitError}=await admin.rpc("henova_finalize_verified_gram_payout",{
           p_withdrawal_id:id,p_tx_hash:claimedHash,p_sender:treasury,
-          p_destination:req.destination_address,p_amount_nano:nano,p_tx_lt:Number(tx.lt)
+          p_destination:req.destination_address,p_amount_nano:nano,p_tx_lt:String(tx.lt)
         });
         if(commitError)return reply({ok:false,error:"settlement_commit_unavailable"},503);
+        if(done?.ok && done?.confirmed){
+          const notice=await notifyVerifiedPayout(id);
+          return reply({...done,notice});
+        }
         return reply(done,done?.ok?200:409);
       }catch(error){
         console.warn("HENOVA chain settlement check",String(error).slice(0,110));
