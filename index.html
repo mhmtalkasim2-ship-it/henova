@@ -2050,6 +2050,7 @@ async function henovaShowAdminPayouts(){
        ' · Mainnet test: '+(c.test_transfer_verified?'verified':'pending')+
        ' · Treasury signature required';
   }
+  document.querySelectorAll('.henova-admin-head .henova-admin-refresh').forEach(b=>b.remove());
   const audit=document.createElement('button');
   audit.type='button';audit.className='henova-admin-refresh';audit.textContent='🔎 Inspect TON treasury (read only)';
   audit.onclick=async()=>{
@@ -2073,6 +2074,14 @@ async function henovaShowAdminPayouts(){
    details.style.overflowWrap='anywhere';
    details.textContent=item.eggs_amount+' eggs → '+item.gram_amount+' GRAM · '+item.destination_address;
    card.append(details);
+   const samePayoutWallet=String(item.destination_address||'')===String(data.payout_wallet_address||'');
+   if(samePayoutWallet){
+    const warning=document.createElement('p');
+    warning.style.color='#a52619';
+    warning.style.fontWeight='800';
+    warning.textContent='⚠️ Recipient is the HENOVA payout wallet itself. Do NOT sign. Correct the recipient wallet before payment.';
+    card.append(warning);
+   }
    if(item.status==='pending'){
     const approve=document.createElement('button');approve.className='henova-wallet-save';approve.textContent='✅ Approve';
     approve.onclick=async()=>{
@@ -2082,7 +2091,7 @@ async function henovaShowAdminPayouts(){
     };
     card.append(approve);
    }else if(item.status==='approved'||item.status==='broadcast'){
-    if(item.status==='approved'){
+    if(item.status==='approved'&&!samePayoutWallet){
       const sign=document.createElement('button');sign.className='henova-wallet-save';
       sign.textContent='🔐 Sign payment in Tonkeeper';
       sign.onclick=()=>henovaSignAdminPayout(item.id);
