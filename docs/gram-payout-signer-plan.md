@@ -2,6 +2,13 @@
 
 Status: PREPARATION ONLY. Public payouts must remain disabled.
 
+## Verified asset identity — October 26, 2026
+- Official TON documentation states that GRAM is the **native coin** of TON (renamed from Toncoin in June 2026); it is **not a jetton** and has no jetton master contract. A counterfeit jetton labelled GRAM must never be used.
+- The existing `sendTransaction` native-coin message is the correct transaction class for a genuine GRAM payment; units remain 1e9 nanotons per GRAM. This fact alone does **not** authorize enabling live withdrawals.
+- The existing browser-side emergency block incorrectly says GRAM is a jetton. Replace it **only after** a server-side exactly-once intent/transaction state machine, independent chain verifier, TON wallet ownership proof, funded treasury limits and a controlled live test are completed.
+- Admin approval and wallet signature are different steps. Never mark Paid from the Tonkeeper send result alone. Persist a unique outbound payment intent and reconcile ambiguous broadcasts before allowing resends.
+- Current deployment has no verified on-chain settlement flow. Leave payout settings enabled=false; do not fabricate readiness flags.
+
 ## Separation
 - Public Telegram Mini App authenticates users with signed Telegram initData. No payout signing keys or provider credentials are ever sent to it.
 - Supabase API validates requested amount, wallet ownership and request ID.
