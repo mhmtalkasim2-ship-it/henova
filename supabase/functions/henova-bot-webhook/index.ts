@@ -45,6 +45,18 @@ Deno.serve(async(request:Request)=>{
   if(!message || message.chat?.type!=="private" || !message.from?.id ||
       message.from.id!==message.chat.id)return response({ok:true,ignored:true});
   const msg=String(message.text||"");
+  if(/^\/payouts(?:@[a-zA-Z0-9_]+)?(?:\s|$)/i.test(msg)){
+    const member=await telegramPost(token,"getChatMember",{chat_id:"@HENOVA_FARM",user_id:message.from.id}).catch(()=>null);
+    if(!member||!["creator","administrator"].includes(member.status)){
+      await telegramPost(token,"sendMessage",{chat_id:message.chat.id,text:"⛔ HENOVA admins only."}).catch(()=>{});
+      return response({ok:true,denied:true});
+    }
+    await telegramPost(token,"sendMessage",{chat_id:message.chat.id,
+      text:"🐔 HENOVA · Withdrawal approvals\nApprove requests, then sign the prepared transaction inside Tonkeeper.\n⚠️ Do not sign twice. PAID is posted only after chain verification.",
+      reply_markup:{inline_keyboard:[[{text:"🔐 Open payout approvals",web_app:{url:APP_URL+"?admin=payouts"}}]]}
+    });
+    return response({ok:true,admin_payouts:true});
+  }
   if(/^\/publish(?:@[a-zA-Z0-9_]+)?(?:\s|$)/i.test(msg)){
     const channel="@HENOVA_FARM";
     try{
