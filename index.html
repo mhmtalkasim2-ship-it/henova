@@ -1846,6 +1846,21 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *{
 
 
 .hv-simple-withdraw .henova-wallet-heading{text-align:center;margin-bottom:4px}.hv-withdraw-subtitle{text-align:center;color:#68866d;margin:0 0 15px}.hv-simple-withdraw .hv-withdraw-summary{background:linear-gradient(145deg,#35a8eb,#1e67b5);color:white;border-radius:24px;padding:24px;box-shadow:0 10px 25px #28599133}.hv-withdraw-summary small{display:block;opacity:.9}.hv-withdraw-summary strong{display:block;font-size:42px}.hv-withdraw-summary p{font-size:19px;margin:7px 0 13px}.hv-withdraw-pill{display:inline-block;border-radius:30px;padding:8px 14px;background:#ffffff28;border:1px solid #ffffff77}.hv-simple-withdraw .henova-wallet-card{margin-top:18px}.hv-amount-line{display:flex;align-items:center;gap:10px;border:2px solid #b4d4b0;border-radius:16px;padding:10px;background:#f7fbf5}.hv-amount-line input{min-width:0;width:100%;font-size:25px;font-weight:800;border:0;outline:0;background:transparent;color:#2d5334}.hv-amount-line strong{font-size:13px;color:#246294;white-space:nowrap}.hv-withdraw-percent{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.hv-withdraw-percent button{border:1px solid #b5d9bb;border-radius:13px;padding:10px 2px;color:#326a90;background:#e7f1dc}.hv-withdraw-total{display:flex;justify-content:space-between;gap:8px;border-radius:15px;background:#edf5e6;padding:16px;margin:14px 0;font-size:16px}.hv-withdraw-total strong{color:#256b9a}.hv-withdraw-form small{color:#6b876e}.hv-withdraw-form .henova-wallet-save:disabled{opacity:.5;box-shadow:none}.hv-withdraw-advanced summary{cursor:pointer;font-weight:800;color:#376b4b}.hv-withdraw-advanced[open] summary{margin-bottom:15px}
+/* Dedicated payout approvals screen: no farm toolbar, balances, or floating artwork. */
+main:has(.henova-admin-payout-page)>.farm-toolbar,
+main:has(.henova-admin-payout-page)>.stats{display:none!important}
+main:has(.henova-admin-payout-page){padding-top:10px!important;overflow-x:hidden!important}
+main:has(.henova-admin-payout-page) #view{width:100%;position:relative!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;overflow:visible!important}
+.henova-admin-payout-page{padding:8px 0 135px!important;direction:ltr!important}
+.henova-admin-list{display:flex!important;flex-direction:column!important;gap:14px!important}
+.henova-admin-list>.henova-wallet-card{order:0;box-shadow:0 4px 14px #1d5c2b10}
+.henova-admin-head{position:relative!important;top:auto!important}
+.henova-admin-tests{order:10;margin-top:22px;border:1px solid #cfe2c8;border-radius:18px;background:#f7faf2;padding:12px}
+.henova-admin-tests>summary{font-size:13px;color:#436b51;font-weight:800;cursor:pointer;padding:6px}
+.henova-admin-tests>.henova-wallet-card{margin-top:12px!important}
+.henova-admin-list button{min-height:42px;border:0;border-radius:12px;padding:10px 12px;white-space:normal}
+.henova-admin-list input{width:100%;max-width:100%;box-sizing:border-box}
+
 /* Administrative payout review: isolated from farm header and artwork. */
 main:has(.henova-admin-payout-page){background:linear-gradient(180deg,#f1f9e9,#fcfff8)!important;min-height:100vh}
 main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-page) #view{position:relative;z-index:2}
@@ -2035,10 +2050,12 @@ async function henovaShowAdminPayouts(){
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
+  const tests=document.createElement('details');tests.className='henova-admin-tests';
+  const testsHeading=document.createElement('summary');testsHeading.textContent='🧪 Previous test withdrawals (tap to expand)';tests.append(testsHeading);
   const simulator=document.createElement('section');
   simulator.className='henova-wallet-card';
   simulator.innerHTML='<h3>🧪 Admin withdrawal test — NO REAL PAYMENT</h3><p>This simulation does not debit eggs, create a real payout or send GRAM.</p><label for="henova-test-eggs">Eggs (500–10000)</label><input id="henova-test-eggs" type="number" min="500" max="10000" step="100" value="500" class="henova-wallet-input"><button class="henova-wallet-save" onclick="henovaCreateAdminTest()">Create TEST withdrawal</button>';
-  list.append(simulator);
+  tests.append(simulator);
   for(const t of testData.items||[]){
    const card=document.createElement('section');card.className='henova-wallet-card';
    const title=document.createElement('h3');title.textContent='🧪 TEST #'+t.id+' · '+t.status;
@@ -2062,9 +2079,10 @@ async function henovaShowAdminPayouts(){
     result.className='henova-wallet-note';result.textContent='No payment is marked Paid by this check.';
     card.append(hashInput,verify,result);
    }
-   list.append(card);
+   tests.append(card);
   }
-  if(!data.items?.length){const empty=document.createElement('div');empty.className='henova-admin-empty';empty.textContent='No real withdrawal requests yet. Real payments remain disabled.';list.append(empty);return;}
+  list.append(tests);
+  if(!data.items?.length){const empty=document.createElement('div');empty.className='henova-admin-empty';empty.textContent='No real withdrawal requests are currently pending.';list.append(empty);}
   for(const item of data.items){
    const card=document.createElement('section');card.className='henova-wallet-card';
    const header=document.createElement('h3');header.textContent='#'+item.id+' · '+item.status;card.append(header);
