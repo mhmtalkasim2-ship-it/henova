@@ -334,7 +334,7 @@ Deno.serve(async (request) => {
       if(!Number.isSafeInteger(id)||id<=0||(action==="admin_verify_payout"&&!/^[a-f0-9]{64}$/.test(claimedHash)))
         return reply({ok:false,error:"invalid_request"},400);
       const {data:req,error:reqError}=await admin.from("henova_gram_withdrawals")
-        .select("id,status,created_at,destination_address,gram_amount,payout_sender_address,payout_tx_hash,signed_boc_hash")
+        .select("id,status,created_at,signing_claimed_at,destination_address,gram_amount,payout_sender_address,payout_tx_hash,signed_boc_hash")
         .eq("id",id).maybeSingle();
       if(reqError)return reply({ok:false,error:"database_unavailable"},503);
       if(!req)return reply({ok:false,error:"not_found"},404);
@@ -388,7 +388,9 @@ Deno.serve(async (request) => {
         const rows=Array.isArray(json?.transactions)?json.transactions:[];
         const tx=rows.find(t=>hexHash(t?.hash)===claimedHash &&
           raw(t?.account)===senderRaw && !t?.emulated && t?.description?.aborted!==true &&
-          t?.description?.action?.success===true && Number(t?.now)>=Math.floor(Date.parse(req.created_at)/1000));
+          t?.description?.action?.success===true &&
+          Number(t?.now)>=Math.floor(Date.parse(req.created_at)/1000) &&
+          (!req.signing_claimed_at || Number(t?.now)>=Math.floor(Date.parse(req.signing_claimed_at)/1000)-15));
         if(!tx)return reply({ok:false,error:"sender_transaction_unverified"},409);
         const matches=(Array.isArray(tx.out_msgs)?tx.out_msgs:[]).filter(x=>
           x?.bounced!==true && raw(x?.source)===senderRaw &&
@@ -437,7 +439,7 @@ Deno.serve(async (request) => {
       const id=Number(body?.withdrawalId);
       if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
       const r=await admin.from("henova_gram_withdrawals")
-        .select("id,destination_address,gram_amount,created_at,status,payout_tx_hash")
+        .select("id,destination_address,gram_amount,created_at,signing_claimed_at,status,payout_tx_hash")
         .eq("id",id).maybeSingle();
       if(r.error)return reply({ok:false,error:"database_unavailable"},503);
       if(!r.data)return reply({ok:false,error:"not_found"},404);
@@ -479,7 +481,7 @@ Deno.serve(async (request) => {
         if(!Array.isArray(data?.transactions))return reply({ok:false,error:"chain_response_invalid"},503);
         const matches=[];
         for(const tx of data.transactions){
-          if(tx?.emulated||tx?.description?.aborted===true||Number(tx?.now)<createdAt)continue;
+          if(tx?.emulated||tx?.description?.aborted===true||Number(tx?.now)<createdAt || (req.signing_claimed_at && Number(tx?.now)<Math.floor(Date.parse(req.signing_claimed_at)/1000)-15))continue;
           for(const msg of Array.isArray(tx?.out_msgs)?tx.out_msgs:[]){
             if(msg?.bounced===true||rawAddress(msg?.destination)!==target||String(msg?.value)!==nano)continue;
             matches.push({hash:String(tx.hash||""),lt:String(tx.lt||""),timestamp:Number(tx.now),message_hash:String(msg.hash||"")});
