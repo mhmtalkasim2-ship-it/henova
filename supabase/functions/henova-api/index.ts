@@ -365,8 +365,9 @@ Deno.serve(async (request) => {
       if(!expectedSender||!expectedRecipient||expectedSender===expectedRecipient)
         return reply({ok:false,error:"invalid_test_wallets"},409);
       const amountText=String(test.gram_amount);
-      if(!/^\\d+(?:\\.\\d{1,9})?$/.test(amountText))return reply({ok:false,error:"invalid_test_amount"},409);
+      if(!/^\d+(?:\.\d+)?$/.test(amountText))return reply({ok:false,error:"invalid_test_amount"},409);
       const [whole,fract=""]=amountText.split(".");
+      if(fract.length>9 && /[1-9]/.test(fract.slice(9)))return reply({ok:false,error:"fractional_nanogram_not_supported"},409);
       const expectedNano=(BigInt(whole)*1000000000n+BigInt((fract+"000000000").slice(0,9))).toString();
       try{
         const url=new URL("https://toncenter.com/api/v3/transactions");
