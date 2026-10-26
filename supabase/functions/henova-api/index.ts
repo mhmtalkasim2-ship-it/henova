@@ -386,16 +386,24 @@ Deno.serve(async (request) => {
         const tx=payload.transactions.find(t=>equalsHash(t?.hash));
         if(!tx)return reply({ok:true,found:false,verified:false,reason:"tx_not_indexed_or_hash_mismatch",test_only:true});
         const outgoing=Array.isArray(tx.out_msgs)?tx.out_msgs:[];
+        const incoming=tx.in_msg;
+        // A transaction hash can identify the recipient-side transaction: its value
+        // is in in_msg, not necessarily in the sender's out_msgs.
+        const incomingMatch=!!incoming &&
+          normalized(incoming.source)===expectedSender &&
+          normalized(incoming.destination||tx.account)===expectedRecipient &&
+          String(incoming.value)===expectedNano && incoming.bounced!==true;
         const matching=outgoing.filter(m=>
           normalized(m?.source||tx.account)===expectedSender &&
           normalized(m?.destination)===expectedRecipient &&
           String(m?.value)===expectedNano && m?.bounced!==true);
+        const paymentMatch=incomingMatch||matching.length===1;
         const txSuccess=tx.emulated!==true && tx.description?.aborted===false &&
           tx.description?.compute_ph?.success===true && tx.description?.action?.success===true;
         return reply({ok:true,found:true,verified:false,test_only:true,
-          sender_matches:normalized(tx.account)===expectedSender,
-          recipient_and_amount_matches:matching.length===1,transaction_success:txSuccess,
-          hash:inputHash,matched_messages:matching.length,diagnostics:{tx_account:String(tx.account||""),expected_sender:expectedSender,expected_recipient:expectedRecipient,expected_nano:expectedNano,outbound:outgoing.slice(0,5).map(m=>({source:String(m.source||""),destination:String(m.destination||""),value:String(m.value||""),bounced:m.bounced===true}))},
+          sender_matches:normalized(tx.account)===expectedSender || incomingMatch || matching.length===1,
+          recipient_and_amount_matches:paymentMatch,transaction_success:txSuccess,
+          hash:inputHash,matched_messages:matching.length+(incomingMatch?1:0),diagnostics:{tx_account:String(tx.account||""),expected_sender:expectedSender,expected_recipient:expectedRecipient,expected_nano:expectedNano,outbound:outgoing.slice(0,5).map(m=>({source:String(m.source||""),destination:String(m.destination||""),value:String(m.value||""),bounced:m.bounced===true}))},
           note:"Read-only audit; recipient-side settlement and unique payment correlation not established. No Paid status assigned."});
       }catch{return reply({ok:false,error:"chain_provider_unavailable"},503);}
     }
