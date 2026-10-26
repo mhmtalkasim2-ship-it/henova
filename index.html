@@ -2070,6 +2070,16 @@ async function henovaPrepareWalletProof(){
   if(!henovaTonUI?.wallet?.account?.address)throw Error('Connect Tonkeeper first.');
   const address=document.getElementById('henova-ton-wallet')?.value.trim();
   if(!address)throw Error('Save your withdrawal wallet address first.');
+  // Refuse a proof challenge for a payout address that differs from the connected account.
+  const connected=String(henovaTonUI.wallet.account.address||'').toLowerCase();
+  function walletRaw(a){
+   if(/^-?\\d+:[0-9a-fA-F]{64}$/.test(a))return a.toLowerCase();
+   const raw=Uint8Array.from(atob(a.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+   if(raw.length!==36)throw Error('Invalid TON wallet address');
+   const wc=raw[1]>127?raw[1]-256:raw[1];
+   return wc+':'+Array.from(raw.slice(2,34),b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  if(walletRaw(connected)!==walletRaw(address))throw Error('Connected Tonkeeper wallet differs from saved withdrawal address.');
   const challenge=await henovaCall('wallet_proof_challenge',{address});
   if(!challenge?.payload)throw Error('Proof challenge unavailable');
   henovaTonUI.setConnectRequestParameters({state:'ready',value:{tonProof:challenge.payload}});
