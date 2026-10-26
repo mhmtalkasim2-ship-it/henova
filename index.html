@@ -2881,6 +2881,17 @@ if(new URLSearchParams(location.search).get('admin')==='payouts'){
   setTimeout(henovaShowAdminPayouts,100);
 }
 if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.textContent='🔇';}
-// Legacy AdsGram interstitial disabled. New platform 53244 is pending moderation;
-// configure a new Ad Block ID here only after AdsGram provides an actual block ID.
+// HENOVA AdsGram interstitial, Unit ID int-56161 (platform 53244).
+// AdsGram is currently in moderation; ad unavailability must never block the farm.
+function henovaLaunchInterstitial(){
+  if(!window.Telegram?.WebApp?.initData)return;
+  if(!window.Adsgram?.init){console.info('HENOVA AdsGram SDK unavailable');return;}
+  try{
+    const controller=window.Adsgram.init({blockId:'int-56161',debug:false});
+    Promise.resolve(controller.show()).catch(err=>{
+      console.info('HENOVA launch ad not available',err?.description||err?.message||'no fill');
+    });
+  }catch(error){console.warn('HENOVA launch ad failed',error?.message||error);}
+}
+setTimeout(henovaLaunchInterstitial,5000);
 </script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span></body></html>
