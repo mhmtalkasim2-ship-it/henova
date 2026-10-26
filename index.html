@@ -1937,6 +1937,29 @@ async function henovaCheckWithdrawals(){
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
 }
+let henovaWalletPageSeq=0;
+async function henovaRefreshPayoutSetup(){
+ const request=++henovaWalletPageSeq;
+ if(!henovaIsTelegram())return;
+ try{
+  const data=await henovaCall('payout_setup');
+  if(tab!==4||request!==henovaWalletPageSeq)return;
+  const input=document.getElementById('henova-ton-wallet'),info=document.getElementById('henova-wallet-info'),history=document.getElementById('henova-payout-history');
+  if(input&&data.wallet?.wallet_address)input.value=data.wallet.wallet_address;
+  if(info&&data.wallet)info.textContent=s.lang==='ar'?'العنوان محفوظ، ولم يتم إثبات ملكيته بعد':s.lang==='tr'?'Adres kayıtlı; sahiplik doğrulanmadı':'Address saved; ownership not verified';
+  if(history&&data.withdrawals?.length)history.textContent=data.withdrawals.map(x=>'#'+x.id+' · '+x.status+' · '+x.eggs_amount+' 🥚').join(' | ');
+ }catch(e){console.warn('Payout setup unavailable',e)}
+}
+async function henovaSaveTonWallet(){
+ const value=document.getElementById('henova-ton-wallet')?.value.trim();
+ const info=document.getElementById('henova-wallet-info');
+ if(!value)return;
+ try{
+  const data=await henovaCall('save_payout_wallet',{address:value});
+  const message=s.lang==='ar'?'تم حفظ العنوان، ويلزم إثبات ملكية المحفظة قبل السحب':s.lang==='tr'?'Adres kaydedildi; çekimden önce sahiplik kanıtı gerekli':'Address saved; wallet ownership proof required before withdrawal';
+  if(info)info.textContent=message;toast(message);
+ }catch(e){const message=e.message==='invalid_ton_wallet'?(s.lang==='ar'?'عنوان TON غير صالح':s.lang==='tr'?'Geçersiz TON adresi':'Invalid TON address'):hvError(e.message);if(info)info.textContent=message;toast(message)}
+}
 function henovaReferralLink(){const id=window.Telegram?.WebApp?.initDataUnsafe?.user?.id;return id?'https://t.me/HenovaEggsBot?startapp=ref_'+id:''}
 function invite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');navigator.clipboard?.writeText(u).then(()=>toast('Invite link copied')).catch(()=>toast(u))}
 function shareInvite(){const u=henovaReferralLink();if(!u)return toast('Open HENOVA from Telegram');const url='https://t.me/share/url?url='+encodeURIComponent(u)+'&text='+encodeURIComponent('Join my HENOVA chicken farm!');const app=window.Telegram?.WebApp;if(app?.openTelegramLink)app.openTelegramLink(url);else window.open(url,'_blank')}
@@ -2161,7 +2184,13 @@ el.innerHTML='<section class="hv-friends-hero"><h1>'+w.heading+'</h1><p>'+w.sub+
 '<section class="hv-friends-stats"><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.eggs+'</small></div><div><strong>🪙 '+num(henovaReferralCoins)+'</strong><small>'+w.coins+'</small></div></section>'+
 '<section class="hv-friends-empty"><span>🎁</span><strong>'+w.empty+'</strong><p>'+w.foot+'</p></section>';
 }
-if(tab===4)el.innerHTML='<h1 class="title">💰 '+names[4]+'</h1><section class="cover"><small>'+hvText('avail')+'</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>≈ '+(s.eggs*.0001).toFixed(4)+' GRAM</p></section><section class="panel"><div class="between"><b>'+names[7]+'</b><span class="badge">'+hvText('demo')+'</span></div><p>'+hvText('min')+': <b>50 eggs</b> = 0.005 GRAM</p><p>'+hvText('freq')+'</p><label class="muted">'+hvText('qty')+'</label><input id="qty" type="number" value="50" min="50"><p class="warning">'+hvText('warn')+'</p><button class="primary" disabled>'+hvText('withdraw')+'</button></section>';
+if(tab===4){
+const word=s.lang==='ar'?{title:'سحب GRAM',status:'السحب قيد التجهيز',wallet:'عنوان محفظة TON',save:'حفظ العنوان',saved:'العنوان المحفوظ',pending:'العنوان محفوظ، لكن ملكية المحفظة لم تُتحقق بعد',info:'يتم تجهيز السحب الآمن عبر شبكة TON. لا توجد دفعات مفعلة حالياً ولا سعر صرف معتمد.',history:'طلبات السحب',empty:'لا توجد طلبات سحب',button:'السحب غير متاح الآن'}:s.lang==='tr'?{title:'GRAM çekimi',status:'Çekimler hazırlanıyor',wallet:'TON cüzdan adresi',save:'Adresi kaydet',saved:'Kayıtlı adres',pending:'Adres kaydedildi; cüzdan sahipliği henüz doğrulanmadı',info:'TON üzerinden güvenli çekim hazırlanıyor. Henüz ödeme ya da onaylı kur yok.',history:'Çekim geçmişi',empty:'Çekim talebi yok',button:'Çekimler şu anda kapalı'}:{title:'GRAM withdrawal',status:'Withdrawals in preparation',wallet:'TON wallet address',save:'Save address',saved:'Saved address',pending:'Address saved; wallet ownership not yet verified',info:'Secure TON payouts are being prepared. No live payments or approved exchange rate yet.',history:'Withdrawal history',empty:'No withdrawal requests',button:'Withdrawals unavailable'};
+el.innerHTML='<h1 class="title">💰 '+word.title+'</h1><section class="cover"><small>'+hvText('avail')+'</small><div><strong>🥚 '+num(s.eggs)+'</strong></div><p>GRAM · TON</p></section>'+
+'<section class="panel"><b>'+word.status+'</b><p class="warning">'+word.info+'</p><label class="muted">'+word.wallet+'</label><input id="henova-ton-wallet" type="text" autocomplete="off" spellcheck="false" placeholder="EQ... / UQ..." maxlength="48"><button onclick="henovaSaveTonWallet()">'+word.save+'</button><p id="henova-wallet-info" class="muted"></p></section>'+
+'<section class="panel"><b>'+word.history+'</b><div id="henova-payout-history" class="muted">'+word.empty+'</div><button class="primary" disabled>'+word.button+'</button></section>';
+henovaRefreshPayoutSetup();
+}
 if(tab===0)prepareFarmArtwork();
 }
 render();henovaLoad();setInterval(()=>{if(tab===2){const x=document.getElementById('join-timer'),b=document.getElementById('join-claim');if(x){const secs=Math.max(0,Math.ceil((henovaChannelNext-Date.now())/1000));x.textContent=secs?henovaTaskClock(secs):hvText('ready');if(b)b.disabled=!!secs;}}},1000);setInterval(()=>{if(tab!==0)return;let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6)),elapsed=Math.min(6*hr,Math.max(0,Date.now()-s.start));let a=document.getElementById('collect-count'),b=document.getElementById('progress'),c=document.getElementById('clock'),d=document.getElementById('collect'),e=document.getElementById('rate');if(a&&b&&c&&d){a.textContent=p;b.style.width=(elapsed/(6*hr)*100)+'%';c.textContent=secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs);d.disabled=!p;if(e)e.textContent=num(r)}},1000);
