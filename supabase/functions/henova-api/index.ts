@@ -312,7 +312,13 @@ Deno.serve(async (request) => {
           claimedHash=found[0].hash.toLowerCase();
         }catch{return reply({ok:false,error:"chain_lookup_unavailable"},503);}
       }
-      if(req.status==="confirmed")return reply({ok:req.payout_tx_hash===claimedHash,confirmed:req.payout_tx_hash===claimedHash,already_confirmed:true});
+      if(req.status==="confirmed"){
+        if(req.payout_tx_hash!==claimedHash)return reply({ok:false,error:"confirmed_with_different_hash"},409);
+        // Retry channel publication on an already-settled request without
+        // signing or paying a second time. Notice RPC enforces single claim.
+        const notice=await notifyVerifiedPayout(id);
+        return reply({ok:true,confirmed:true,already_confirmed:true,notice});
+      }
       if(!["approved","broadcast"].includes(req.status))
         return reply({ok:false,error:"not_approved"},409);
       const treasury=String(settings.data.payout_wallet_address||"");
