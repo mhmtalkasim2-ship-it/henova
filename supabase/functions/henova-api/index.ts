@@ -206,7 +206,7 @@ Deno.serve(async (request) => {
     if(!membership?.ok||!["creator","administrator"].includes(membership.result?.status))
       return reply({ok:false,error:"admin_only"},403);
     const settings=await admin.from("henova_payout_settings")
-      .select("payout_wallet_address,enabled,gram_per_egg,min_eggs,max_eggs,chain_verifier_configured,test_transfer_verified").eq("singleton",true).single();
+      .select("payout_wallet_address,enabled,gram_per_egg,min_eggs,max_eggs,chain_verifier_configured,test_transfer_verified,signer_configured,payout_mode").eq("singleton",true).single();
     if(settings.error)return reply({ok:false,error:"database_unavailable"},503);
     // No server-generated real payment intent until independent on-chain verification
     // and the controlled live transfer test are explicitly completed.
@@ -218,7 +218,7 @@ Deno.serve(async (request) => {
         .select("id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash")
         .in("status",["pending","approved","broadcast"]).order("id",{ascending:true}).limit(50);
       if(result.error)return reply({ok:false,error:"database_unavailable"},503);
-      return reply({ok:true,items:result.data||[],payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:false});
+      return reply({ok:true,items:result.data||[],payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:false,checks:{withdrawals_enabled:settings.data.enabled===true,chain_verifier_ready:settings.data.chain_verifier_configured===true,test_transfer_verified:settings.data.test_transfer_verified===true,manual_tonkeeper_approval_required:true},reason:"Payouts remain disabled until independently verified mainnet settlement and a signed test transfer."});
     }
     const id=Number(body?.withdrawalId);
     if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
