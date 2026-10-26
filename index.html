@@ -2088,7 +2088,16 @@ async function henovaShowAdminPayouts(){
       const verify=document.createElement('button');verify.className='henova-wallet-save';
       verify.textContent='🔎 Verify TEST #3 on TON';
       verify.onclick=async()=>{verify.disabled=true;try{
-       const r=await henovaCall('admin_verify_test_transfer',{testId:3,txHash:proof.value.trim()});
+       let r;
+       for(let attempt=0;attempt<2;attempt++){
+        try{
+         r=await henovaCall('admin_verify_test_transfer',{testId:3,txHash:proof.value.trim()});
+         break;
+        }catch(error){
+         if(attempt===1 || !/failed to fetch|networkerror|load failed/i.test(String(error?.message||error)))throw error;
+         await new Promise(done=>setTimeout(done,1200));
+        }
+       }
        toast(!r.found?'Not indexed yet. Do not send again.':r.verified===true?'✅ TEST #3: recipient credit confirmed on TON.':'Sender transfer matches; recipient confirmation pending. Do not send again.');
       }catch(e){toast('Verification unavailable: '+String(e.message||e).slice(0,75));}finally{verify.disabled=false;}};
       t.append(verify);
