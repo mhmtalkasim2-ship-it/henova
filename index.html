@@ -1844,6 +1844,21 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *{
 .henova-wallet-page .henova-wallet-history{font-size:12px;color:#648568;padding:9px 0 15px;line-height:1.7;overflow-wrap:anywhere}
 .henova-wallet-page .henova-wallet-disabled{width:100%;display:block;border:0;border-radius:15px;padding:14px;background:#f8df9a;color:#8a7a53;font-size:14px;font-weight:800;opacity:.7}
 
+
+/* Administrative payout review: isolated from farm header and artwork. */
+main:has(.henova-admin-payout-page){background:linear-gradient(180deg,#f1f9e9,#fcfff8)!important;min-height:100vh}
+main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-page) #view{position:relative;z-index:2}
+.henova-admin-payout-page{direction:ltr;position:relative;z-index:4;isolation:isolate;width:100%;max-width:520px;margin:0 auto;padding:12px 0 100px;color:#285039;min-height:60vh;box-sizing:border-box}
+.henova-admin-head{display:block;background:#fff;border:1px solid #deedd9;border-radius:22px;padding:20px 16px;margin:0 0 15px;box-shadow:0 5px 20px #21542b12}
+.henova-admin-head h2{font-size:20px;line-height:1.35;color:#2e6943;white-space:normal;overflow-wrap:anywhere;margin:0 0 12px}
+.henova-admin-head p{font-size:12px;line-height:1.6;color:#6a846f;overflow-wrap:anywhere;margin:0}
+.henova-admin-list{display:grid;gap:12px}
+.henova-admin-list .henova-wallet-card{display:block;width:100%;min-width:0;margin:0;border-radius:18px;background:white;border:1px solid #deedd9;padding:16px;overflow-wrap:anywhere}
+.henova-admin-list .henova-wallet-card h3{font-size:16px}
+.henova-admin-list .henova-wallet-card p{font-size:13px;line-height:1.7}
+.henova-admin-empty{padding:30px 14px;text-align:center;border-radius:20px;background:white;border:1px dashed #b9d9b7;font-weight:800;color:#507e58}
+.henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
+.henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
@@ -1963,7 +1978,7 @@ async function henovaCheckWithdrawals(){
 async function henovaShowAdminPayouts(){
  const root=document.getElementById('view');
  if(!root)return;
- root.innerHTML='<h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p><div id="henova-admin-list"></div><button onclick="henovaShowAdminPayouts()">↻ Refresh</button>';
+ root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  try{
   const data=await henovaCall('admin_payout_queue');
   const status=document.getElementById('henova-admin-state');
@@ -1971,7 +1986,7 @@ async function henovaShowAdminPayouts(){
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
-  if(!data.items?.length){list.textContent='No withdrawal requests.';return;}
+  if(!data.items?.length){list.innerHTML='<div class="henova-admin-empty">📋 No withdrawal requests yet.<small>New requests will appear here after the withdrawal service is enabled.</small></div>';return;}
   for(const item of data.items){
    const card=document.createElement('section');card.className='henova-wallet-card';
    const header=document.createElement('h3');header.textContent='#'+item.id+' · '+item.status;card.append(header);
