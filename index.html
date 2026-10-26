@@ -2215,6 +2215,27 @@ async function henovaShowAdminPayouts(){
     hash.placeholder='Paste 64-character sender TON transaction hash';
     hash.maxLength=64;hash.autocomplete='off';hash.spellcheck=false;
     card.append(hash);
+    if(item.status==='approved'&&item.signing_claimed_at&&!item.signed_boc_hash){
+      const find=document.createElement('button');find.className='henova-wallet-save';
+      find.textContent='🔍 Find matching TON transfer (read only)';
+      find.onclick=async()=>{
+        find.disabled=true;
+        try{
+          const found=await henovaCall('admin_match_payout',{withdrawalId:item.id});
+          const candidates=found.matching_transactions||[];
+          if(candidates.length===1&&candidates[0].hash){
+            hash.value=String(candidates[0].hash);
+            toast('One candidate found. Its sender hash is filled in. Press Verify to check TON delivery; never sign again.');
+          }else if(candidates.length===0){
+            toast('No matching outgoing transfer found in scanned treasury history. Do NOT sign again; review Tonkeeper history.');
+          }else{
+            toast('Multiple candidate transfers found. Verify exact sender transaction manually. Do not sign again.');
+          }
+        }catch(e){toast('Lookup unavailable: '+String(e.message||e).slice(0,90));}
+        finally{find.disabled=false;}
+      };
+      card.append(find);
+    }
     const verify=document.createElement('button');verify.className='henova-wallet-save';
     verify.textContent='🔎 Verify TON payout and publish proof';
     verify.onclick=async()=>{
