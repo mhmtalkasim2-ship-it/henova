@@ -640,7 +640,7 @@ Deno.serve(async (request) => {
   }
   if (action === "payout_setup") {
     const [settings,wallet,withdrawals] = await Promise.all([
-      admin.from("henova_payout_settings").select("asset,network,enabled,min_eggs,max_eggs,cooldown_hours,gram_per_egg").eq("singleton",true).single(),
+      admin.from("henova_payout_settings").select("asset,network,enabled,withdrawal_requests_enabled,min_eggs,max_eggs,cooldown_hours,gram_per_egg").eq("singleton",true).single(),
       admin.from("henova_ton_wallets").select("wallet_address,verified_owner").eq("telegram_id",telegram.id).maybeSingle(),
       admin.from("henova_gram_withdrawals").select("id,eggs_amount,gram_amount,status,payout_tx_hash,created_at").eq("telegram_id",telegram.id).order("created_at",{ascending:false}).limit(10)
     ]);
@@ -690,7 +690,7 @@ Deno.serve(async (request) => {
         }
       }
     }
-    return reply({ok:true,payout:{...settings.data,enabled:false},wallet:wallet.data||null,withdrawals:withdrawals.data||[]});
+    return reply({ok:true,payout:{...settings.data,enabled:settings.data.withdrawal_requests_enabled===true,real_payouts_enabled:false},wallet:wallet.data||null,withdrawals:withdrawals.data||[]});
   }
   // Issue a short-lived, server-generated TON Proof nonce after Telegram authentication.
   // This action does not mark any wallet as verified.
