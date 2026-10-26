@@ -210,13 +210,17 @@ Deno.serve(async (request) => {
     if(!membership?.ok||!["creator","administrator"].includes(membership.result?.status))
       return reply({ok:false,error:"admin_only"},403);
     const settings=await admin.from("henova_payout_settings")
-      .select("payout_wallet_address,enabled,gram_per_egg,min_eggs,max_eggs,chain_verifier_configured,test_transfer_verified,signer_configured,payout_mode").eq("singleton",true).single();
+      .select("payout_wallet_address,enabled,manual_tonkeeper_enabled,gram_per_egg,min_eggs,max_eggs,chain_verifier_configured,test_transfer_verified,signer_configured,payout_mode").eq("singleton",true).single();
     if(settings.error)return reply({ok:false,error:"database_unavailable"},503);
     // No server-generated real payment intent until independent on-chain verification
     // and the controlled live transfer test are explicitly completed.
     if(action==="admin_payout_intent" &&
-       (!settings.data.enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified))
+       (!settings.data.manual_tonkeeper_enabled || !settings.data.chain_verifier_configured || !settings.data.test_transfer_verified))
       return reply({ok:false,error:"payout_safety_gate_closed"},403);
+    if(["admin_payout_intent","admin_record_signed_payout","admin_track_signed_payout",
+        "admin_verify_payout","admin_match_payout","admin_post_payout_notice"].includes(action)
+        && String(telegram.id)!=="1035565575")
+      return reply({ok:false,error:"owner_only"},403);
     if(action==="admin_chain_audit"){
       // Read-only mainnet inspection, never authorizes a payout or changes its status.
       // Restrict requests to the configured treasury account only.
@@ -616,10 +620,17 @@ Deno.serve(async (request) => {
     }
     if(action==="admin_payout_queue"){
       const result=await admin.from("henova_gram_withdrawals")
-        .select("id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash")
+        .select("id,telegram_id,destination_address,eggs_amount,gram_amount,status,created_at,payout_tx_hash,signing_claimed_at,signed_boc_hash")
         .in("status",["pending","approved","broadcast"]).order("id",{ascending:true}).limit(50);
       if(result.error)return reply({ok:false,error:"database_unavailable"},503);
-      return reply({ok:true,items:result.data||[],payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:false,checks:{withdrawals_enabled:settings.data.enabled===true,chain_verifier_ready:settings.data.chain_verifier_configured===true,test_transfer_verified:settings.data.test_transfer_verified===true,manual_tonkeeper_approval_required:true},reason:"Payouts remain disabled until independently verified mainnet settlement and a signed test transfer."});
+      return reply({ok:true,items:result.data||[],payout_wallet_address:settings.data.payout_wallet_address,payments_enabled:settings.data.manual_tonkeeper_enabled===true &&
+        settings.data.chain_verifier_configured===true &&
+        settings.data.test_transfer_verified===true,
+        checks:{withdrawals_enabled:settings.data.manual_tonkeeper_enabled===true,
+          chain_verifier_ready:settings.data.chain_verifier_configured===true,
+          test_transfer_verified:settings.data.test_transfer_verified===true,
+          manual_tonkeeper_approval_required:true},
+        reason:"Manual Tonkeeper payouts require owner signature for every transfer."});
     }
     const id=Number(body?.withdrawalId);
     if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
@@ -635,9 +646,6 @@ Deno.serve(async (request) => {
       const address=String(body?.destination||"");
       const amount=String(body?.amountNanograms||"");
       const sender=String(settings.data.payout_wallet_address||"");
-      if(!settings.data.enabled || !settings.data.chain_verifier_configured ||
-         !settings.data.test_transfer_verified)
-        return reply({ok:false,error:"payout_safety_gate_closed"},403);
       if(!/^[a-f0-9]{64}$/.test(hash)||!/^[0-9]+$/.test(amount)||
          amount.length>22 || !/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(address))
         return reply({ok:false,error:"invalid_signed_receipt"},400);
@@ -660,10 +668,11 @@ Deno.serve(async (request) => {
       return reply({ok:true,request:result.data});
     }
     const result=await admin.from("henova_gram_withdrawals")
-      .select("id,status,destination_address,gram_amount,eggs_amount,signed_boc_hash")
+      .select("id,status,destination_address,gram_amount,eggs_amount,signed_boc_hash,signing_claimed_at,payout_tx_hash")
       .eq("id",id).eq("status","approved").maybeSingle();
     if(result.error||!result.data)return reply({ok:false,error:"not_approved"},409);
-    if(result.data.signed_boc_hash)return reply({ok:false,error:"already_signed_awaiting_confirmation"},409);
+    if(result.data.signed_boc_hash || result.data.payout_tx_hash || result.data.signing_claimed_at)
+      return reply({ok:false,error:"signing_already_started_do_not_send_again"},409);
     if(!settings.data.payout_wallet_address)return reply({ok:false,error:"treasury_unset"},503);
     // Prevent accidental self-transfers, including differing TON friendly flags.
     const rawTon=(address)=>{
@@ -681,6 +690,12 @@ Deno.serve(async (request) => {
     const nanograms=Math.round(Number(result.data.gram_amount)*1e9);
     if(!Number.isSafeInteger(nanograms)||nanograms<=0||nanograms>1e9)
       return reply({ok:false,error:"invalid_amount"},409);
+    // Atomically reserve one signing attempt before any wallet can transfer.
+    // This reservation is never auto-released on network loss.
+    const {data:lock,error:lockError}=await admin.rpc("henova_claim_gram_payout_signing",
+      {p_withdrawal_id:id});
+    if(lockError)return reply({ok:false,error:"signing_claim_unavailable"},503);
+    if(!lock?.ok)return reply({ok:false,error:String(lock?.error||"signing_already_started_do_not_send_again")},409);
     return reply({ok:true,intent:{
       id:result.data.id,destination:result.data.destination_address,
       amountNanograms:String(nanograms),amountGram:String(result.data.gram_amount),
