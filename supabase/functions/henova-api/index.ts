@@ -199,7 +199,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -538,6 +538,25 @@ Deno.serve(async (request) => {
     }
     const id=Number(body?.withdrawalId);
     if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
+    if(action==="admin_record_signed_payout"){
+      // The BOC proves a wallet returned a signed external message, NOT chain settlement.
+      const hash=String(body?.signedBocHash||"").toLowerCase();
+      const address=String(body?.destination||"");
+      const amount=String(body?.amountNanograms||"");
+      const sender=String(settings.data.payout_wallet_address||"");
+      if(!settings.data.enabled || !settings.data.chain_verifier_configured ||
+         !settings.data.test_transfer_verified || !settings.data.signer_configured)
+        return reply({ok:false,error:"payout_safety_gate_closed"},403);
+      if(!/^[a-f0-9]{64}$/.test(hash)||!/^\\d+$/.test(amount)||
+         amount.length>22 || !/^(EQ|UQ)[A-Za-z0-9_-]{46}$/.test(address))
+        return reply({ok:false,error:"invalid_signed_receipt"},400);
+      const {data,error}=await admin.rpc("henova_record_signed_gram_payout",{
+        p_withdrawal_id:id,p_boc_hash:hash,p_sender:sender,
+        p_destination:address,p_amount_nano:amount
+      });
+      if(error)return reply({ok:false,error:"signing_receipt_unavailable"},503);
+      return reply(data,data?.ok?200:409);
+    }
     if(action==="admin_payout_approve"){
       // Status approval is NOT a payment and cannot trigger 'PAID' notices.
       const result=await admin.from("henova_gram_withdrawals")
@@ -548,9 +567,10 @@ Deno.serve(async (request) => {
       return reply({ok:true,request:result.data});
     }
     const result=await admin.from("henova_gram_withdrawals")
-      .select("id,status,destination_address,gram_amount,eggs_amount")
+      .select("id,status,destination_address,gram_amount,eggs_amount,signed_boc_hash")
       .eq("id",id).eq("status","approved").maybeSingle();
     if(result.error||!result.data)return reply({ok:false,error:"not_approved"},409);
+    if(result.data.signed_boc_hash)return reply({ok:false,error:"already_signed_awaiting_confirmation"},409);
     if(!settings.data.payout_wallet_address)return reply({ok:false,error:"treasury_unset"},503);
     // Prevent accidental self-transfers, including differing TON friendly flags.
     const rawTon=(address)=>{
