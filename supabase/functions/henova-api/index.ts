@@ -256,15 +256,32 @@ Deno.serve(async (request) => {
     const notifyVerifiedPayout=async(paymentId)=>{
       const {data:claim,error:claimError}=await admin.rpc("henova_claim_verified_payout_notice",{p_id:paymentId});
       if(claimError||!claim?.ok)return {sent:false,error:claimError?"notice_claim_failed":"notice_already_sent_or_locked"};
-      const message="✅ HENOVA GRAM WITHDRAWAL CONFIRMED\n"+
-        "Withdrawal #"+claim.id+"\nAmount: "+claim.gram_amount+" GRAM\n"+
-        "TON transaction: https://tonviewer.com/transaction/"+claim.tx_hash;
+      // The older payout notice flow now uses the same rich format as confirmed withdrawals.
+      const {data:noticeWithdrawal}=await admin.from("henova_gram_withdrawals")
+        .select("telegram_id,eggs_amount,destination_address,blockchain_verified_at")
+        .eq("id",claim.id).eq("status","confirmed").maybeSingle();
+      const wallet=String(noticeWithdrawal?.destination_address||"");
+      const maskedWallet=wallet.length>12?wallet.slice(0,6)+"..."+wallet.slice(-5):"Not available";
+      const explorer="https://tonviewer.com/transaction/"+encodeURIComponent(String(claim.tx_hash));
+      const message="✅ WITHDRAWAL PAID · #"+claim.id+"\n\n"+
+        "👤 Farmer: "+(noticeWithdrawal?.telegram_id?"Player #"+noticeWithdrawal.telegram_id:"HENOVA Farmer")+"\n"+
+        "💎 Amount: "+claim.gram_amount+" GRAM\n"+
+        "🥚 Eggs: "+(noticeWithdrawal?.eggs_amount??"-")+"\n"+
+        "👛 Wallet: "+maskedWallet+"\n"+
+        "⚡ Sent: Confirmed on TON\n"+
+        "🕒 "+(noticeWithdrawal?.blockchain_verified_at?new Date(noticeWithdrawal.blockchain_verified_at).toISOString().replace("T"," ").replace(".000Z"," UTC"):"Confirmed")+"\n\n"+
+        "🐔 HENOVA — hens lay eggs, eggs become GRAM.\n"+
+        "Start free and withdraw when eligible 👇";
       let response;
       try{
         response=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
           method:"POST",headers:{"Content-Type":"application/json"},
           body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:message,
-            disable_web_page_preview:true}),signal:AbortSignal.timeout(12000)
+            disable_web_page_preview:true,
+            reply_markup:{inline_keyboard:[
+              [{text:"🔎 View transaction",url:explorer}],
+              [{text:"🐔 Play & earn GRAM",url:"https://t.me/HenovaEggsBot/farm"}]
+            ]}}),signal:AbortSignal.timeout(12000)
         });
       }catch{
         // A timed-out Telegram request MAY already have delivered the message.
