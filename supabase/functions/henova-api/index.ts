@@ -451,10 +451,22 @@ Deno.serve(async (request) => {
         const rows=Array.isArray(json?.transactions)?json.transactions:[];
         const tx=rows.find(t=>hexHash(t?.hash)===claimedHash &&
           raw(t?.account)===senderRaw && !t?.emulated && t?.description?.aborted!==true &&
-          t?.description?.action?.success===true &&
+          t?.description?.action?.success!==false &&
           Number(t?.now)>=Math.floor(Date.parse(req.created_at)/1000) &&
           (!req.signing_claimed_at || Number(t?.now)>=Math.floor(Date.parse(req.signing_claimed_at)/1000)-15));
-        if(!tx)return reply({ok:false,error:"sender_transaction_unverified"},409);
+        if(!tx){
+          // Diagnostic only: never confirm a transaction based on this result.
+          const candidate=rows.find(t=>hexHash(t?.hash)===claimedHash);
+          const diagnostics=!candidate?"hash_not_found":{
+            account_match:raw(candidate?.account)===senderRaw,
+            emulated:candidate?.emulated===true,
+            aborted:candidate?.description?.aborted===true,
+            action_success: candidate?.description?.action?.success??null,
+            after_request:Number(candidate?.now)>=Math.floor(Date.parse(req.created_at)/1000),
+            after_signing:!req.signing_claimed_at||Number(candidate?.now)>=Math.floor(Date.parse(req.signing_claimed_at)/1000)-15
+          };
+          return reply({ok:false,error:"sender_transaction_unverified",diagnostics},409);
+        }
         const matches=(Array.isArray(tx.out_msgs)?tx.out_msgs:[]).filter(x=>
           x?.bounced!==true && raw(x?.source)===senderRaw &&
           raw(x?.destination)===destinationRaw && String(x?.value)===nano &&
@@ -820,8 +832,15 @@ Deno.serve(async (request) => {
     if(!senderRaw||!receiverRaw)return reply({ok:false,error:"invalid_payout_address"},409);
     if(senderRaw===receiverRaw)return reply({ok:false,error:"recipient_matches_treasury"},409);
     // The amount is server-side; never accept the amount or destination from the client.
-    const nanograms=Math.round(Number(result.data.gram_amount)*1e9);
-    if(!Number.isSafeInteger(nanograms)||nanograms<=0||nanograms>1e9)
+    const amountText=String(result.data.gram_amount||"");
+    if(!/^[0-9]+(?:\\.[0-9]+)?$/.test(amountText))
+      return reply({ok:false,error:"invalid_amount"},409);
+    const [wholePart,decimalPart=""]=amountText.split(".");
+    if(decimalPart.length>9 && /[1-9]/.test(decimalPart.slice(9)))
+      return reply({ok:false,error:"amount_precision_exceeds_nano"},409);
+    const nanograms=BigInt(wholePart)*1000000000n+
+      BigInt((decimalPart+"000000000").slice(0,9));
+    if(nanograms<=0n||nanograms>1000000000n)
       return reply({ok:false,error:"invalid_amount"},409);
     // Atomically reserve one signing attempt before any wallet can transfer.
     // This reservation is never auto-released on network loss.
