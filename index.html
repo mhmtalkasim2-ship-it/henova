@@ -1880,7 +1880,21 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 .henova-admin-empty{padding:30px 14px;text-align:center;border-radius:20px;background:white;border:1px dashed #b9d9b7;font-weight:800;color:#507e58}
 .henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
 .henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
-</style><script src="https://telegram.org/js/telegram-web-app.js"></script></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script><style id="henova-sponsored-task-card-style-v1">
+/* Match native HENOVA task-card layout without changing AdsGram verification. */
+#view .hv-sponsored-card{display:grid;grid-template-columns:58px minmax(0,1fr) minmax(115px,41%);align-items:center;gap:12px;min-height:124px;padding:17px 15px}
+#view .hv-sponsored-icon{width:58px;height:58px;min-width:58px;border-radius:15px;background:#e7f1da;display:flex;align-items:center;justify-content:center;font-size:28px}
+#view .hv-sponsored-copy{min-width:0;overflow-wrap:anywhere}
+#view .hv-sponsored-copy h3{font-size:17px;line-height:1.22;margin:0 0 7px}
+#view .hv-sponsored-copy p{font-size:14px;margin:0 0 4px}
+#view .hv-sponsored-copy small{display:block;line-height:1.3}
+#view .hv-sponsored-action{min-width:0;max-width:100%;overflow-wrap:anywhere}
+#view .hv-sponsored-action adsgram-task{display:block;width:100%;min-width:0;min-height:70px}
+#view .hv-sponsored-action button{max-width:100%;white-space:normal}
+#view .hv-sponsored-copy #henova-adsgram-status:empty{display:none}
+@media(max-width:390px){#view .hv-sponsored-card{grid-template-columns:48px minmax(0,1fr) minmax(110px,40%);gap:8px;padding:14px 10px}#view .hv-sponsored-icon{width:48px;height:48px;min-width:48px}#view .hv-sponsored-copy h3{font-size:15px}}
+</style>
+</head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
 <script>
@@ -2840,7 +2854,7 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+'<article class="item" s
 }
 if(tab===2){
  const a=henovaAdsgramLabels();
- el.insertAdjacentHTML('beforeend','<article class="item" style="align-items:stretch;flex-direction:column"><div class="grow"><h3>📣 '+a.name+'</h3><p>🥚 '+a.reward+' · ⏱ '+a.interval+'</p></div><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false" style="display:block;min-height:78px"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task><small id="henova-adsgram-status"></small></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card"><span class="face hv-sponsored-icon" aria-hidden="true">📣</span><div class="grow hv-sponsored-copy"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
  henovaAttachAdsgramTask();
 }
 if(tab===3){
