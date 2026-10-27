@@ -484,16 +484,33 @@ Deno.serve(async (request) => {
         const recipientJson=await recipientResponse.json();
         if(!Array.isArray(recipientJson?.transactions))
           return reply({ok:false,error:"recipient_chain_invalid_response"},503);
-        const credited=recipientJson.transactions.some(t=>
+        const validRecipient=(t)=>
           !t?.emulated && raw(t?.account)===destinationRaw &&
           t?.description?.aborted!==true &&
           t?.description?.action?.success!==false &&
           t?.in_msg?.bounced!==true && raw(t?.in_msg?.source)===senderRaw &&
           raw(t?.in_msg?.destination||t?.account)===destinationRaw &&
           String(t?.in_msg?.value)===nano &&
-          hexHash(t?.in_msg?.hash)===hexHash(matches[0].hash)
-        );
-        if(!credited)return reply({ok:false,error:"recipient_credit_not_verified"},409);
+          hexHash(t?.in_msg?.hash)===hexHash(matches[0].hash);
+        let credited=recipientJson.transactions.some(validRecipient);
+        if(!credited){
+          // Indexer message lookup can lag or omit the recipient entry.
+          // Independent destination-account lookup; still require the exact
+          // sender's outgoing message hash, value and both account addresses.
+          const fallbackUrl=new URL("https://toncenter.com/api/v3/transactions");
+          fallbackUrl.searchParams.set("account",req.destination_address);
+          fallbackUrl.searchParams.set("start_utime",String(Math.max(0,Number(tx.now)-120)));
+          fallbackUrl.searchParams.set("end_utime",String(Number(tx.now)+3600));
+          fallbackUrl.searchParams.set("limit","100");
+          const fallbackResp=await fetchTon(fallbackUrl);
+          if(fallbackResp.ok){
+            const fallbackJson=await fallbackResp.json();
+            if(Array.isArray(fallbackJson?.transactions))
+              credited=fallbackJson.transactions.some(validRecipient);
+          }
+        }
+        if(!credited)return reply({ok:false,error:"recipient_credit_not_verified",
+          checked:"message_lookup_and_destination_account",candidate_count:recipientJson.transactions.length},409);
         const {data:done,error:commitError}=await admin.rpc("henova_finalize_verified_gram_payout",{
           p_withdrawal_id:id,p_tx_hash:claimedHash,p_sender:treasury,
           p_destination:req.destination_address,p_amount_nano:nano,p_tx_lt:String(tx.lt)
