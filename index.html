@@ -2826,7 +2826,7 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+'<article class="item" s
 }
 if(tab===2){
  const a=henovaAdsgramLabels();
- el.insertAdjacentHTML('beforeend','<article class="item" style="align-items:stretch;flex-direction:column"><div class="grow"><h3>📣 '+a.name+'</h3><p>🥚 '+a.reward+' · ⏱ '+a.interval+'</p></div><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false" style="display:block;min-height:78px"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task><small id="henova-adsgram-status"></small></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item" style="align-items:stretch;flex-direction:column"><div class="grow"><h3>📣 '+a.name+'</h3><p>🥚 '+a.reward+' · ⏱ '+a.interval+'</p></div><adsgram-task id="henova-adsgram-task" block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false" style="display:block;min-height:78px"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task><small id="henova-adsgram-status"></small></article>');
  henovaAttachAdsgramTask();
 }
 if(tab===3){
