@@ -2791,6 +2791,24 @@ function henovaOwnedHensMarkup(){
  }).join('');
 }
 
+/* AdsGram task-56216: native task widget. Never credit withdrawable eggs from a browser event. */
+const HENOVA_ADSGRAM_TASK='task-56216';
+function henovaAdsgramLabels(){
+return ({
+ en:{name:'Complete Sponsored Task',reward:'25 eggs',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
+ ar:{name:'أكمل المهمة الممولة',reward:'25 بيضة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
+ tr:{name:'Sponsorlu Görevi Tamamla',reward:'25 yumurta',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
+})[s.lang]||({
+name:'Complete Sponsored Task',reward:'25 eggs',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
+});
+}
+function henovaAttachAdsgramTask(){
+ const task=document.getElementById('henova-adsgram-task');
+ if(!task||task.dataset.henovaBound==='1')return;
+ task.dataset.henovaBound='1';
+ task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending)});
+ task.addEventListener('onBannerNotFound',()=>{const status=document.getElementById('henova-adsgram-status');if(status)status.textContent=henovaAdsgramLabels().unavailable});
+}
 function render(){
 updateFarmIdentity();
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
@@ -2805,6 +2823,11 @@ const name=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join
 el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+'<article class="item" style="background:#e2edd1;border-radius:18px"><span class="face">🎁</span><div class="grow"><h3>Invite 3 Friends</h3><p>🪙 +200 Coins</p><div style="height:7px;background:#ccddba;border-radius:8px;overflow:hidden"><div style="height:100%;width:'+Math.round(henovaInviteThreeProgress/3*100)+'%;background:#74a65c"></div></div></div><button onclick="openTab(3)" style="border-radius:24px">'+(henovaInviteThreeRewarded?'✓':henovaInviteThreeProgress+'/3')+'</button></article>'+'<article class="item"><span class="face">🎁</span><div class="grow"><h3>'+hvText('daily')+'</h3><p>'+hvText('dailyDesc')+'</p></div><button onclick="daily()" '+(claimed?'disabled':'')+'>'+(claimed?hvText('claimed'):hvText('claim'))+'</button></article>'+
 '<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 '+hvText('taskDesc')+'</p><small id="join-timer">'+(Date.now()<henovaChannelNext?henovaTaskClock(Math.ceil((henovaChannelNext-Date.now())/1000)):hvText('ready'))+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">'+hvText('open')+'</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>'+hvText('verify')+'</button></div></article>'+
 '<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_WITHDRAWALS.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:14px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'قناة السحب':s.lang==='tr'?'Çekim Kanalı':'Withdrawals Channel')+'</h3><p>HENOVA Withdrawals</p><small id="withdraw-channel-status">'+(s.lang==='ar'?'تحقق من اشتراكك':s.lang==='tr'?'Üyeliğini doğrula':'Verify membership')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenWithdrawals()">'+hvText('open')+'</button><button onclick="henovaCheckWithdrawals()">'+hvText('verify')+'</button></div></article>';
+}
+if(tab===2){
+ const a=henovaAdsgramLabels();
+ el.insertAdjacentHTML('beforeend','<article class="item" style="align-items:stretch;flex-direction:column"><div class="grow"><h3>📣 '+a.name+'</h3><p>🥚 '+a.reward+' · ⏱ '+a.interval+'</p></div><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false" style="display:block;min-height:78px"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task><small id="henova-adsgram-status"></small></article>');
+ henovaAttachAdsgramTask();
 }
 if(tab===3){
 const w=s.lang==='ar'?
