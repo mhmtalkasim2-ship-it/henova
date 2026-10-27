@@ -474,7 +474,8 @@ Deno.serve(async (request) => {
           return reply({ok:false,error:"recipient_chain_invalid_response"},503);
         const credited=recipientJson.transactions.some(t=>
           !t?.emulated && raw(t?.account)===destinationRaw &&
-          t?.description?.aborted===false &&
+          t?.description?.aborted!==true &&
+          t?.description?.action?.success!==false &&
           t?.in_msg?.bounced!==true && raw(t?.in_msg?.source)===senderRaw &&
           raw(t?.in_msg?.destination||t?.account)===destinationRaw &&
           String(t?.in_msg?.value)===nano &&
