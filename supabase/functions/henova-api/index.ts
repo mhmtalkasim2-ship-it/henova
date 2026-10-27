@@ -199,7 +199,7 @@ Deno.serve(async (request) => {
   const action = body?.action;
   // Telegram initData is verified before this point. Leaderboard values are
   // aggregated on the server from confirmed collection events, not client state.
-  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_track_signed_payout","admin_post_payout_notice","admin_test_submit","admin_test_queue","admin_test_intent","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
+  if (["admin_payout_queue","admin_payout_approve","admin_payout_intent","admin_record_signed_payout","admin_chain_audit","admin_match_payout","admin_verify_payout","admin_track_signed_payout","admin_post_payout_notice","admin_repost_selected_proofs","admin_test_submit","admin_test_queue","admin_test_intent","admin_test_approve","admin_verify_test_transfer"].includes(action)) {
     // Only existing HENOVA channel administrators can read or approve payouts.
     const adminResponse=await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember",{
       method:"POST",headers:{"Content-Type":"application/json"},
@@ -309,6 +309,52 @@ Deno.serve(async (request) => {
         return {sent:true,stored:false,message_id:messageId,error:"notice_record_failed_manual_reconcile"};
       return {sent:true,stored:true,message_id:messageId};
     };
+        if(action==="admin_repost_selected_proofs"){
+      // Administration-only: republish proof messages, NEVER repeat a payout.
+      const results=[];
+      for(const id of [14,15,16]){
+        const {data:claimed,error:claimError}=await admin.rpc("henova_claim_proof_repost",{p_id:id});
+        if(claimError){results.push({id,error:"claim_failed"});continue;}
+        if(!claimed){results.push({id,status:"already_reposted_or_ineligible"});continue;}
+        const {data:wd,error:readError}=await admin.from("henova_gram_withdrawals")
+          .select("id,telegram_id,eggs_amount,gram_amount,destination_address,payout_tx_hash,blockchain_verified_at,status")
+          .eq("id",id).eq("status","confirmed").single();
+        if(readError||!wd){results.push({id,error:"confirmed_record_unavailable"});continue;}
+        const hash=String(wd.payout_tx_hash||"");
+        const wallet=String(wd.destination_address||"");
+        if(!/^[a-f0-9]{64}$/i.test(hash)){results.push({id,error:"invalid_hash"});continue;}
+        const explorer="https://tonviewer.com/transaction/"+encodeURIComponent(hash);
+        const msg="✅ WITHDRAWAL PAID · #"+id+
+          "\n\n👤 Farmer: Player #"+wd.telegram_id+
+          "\n💎 Amount: "+wd.gram_amount+" GRAM"+
+          "\n🥚 Eggs: "+wd.eggs_amount+
+          "\n👛 Wallet: "+wallet.slice(0,6)+"..."+wallet.slice(-5)+
+          "\n⚡ Network: TON"+
+          "\n🕒 "+new Date(wd.blockchain_verified_at).toISOString().replace("T"," ").replace(".000Z"," UTC")+
+          "\n\n🐔 HENOVA Chicken Farm";
+        try{
+          const response=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+            method:"POST",headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:msg,
+              reply_markup:{inline_keyboard:[
+                [{text:"🔎 View transaction",url:explorer}],
+                [{text:"🐔 Play & earn GRAM",url:"https://t.me/HenovaEggsBot/farm"}]
+              ]}}),signal:AbortSignal.timeout(12000)
+          });
+          const payload=await response.json().catch(()=>null);
+          if(response.ok&&payload?.ok&&payload.result?.message_id){
+            await admin.from("henova_proof_reposts").update({telegram_message_id:payload.result.message_id})
+              .eq("withdrawal_id",id);
+            results.push({id,status:"posted",message_id:payload.result.message_id});
+          } else {
+            results.push({id,error:"telegram_not_confirmed"});
+          }
+        }catch{
+          results.push({id,error:"telegram_delivery_uncertain"});
+        }
+      }
+      return reply({ok:true,results});
+    }
         if(action==="admin_post_payout_notice"){
       const id=Number(body?.withdrawalId);
       if(!Number.isSafeInteger(id)||id<=0)return reply({ok:false,error:"invalid_request"},400);
