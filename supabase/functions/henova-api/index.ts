@@ -785,7 +785,10 @@ Deno.serve(async (request) => {
     const status=member.result?.status;
     const joined=["creator","administrator","member"].includes(status) ||
       (status==="restricted" && member.result?.is_member===true);
-    return reply({ok:true,joined,channel:"@HENOVA_WITHDRAWALS"});
+    if (!joined) return reply({ok:true,joined:false,channel:"@HENOVA_WITHDRAWALS"});
+    const { data: reward, error: claimError } = await admin.rpc("henova_claim_withdrawals_channel_reward",{p_telegram_id:telegram.id});
+    if(claimError)return reply({ok:false,error:"database_unavailable"},503);
+    return reply({ok:true,joined:true,channel:"@HENOVA_WITHDRAWALS",reward_claimed:reward?.ok===true,coins_added:reward?.ok?20:0,already_claimed:reward?.error==="already_claimed"});
   }
   if (action === "payout_setup") {
     const [settings,wallet,withdrawals] = await Promise.all([
