@@ -816,49 +816,9 @@ Deno.serve(async (request) => {
     if(settings.error||wallet.error||withdrawals.error)return reply({ok:false,error:"database_unavailable"},503);
     // Notify only for confirmed payments, never for pending submissions.
     // Conditional claim prevents parallel requests from double-posting.
-    const due=await admin.from("henova_gram_withdrawals")
-      .select("id,telegram_id,destination_address,eggs_amount,gram_amount,payout_tx_hash,blockchain_verified_at")
-      .eq("telegram_id",telegram.id).eq("status","confirmed").is("notice_message_id",null)
-      .not("payout_tx_hash","is",null).not("blockchain_verified_at","is",null)
-      .order("id",{ascending:true}).limit(1);
-    if(!due.error && due.data?.length){
-      const wd=due.data[0];
-      const claim=await admin.from("henova_gram_withdrawals").update({notice_message_id:-1})
-        .eq("id",wd.id).eq("status","confirmed").is("notice_message_id",null)
-        .select("id").maybeSingle();
-      if(!claim.error&&claim.data){
-        try{
-          const mask=wd.destination_address.slice(0,6)+"..."+wd.destination_address.slice(-5);
-          const hash=String(wd.payout_tx_hash);
-          if(!/^[a-zA-Z0-9_+\/-]{32,100}={0,2}$/.test(hash))throw Error("invalid_payment_hash");
-          const explorer="https://tonviewer.com/transaction/"+encodeURIComponent(hash);
-          const bodyText="✅ WITHDRAWAL PAID · #"+wd.id+
-            "\n\n👤 Farmer: Player #"+wd.telegram_id+
-            "\n💎 Amount: "+wd.gram_amount+" GRAM"+
-            "\n🥚 Eggs: "+wd.eggs_amount+
-            "\n👛 Wallet: "+mask+
-            "\n⚡ Network: TON"+
-            "\n🕒 "+new Date(wd.blockchain_verified_at).toISOString().replace("T"," ").replace(".000Z"," UTC")+
-            "\n\n🐔 HENOVA Chicken Farm";
-          const sent=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
-            method:"POST",headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:bodyText,
-              reply_markup:{inline_keyboard:[
-                [{text:"🔎 View transaction",url:explorer}],
-                [{text:"🐔 Play & earn GRAM",url:"https://t.me/HenovaEggsBot/farm"}]
-              ]}}),signal:AbortSignal.timeout(9000)});
-          const payload=await sent.json().catch(()=>null);
-          if(!sent.ok||!payload?.ok||!payload.result?.message_id)throw Error("telegram_send_failed");
-          const saved=await admin.from("henova_gram_withdrawals")
-            .update({notice_message_id:payload.result.message_id}).eq("id",wd.id).eq("notice_message_id",-1);
-          if(saved.error)console.error("HENOVA notice message id persist failed",saved.error.code);
-        }catch(err){
-          console.warn("HENOVA notice delayed",String(err).slice(0,100));
-          // Retry is safe only when the send definitely failed; avoid duplicate paid posts
-          // after ambiguous network failures by leaving -1 pending manual reconciliation.
-        }
-      }
-    }
+    // The old wallet-page payout announcer was removed to prevent a second
+    // posting path. Verified payouts are announced via notifyVerifiedPayout,
+    // which uses the canonical #13-style template and an atomic claim.
     return reply({ok:true,payout:{...settings.data,enabled:settings.data.withdrawal_requests_enabled===true,real_payouts_enabled:false},wallet:wallet.data||null,withdrawals:withdrawals.data||[]});
   }
   // Issue a short-lived, server-generated TON Proof nonce after Telegram authentication.
