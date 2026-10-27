@@ -833,7 +833,7 @@ Deno.serve(async (request) => {
     if(senderRaw===receiverRaw)return reply({ok:false,error:"recipient_matches_treasury"},409);
     // The amount is server-side; never accept the amount or destination from the client.
     const amountText=String(result.data.gram_amount||"");
-    if(!/^[0-9]+(?:\\.[0-9]+)?$/.test(amountText))
+    if(!/^[0-9]+(?:\.[0-9]+)?$/.test(amountText))
       return reply({ok:false,error:"invalid_amount"},409);
     const [wholePart,decimalPart=""]=amountText.split(".");
     if(decimalPart.length>9 && /[1-9]/.test(decimalPart.slice(9)))
