@@ -1990,7 +1990,8 @@ async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
  try{
   const result=await henovaCall('verify_withdrawals_channel');
-  const message=result.joined?(s.lang==='ar'?'تم تأكيد الاشتراك ✅':s.lang==='tr'?'Üyelik onaylandı ✅':'Membership verified ✅'):hvError('not_joined');
+  const message=!result.joined?hvError('not_joined'):result.reward_claimed?(s.lang==='ar'?'✅ تم إضافة 20 عملة إلى رصيدك':s.lang==='tr'?'✅ Bakiyene 20 jeton eklendi':'✅ 20 coins added to your balance'):(s.lang==='ar'?'✅ تم تأكيد الاشتراك، المكافأة مستلمة سابقاً':s.lang==='tr'?'✅ Üyelik onaylandı, ödül daha önce alındı':'✅ Membership verified; reward already claimed');
+  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);}
   if(field)field.textContent=message;
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
