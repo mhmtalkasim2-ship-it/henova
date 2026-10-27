@@ -2870,6 +2870,15 @@ el.innerHTML='<div class="henova-wallet-page hv-simple-withdraw">'+
 
 '<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div></section></div>';
 
+// Clearly expose the payout management screen to the existing staff account.
+if(String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'')==='1035565575'){
+ const adminLink=document.createElement('button');
+ adminLink.type='button';
+ adminLink.textContent='📣 Manage payouts / Repost #14–#16';
+ adminLink.style.cssText='display:block!important;width:100%;margin:14px 0;padding:15px;border:2px solid #8cae73;border-radius:14px;background:#ecf7dc;color:#275b38;font-weight:800;position:relative;z-index:3';
+ adminLink.onclick=henovaShowAdminPayouts;
+ el.prepend(adminLink);
+}
 henovaRefreshPayoutSetup();
 }
 if(tab===0)prepareFarmArtwork();
