@@ -2105,6 +2105,36 @@ function henovaStartAutomaticTONMonitor(){
 }
 const henovaBatchSelected=new Set();
 let henovaBatchApproving=false;
+let henovaSigningQueue=[];
+function henovaLoadSigningQueue(){
+ try{
+  const v=JSON.parse(localStorage.getItem('henova-admin-signing-queue')||'[]');
+  henovaSigningQueue=Array.isArray(v)?v.filter(x=>Number.isSafeInteger(x)&&x>0).slice(0,5):[];
+ }catch{henovaSigningQueue=[]}
+}
+function henovaSaveSigningQueue(){
+ try{localStorage.setItem('henova-admin-signing-queue',JSON.stringify(henovaSigningQueue))}catch{}
+}
+function henovaClearSigningQueue(){henovaSigningQueue=[];henovaSaveSigningQueue();henovaRenderSigningQueue();}
+function henovaRenderSigningQueue(items){
+ const root=document.getElementById('henova-signing-queue');
+ if(!root)return;
+ root.replaceChildren();
+ if(!henovaSigningQueue.length){root.textContent='No signing queue selected.';return}
+ const title=document.createElement('strong');title.textContent='🔐 Sequential Tonkeeper signing · '+henovaSigningQueue.length+' left';root.append(title);
+ const queue=Array.isArray(items)?items:window.henovaLastAdminQueue||[];
+ const current=queue.find(x=>Number(x.id)===henovaSigningQueue[0]);
+ if(!current){const note=document.createElement('p');note.textContent='Refresh the admin queue to check the next withdrawal.';root.append(note);return}
+ const desc=document.createElement('p');
+ desc.textContent='#'+current.id+' · '+current.gram_amount+' GRAM · '+current.status;root.append(desc);
+ const btn=document.createElement('button');btn.className='henova-wallet-save';btn.type='button';
+ btn.textContent=current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash?'🔐 Sign next withdrawal #'+current.id:'🔎 Next payment needs review (#'+current.id+')';
+ btn.disabled=!(current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash);
+ btn.onclick=()=>henovaSignAdminPayout(current.id);root.append(btn);
+ const stop=document.createElement('button');stop.type='button';stop.textContent='Stop sequence';stop.onclick=henovaClearSigningQueue;root.append(stop);
+}
+henovaLoadSigningQueue();
+
 function henovaBatchToggle(id,checked){
  if(checked&&henovaBatchSelected.size>=5){toast('Select up to 5 withdrawals');renderHenovaBatchStatus();return}
  if(checked)henovaBatchSelected.add(id);else henovaBatchSelected.delete(id);
@@ -2124,12 +2154,14 @@ async function henovaBatchApprove(){
  if(!confirm('Approve '+ids.length+' withdrawals? This does NOT send GRAM. Each payment must be signed separately.'))return;
  henovaBatchApproving=true;renderHenovaBatchStatus();
  let succeeded=0,failed=0;
+ const approvedIds=[];
  try{
   for(const id of ids){
-   try{await henovaCall('admin_payout_approve',{withdrawalId:id});henovaBatchSelected.delete(id);succeeded++}
+   try{await henovaCall('admin_payout_approve',{withdrawalId:id});henovaBatchSelected.delete(id);approvedIds.push(id);succeeded++}
    catch(e){failed++;console.warn('Batch approval failed for',id,String(e.message||e).slice(0,80))}
   }
  }finally{henovaBatchApproving=false}
+ if(approvedIds.length){henovaSigningQueue=approvedIds;henovaSaveSigningQueue()}
  toast('Approved '+succeeded+' requests'+(failed?' · '+failed+' could not be approved':'')+'. Sign each transfer separately.');
  await henovaShowAdminPayouts();
 }
@@ -2137,7 +2169,7 @@ async function henovaShowAdminPayouts(){
  document.body.classList.add('henova-payout-admin-active');
  const root=document.getElementById('view');
  if(!root)return;
- root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div class="henova-wallet-card"><strong>✅ Batch approvals (max 5)</strong><p id="henova-batch-status">0/5 selected · approval only; sign payments individually</p><button id="henova-batch-approve" type="button" class="henova-wallet-save" onclick="henovaBatchApprove()" disabled>Approve selected (up to 5)</button></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
+ root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div class="henova-wallet-card" id="henova-signing-queue" style="border:2px solid #a6c891;padding:14px;margin:12px 0"></div><div class="henova-wallet-card"><strong>✅ Batch approvals (max 5)</strong><p id="henova-batch-status">0/5 selected · approval only; sign payments individually</p><button id="henova-batch-approve" type="button" class="henova-wallet-save" onclick="henovaBatchApprove()" disabled>Approve selected (up to 5)</button></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  henovaStartActivityMonitor();
  henovaStartAutomaticTONMonitor();
  try{
@@ -2166,6 +2198,8 @@ async function henovaShowAdminPayouts(){
    finally{audit.disabled=false}
   };
   document.querySelector('.henova-admin-head')?.append(audit);
+  window.henovaLastAdminQueue=data.items||[];
+  henovaRenderSigningQueue(data.items||[]);
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
@@ -2497,7 +2531,10 @@ async function henovaSignAdminPayout(id){
   });
   if(!receipt?.ok)throw Error('Receipt not saved. Use Recover receipt; do not sign again.');
   try{localStorage.removeItem('henova-signed-receipt-'+id);}catch{}
-  toast('Signed transfer recorded. Checking the TON network automatically.');
+  if(henovaSigningQueue[0]===Number(id)){
+    henovaSigningQueue.shift();henovaSaveSigningQueue();
+  }
+  toast('Signed transfer recorded. Checking TON. Next selected withdrawal is ready in the same panel.');
   void henovaTrackAdminPayout(id);
   await henovaShowAdminPayouts();
  }catch(e){
