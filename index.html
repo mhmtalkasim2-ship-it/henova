@@ -2307,6 +2307,22 @@ async function henovaShowAdminPayouts(){
         verify.disabled=false;
       }
     };
+    // A complete pasted transaction hash triggers server-side TON verification automatically.
+    // Verification still matches source wallet, recipient, amount and final chain credit.
+    let hashCheckBusy=false;
+    const autoVerifyHash=async()=>{
+      const value=hash.value.trim();
+      if(!/^[a-fA-F0-9]{64}$/.test(value)||hashCheckBusy)return;
+      hashCheckBusy=true;verify.disabled=true;
+      try{
+        const result=await henovaCall('admin_verify_payout',{withdrawalId:item.id,txHash:value});
+        toast(result.confirmed?'✅ TON confirmed — proof '+(result.notice?.sent?'published':'pending'):'TON confirmation pending');
+        if(result.confirmed)await henovaShowAdminPayouts();
+      }catch(e){toast('Hash found, but TON verification pending: '+String(e.message||e).slice(0,75))}
+      finally{hashCheckBusy=false;verify.disabled=false;}
+    };
+    hash.addEventListener('paste',()=>setTimeout(autoVerifyHash,100));
+    hash.addEventListener('change',autoVerifyHash);
     card.append(verify);
    }
    list.append(card);
