@@ -2091,12 +2091,25 @@ async function henovaRepostSelectedProofs(){
  }catch(e){toast('Repost failed: '+String(e.message||e).slice(0,90))}
  finally{if(button){button.disabled=false;button.textContent='📣 Repost proofs #14–#16'}}
 }
+let henovaAutoCheckBusy=false;
+let henovaAutoMonitorInterval=null;
+function henovaStartAutomaticTONMonitor(){
+ if(henovaAutoMonitorInterval)return;
+ henovaAutoMonitorInterval=setInterval(()=>{
+  if(!document.body.classList.contains('henova-payout-admin-active')){
+   clearInterval(henovaAutoMonitorInterval);henovaAutoMonitorInterval=null;return;
+  }
+  if(document.hidden||henovaAutoCheckBusy)return;
+  void henovaShowAdminPayouts();
+ },30000);
+}
 async function henovaShowAdminPayouts(){
  document.body.classList.add('henova-payout-admin-active');
  const root=document.getElementById('view');
  if(!root)return;
  root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  henovaStartActivityMonitor();
+ henovaStartAutomaticTONMonitor();
  try{
   const data=await henovaCall('admin_payout_queue');
   if(data.channel_notice?.stored)toast('✅ Withdrawal proof published to @HENOVA_WITHDRAWALS');
@@ -2127,6 +2140,28 @@ async function henovaShowAdminPayouts(){
   if(!list)return;
   list.replaceChildren();
   if(!data.items?.length){const empty=document.createElement('div');empty.className='henova-admin-empty';empty.textContent='No real withdrawal requests are currently pending.';list.append(empty);}
+  // Automatically discover the sender transaction hash from the saved signed message.
+  // This is read-only until TON verification confirms the exact recipient credit.
+  const autoCandidates=(data.items||[]).filter(x=>x.status==='broadcast'&&x.signed_boc_hash&&!x.payout_tx_hash);
+  if(autoCandidates.length){
+   const box=document.createElement('p');
+   box.style.cssText='padding:10px;border-radius:12px;background:#e8f5df;color:#275b38';
+   box.textContent='🔎 Automatic TON verification active — no hash entry needed.';
+   list.prepend(box);
+   if(!henovaAutoCheckBusy){
+    henovaAutoCheckBusy=true;
+    (async()=>{
+     try{
+      for(const x of autoCandidates.slice(0,3)){
+       try{
+        const result=await henovaCall('admin_track_signed_payout',{withdrawalId:x.id});
+        if(result.confirmed)toast('✅ Withdrawal #'+x.id+' confirmed on TON; proof publication attempted');
+       }catch(e){console.info('TON confirmation pending for request',x.id,String(e.message||e).slice(0,60))}
+      }
+     }finally{henovaAutoCheckBusy=false;}
+    })();
+   }
+  }
   // Test-only signing: this does not unlock production payout authorization.
   try{
    const tests=await henovaCall('admin_test_queue');
