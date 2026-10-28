@@ -2103,11 +2103,41 @@ function henovaStartAutomaticTONMonitor(){
   void henovaShowAdminPayouts();
  },30000);
 }
+const henovaBatchSelected=new Set();
+let henovaBatchApproving=false;
+function henovaBatchToggle(id,checked){
+ if(checked&&henovaBatchSelected.size>=5){toast('Select up to 5 withdrawals');renderHenovaBatchStatus();return}
+ if(checked)henovaBatchSelected.add(id);else henovaBatchSelected.delete(id);
+ renderHenovaBatchStatus();
+}
+function renderHenovaBatchStatus(){
+ const status=document.getElementById('henova-batch-status');
+ if(status)status.textContent=henovaBatchSelected.size+'/5 selected · approval only; sign payments individually';
+ document.querySelectorAll('.henova-batch-choice').forEach(x=>{x.checked=henovaBatchSelected.has(Number(x.value));x.disabled=!x.checked&&henovaBatchSelected.size>=5});
+ const btn=document.getElementById('henova-batch-approve');
+ if(btn)btn.disabled=henovaBatchApproving||henovaBatchSelected.size===0;
+}
+async function henovaBatchApprove(){
+ if(henovaBatchApproving)return;
+ const ids=[...henovaBatchSelected].slice(0,5);
+ if(!ids.length)return;
+ if(!confirm('Approve '+ids.length+' withdrawals? This does NOT send GRAM. Each payment must be signed separately.'))return;
+ henovaBatchApproving=true;renderHenovaBatchStatus();
+ let succeeded=0,failed=0;
+ try{
+  for(const id of ids){
+   try{await henovaCall('admin_payout_approve',{withdrawalId:id});henovaBatchSelected.delete(id);succeeded++}
+   catch(e){failed++;console.warn('Batch approval failed for',id,String(e.message||e).slice(0,80))}
+  }
+ }finally{henovaBatchApproving=false}
+ toast('Approved '+succeeded+' requests'+(failed?' · '+failed+' could not be approved':'')+'. Sign each transfer separately.');
+ await henovaShowAdminPayouts();
+}
 async function henovaShowAdminPayouts(){
  document.body.classList.add('henova-payout-admin-active');
  const root=document.getElementById('view');
  if(!root)return;
- root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
+ root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div class="henova-wallet-card"><strong>✅ Batch approvals (max 5)</strong><p id="henova-batch-status">0/5 selected · approval only; sign payments individually</p><button id="henova-batch-approve" type="button" class="henova-wallet-save" onclick="henovaBatchApprove()" disabled>Approve selected (up to 5)</button></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  henovaStartActivityMonitor();
  henovaStartAutomaticTONMonitor();
  try{
@@ -2201,8 +2231,17 @@ async function henovaShowAdminPayouts(){
     list.append(t);
    }
   }catch(error){console.warn('Test queue unavailable',error);}
+  henovaBatchSelected.forEach(x=>{if(!data.items.some(item=>Number(item.id)===x&&item.status==='pending'))henovaBatchSelected.delete(x)});
+  renderHenovaBatchStatus();
   for(const item of data.items){
    const card=document.createElement('section');card.className='henova-wallet-card';
+   if(item.status==='pending'){
+    const label=document.createElement('label');label.style.cssText='display:flex;gap:9px;align-items:center;margin-bottom:10px';
+    const check=document.createElement('input');check.type='checkbox';check.className='henova-batch-choice';check.value=String(item.id);
+    check.checked=henovaBatchSelected.has(item.id);check.disabled=!check.checked&&henovaBatchSelected.size>=5;
+    check.onchange=()=>henovaBatchToggle(item.id,check.checked);
+    label.append(check,document.createTextNode(' Select withdrawal #'+item.id+' for batch approval'));card.append(label);
+   }
    const header=document.createElement('h3');header.textContent='#'+item.id+' · '+item.status;card.append(header);
    if(item.status==='confirmed'){
      const confirmed=document.createElement('p');confirmed.style.color='#216f43';
