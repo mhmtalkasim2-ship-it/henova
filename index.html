@@ -3028,7 +3028,7 @@ function henovaAttachAdsgramTask(){
  task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward()});
  task.addEventListener('onBannerNotFound',()=>{const status=document.getElementById('henova-adsgram-status');if(status)status.textContent=henovaAdsgramLabels().unavailable});
 }
-/* AdsGram video reward-56732: client confirms display only; backend callback credits eggs. */
+/* Interstitial int-56730 has a separate server-side button-use reward. */
 let henovaRewardVideoBusy=false;
 function henovaVideoRewardText(){
  return ({en:{title:'Watch Advertisement',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',unavailable:'Ad currently unavailable'},
@@ -3053,7 +3053,6 @@ function henovaShowRewardCard(amount,unit){
  const btn=document.createElement('button');btn.type='button';btn.textContent=close;btn.style.cssText='background:#f5c253;color:#283d24;border:0;border-radius:13px;padding:12px 34px;font-size:17px;font-weight:800';btn.onclick=()=>shade.remove();
  card.append(ico,h,p,btn);shade.appendChild(card);document.body.appendChild(shade);
 }
-function henovaShowVideoRewardCard(){henovaShowRewardCard(5,'eggs')}
 async function henovaWatchSponsoredReward(){
  try{
   const initial=await henovaCall('state');
