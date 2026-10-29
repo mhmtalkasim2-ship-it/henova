@@ -1914,6 +1914,19 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 #view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
 #view .hv-sponsored-task-vertical adsgram-task{display:block!important;max-width:100%;width:100%;overflow-wrap:normal;word-break:normal}
 @media(max-width:390px){#view .hv-video-task-card .hv-task-avatar{width:48px;height:48px;flex-basis:48px}#view .hv-video-task-card{gap:10px!important}}
+/* Mobile polish for AdsGram tasks: compact video card, no clipped task CTA. */
+#view .hv-video-task-card{display:grid!important;grid-template-columns:58px minmax(0,1fr) auto!important;grid-template-areas:"avatar description action";gap:12px!important;align-items:center!important;min-height:0!important;padding:16px 14px!important}
+#view .hv-video-task-card .hv-task-top{display:contents!important}
+#view .hv-video-task-card .hv-task-avatar{grid-area:avatar}
+#view .hv-video-task-card .hv-sponsored-copy{grid-area:description;min-width:0!important}
+#view .hv-video-task-card .hv-sponsored-copy h3{font-size:15px!important;line-height:1.24!important}
+#view .hv-video-task-card .hv-sponsored-copy p{font-size:13px!important}
+#view .hv-video-task-card .hv-video-task-action{grid-area:action;display:block!important;width:auto!important;min-width:0;justify-self:end}
+#view .hv-video-task-card .hv-video-task-action button{font-size:13px!important;padding:12px 10px!important;min-height:44px;max-width:100%;white-space:normal!important}
+#view .hv-sponsored-task-vertical{padding:16px 14px!important;gap:10px!important}
+#view .hv-sponsored-task-vertical>.hv-sponsored-action{box-sizing:border-box!important;width:100%!important;max-width:100%!important;padding:0 10px!important;overflow:visible!important}
+#view .hv-sponsored-task-vertical adsgram-task{box-sizing:border-box!important;display:block!important;width:100%!important;max-width:100%!important;zoom:.85}
+@media(max-width:430px){#view .hv-video-task-card{grid-template-columns:50px minmax(0,1fr) 94px!important;gap:9px!important}#view .hv-video-task-card .hv-task-avatar{width:50px;height:50px;flex-basis:50px}#view .hv-video-task-card .hv-sponsored-copy h3{font-size:14px!important}#view .hv-video-task-card .hv-sponsored-copy p{font-size:12px!important}}
 </style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
