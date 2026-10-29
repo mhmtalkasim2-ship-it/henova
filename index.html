@@ -3070,6 +3070,16 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+'<article class="item" s
 '<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 '+hvText('taskDesc')+'</p><small id="join-timer">'+(Date.now()<henovaChannelNext?henovaTaskClock(Math.ceil((henovaChannelNext-Date.now())/1000)):hvText('ready'))+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">'+hvText('open')+'</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>'+hvText('verify')+'</button></div></article>'+
 '<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_WITHDRAWALS.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:14px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'قناة السحب':s.lang==='tr'?'Çekim Kanalı':'Withdrawals Channel')+'</h3><p>HENOVA Withdrawals</p><small id="withdraw-channel-status">'+(s.lang==='ar'?'تحقق من اشتراكك':s.lang==='tr'?'Üyeliğini doğrula':'Verify membership')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenWithdrawals()">'+hvText('open')+'</button><button onclick="henovaCheckWithdrawals()">'+hvText('verify')+'</button></div></article>';
 }
+
+if(tab===2){
+ const nTitle=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join Us';
+ const nDesc=s.lang==='ar'?'20 عملة · مرة واحدة':s.lang==='tr'?'20 jeton · Tek seferlik':'20 coins · One time only';
+ const nOpen=s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot';
+ const nClaim=s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim';
+ const nPending=s.lang==='ar'?'الاستلام قيد التفعيل':s.lang==='tr'?'Ödül doğrulaması hazırlanıyor':'Reward verification pending';
+ el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/NGMCloudeminingbot.jpg" alt="NGM" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="window.Telegram?.WebApp?.openTelegramLink?.(\'https://t.me/NGMCloudeminingbot?start=ref_7X9GZR7H\')">'+nOpen+'</button><button disabled title="'+nPending+'" style="opacity:.55">'+nClaim+'</button></div></article>');
+}
+
 if(tab===2){
 const v=henovaVideoRewardText();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>🥚 '+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
