@@ -3011,7 +3011,7 @@ if(tab===2){
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card"><span class="face hv-sponsored-icon" aria-hidden="true">📣</span><div class="grow hv-sponsored-copy"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
  henovaAttachAdsgramTask();
  const v=henovaVideoRewardText();
- el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card"><img src="./assets/henova-rewarded-ad-thumb.svg" alt="Sponsored video" loading="lazy" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>🥚 '+v.desc+'</p></div><div class="hv-sponsored-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>🥚 '+v.desc+'</p></div><div class="hv-sponsored-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
 }
 if(tab===3){
 const w=s.lang==='ar'?
