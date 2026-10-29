@@ -3007,6 +3007,23 @@ function henovaVideoRewardText(){
  ar:{title:'شاهد الإعلان وانقر عليه',desc:'5 بيضات · كل 5 دقائق',button:'شاهد الإعلان',completed:'اكتمل الفيديو، بانتظار تأكيد المكافأة.',unavailable:'الإعلان غير متاح أو تم تخطيه. لم تُصرف المكافأة.'},
  tr:{title:'Reklamı İzle ve Tıkla',desc:'5 yumurta · Her 5 dakikada bir',button:'Reklam İzle',completed:'Video tamamlandı. Ödül doğrulaması bekleniyor.',unavailable:'Reklam mevcut değil veya atlandı. Ödül verilmedi.'}})[s.lang]||({title:'Watch Ad and Tap to Visit',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',completed:'Awaiting verified reward',unavailable:'Ad unavailable'});
 }
+function henovaShowVideoRewardCard(){
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ const headline=ar?'تمت إضافة المكافأة!':tr?'Ödül eklendi!':'Reward Added!';
+ const detail=ar?'تمت إضافة 5 بيضات إلى رصيدك بنجاح.':tr?'Bakiyene 5 yumurta eklendi.':'5 eggs have been added to your balance.';
+ const close=ar?'حسناً':tr?'Tamam':'Great!';
+ document.getElementById('henova-video-reward-popup')?.remove();
+ const shade=document.createElement('div');
+ shade.id='henova-video-reward-popup';
+ shade.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(9,31,18,.57);display:flex;align-items:center;justify-content:center;padding:22px';
+ const card=document.createElement('section');
+ card.style.cssText='background:#fffdf4;color:#244c33;border:2px solid #e1c66f;border-radius:25px;max-width:360px;width:100%;padding:26px 22px;box-shadow:0 20px 55px #10291344;text-align:center';
+ const icon=document.createElement('div');icon.textContent='🥚';icon.style.cssText='font-size:62px;margin-bottom:7px';
+ const h=document.createElement('h2');h.textContent=headline;h.style.cssText='font-size:23px;margin:0 0 9px';
+ const p=document.createElement('p');p.textContent=detail;p.style.cssText='font-size:17px;color:#58815c;margin:0 0 20px;line-height:1.5';
+ const btn=document.createElement('button');btn.type='button';btn.textContent=close;btn.style.cssText='background:#f5c253;color:#283d24;border:0;border-radius:13px;padding:12px 34px;font-size:17px;font-weight:800';btn.onclick=()=>shade.remove();
+ card.append(icon,h,p,btn);shade.appendChild(card);document.body.appendChild(shade);
+}
 async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
  const l=henovaVideoRewardText();
@@ -3015,14 +3032,27 @@ async function henovaWatchRewardVideo(){
  henovaRewardVideoBusy=true;
  const btn=document.getElementById('henova-reward-video-btn');if(btn)btn.disabled=true;
  try{
+  // Establish the server-confirmed starting balance before showing the rewarded video.
+  const before=await henovaCall('state');
+  if(!before?.state||!Number.isFinite(before.state.eggs))throw Error('reward_balance_unavailable');
+  const initialEggs=before.state.eggs;
   const video=window.Adsgram.init({blockId:'56732',debug:false});
   const result=await video.show();
   if(result?.done===true&&!result.error){
    toast(l.completed);
-   // Only the private AdsGram-to-Supabase callback may credit withdrawable eggs.
-   setTimeout(async()=>{try{const data=await henovaCall('state');if(data?.state){henovaApplyState(data.state);render()}}catch{}},2500);
+   // The AdsGram server callback, never the browser, credits eggs.
+   // Show success only after the server returns an increased balance.
+   for(let attempt=0;attempt<5;attempt++){
+    await new Promise(resolve=>setTimeout(resolve,2000));
+    try{
+     const data=await henovaCall('state');
+     if(!data?.state)continue;
+     henovaApplyState(data.state);render();
+     if(data.state.eggs>=initialEggs+5){henovaShowVideoRewardCard();break}
+    }catch(err){console.warn('Reward balance refresh failed',err)}
+   }
   }else toast(l.unavailable);
- }catch{toast(l.unavailable)}
+ }catch(err){console.warn('Rewarded video error',err);toast(l.unavailable)}
  finally{henovaRewardVideoBusy=false;if(btn)btn.disabled=false}
 }
 function render(){
