@@ -1901,6 +1901,19 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 #view .hv-sponsored-card:has(#henova-adsgram-task) adsgram-task{display:block;width:100%;min-width:0;max-width:100%;min-height:64px}
 #view .hv-sponsored-card:has(#henova-adsgram-task) adsgram-task::part(container){max-width:100%}
 @media(max-width:390px){#view .hv-sponsored-card:has(#henova-adsgram-task){grid-template-columns:48px minmax(0,1fr)!important}}
+/* Consistent tidy layout for the last two AdsGram tasks. */
+#view .hv-video-task-card{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;min-height:0!important;direction:inherit}
+#view .hv-video-task-card .hv-task-top{display:flex;gap:12px;align-items:center;width:100%;min-width:0}
+#view .hv-video-task-card .hv-task-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;object-fit:cover}
+#view .hv-video-task-card .hv-sponsored-copy{flex:1;min-width:0;overflow-wrap:normal;word-break:normal}
+#view .hv-video-task-card .hv-sponsored-copy h3{margin:0 0 6px;font-size:17px;line-height:1.3}
+#view .hv-video-task-card .hv-sponsored-copy p{margin:0;font-size:14px;line-height:1.4}
+#view .hv-video-task-card .hv-video-task-action{display:flex;justify-content:flex-end;width:100%;max-width:none}
+#view .hv-video-task-card .hv-video-task-action button{min-height:44px;white-space:nowrap}
+#view .hv-sponsored-task-vertical{min-height:0!important}
+#view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
+#view .hv-sponsored-task-vertical adsgram-task{display:block!important;max-width:100%;width:100%;overflow-wrap:normal;word-break:normal}
+@media(max-width:390px){#view .hv-video-task-card .hv-task-avatar{width:48px;height:48px;flex-basis:48px}#view .hv-video-task-card{gap:10px!important}}
 </style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button><button id="fullscreen-toggle" onclick="toggleTelegramFullscreen()" aria-label="Enable fullscreen" title="Fullscreen">⛶</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
@@ -3019,7 +3032,7 @@ if(tab===2){
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
  henovaAttachAdsgramTask();
  const v=henovaVideoRewardText();
- el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>🥚 '+v.desc+'</p></div><div class="hv-sponsored-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>🥚 '+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
 }
 if(tab===3){
 const w=s.lang==='ar'?
