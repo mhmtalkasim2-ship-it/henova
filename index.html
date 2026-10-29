@@ -3023,9 +3023,9 @@ function henovaAttachAdsgramTask(){
 /* AdsGram video reward-56732: client confirms display only; backend callback credits eggs. */
 let henovaRewardVideoBusy=false;
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad currently unavailable'},
- ar:{title:'شاهد الإعلان',desc:'إعلان اختياري · دون مكافأة بيض',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'İsteğe bağlı reklam · Yumurta ödülü yok',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
+ return ({en:{title:'Watch Advertisement',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',unavailable:'Ad currently unavailable'},
+ ar:{title:'شاهد الإعلان',desc:'5 بيضات · كل 5 دقائق',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
+ tr:{title:'Reklam İzle',desc:'5 yumurta · Her 5 dakikada bir',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -3070,7 +3070,16 @@ async function henovaWatchRewardVideo(){
  try{
   const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
   await ad.show();
- }catch(err){console.warn('HENOVA interstitial unavailable',err);toast(l.unavailable)}
+  // Independent five-egg button-use reward; not a verified AdsGram impression.
+  const result=await henovaCall('claim_interstitial_open');
+  if(result?.ok&&result.eggs===5){
+   const fresh=await henovaCall('state');
+   if(fresh?.state){henovaApplyState(fresh.state);render()}
+   henovaShowRewardCard(5,'eggs');
+  }else if(result?.error==='cooldown'){
+   toast(s.lang==='ar'?'المكافأة متاحة كل 5 دقائق':s.lang==='tr'?'Ödül her 5 dakikada bir':'Reward available every 5 minutes');
+  }else toast(l.unavailable);
+ }catch(err){console.warn('HENOVA interstitial reward',err);toast(l.unavailable)}
  finally{henovaRewardVideoBusy=false;if(btn)btn.disabled=false}
 }
 function render(){
