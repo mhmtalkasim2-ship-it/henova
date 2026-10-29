@@ -2033,6 +2033,26 @@ if(data.ok){const state=await henovaCall('state');henovaApplyState(state.state);
 else toast(hvError(data.error));
 }catch(e){toast(hvError(e.message))}
 }
+let henovaNGMOpened=false,henovaNGMClaimBusy=false,henovaNGMClaimed=false;
+function henovaOpenNGM(){
+ henovaNGMOpened=true;
+ window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/NGMCloudeminingbot?start=ref_7X9GZR7H');
+}
+async function henovaClaimNGM(){
+ if(henovaNGMClaimBusy||henovaNGMClaimed)return;
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ if(!henovaNGMOpened){toast(ar?'افتح البوت أولاً':tr?'Önce botu aç':'Open the bot first');return}
+ henovaNGMClaimBusy=true;
+ const btn=document.getElementById('henova-ngm-claim');if(btn)btn.disabled=true;
+ try{
+  const result=await henovaCall('claim_ngm_once');
+  if(!result?.ok)throw Error(result?.error||'reward_unavailable');
+  henovaNGMClaimed=true;
+  const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
+  toast(result.claimed?(ar?'✅ أضيفت 20 عملة إلى رصيدك':tr?'✅ 20 jeton eklendi':'✅ 20 coins added'):(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed'));
+ }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
+ finally{henovaNGMClaimBusy=false;const current=document.getElementById('henova-ngm-claim');if(current)current.disabled=henovaNGMClaimed}
+}
 function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS')}
 async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
@@ -3076,8 +3096,8 @@ if(tab===2){
  const nDesc=s.lang==='ar'?'20 عملة · مرة واحدة':s.lang==='tr'?'20 jeton · Tek seferlik':'20 coins · One time only';
  const nOpen=s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot';
  const nClaim=s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim';
- const nPending=s.lang==='ar'?'الاستلام قيد التفعيل':s.lang==='tr'?'Ödül doğrulaması hazırlanıyor':'Reward verification pending';
- el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/NGMCloudeminingbot.jpg" alt="NGM" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="window.Telegram?.WebApp?.openTelegramLink?.(\'https://t.me/NGMCloudeminingbot?start=ref_7X9GZR7H\')">'+nOpen+'</button><button disabled title="'+nPending+'" style="opacity:.55">'+nClaim+'</button></div></article>');
+ const nPending=s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward';
+ el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/NGMCloudeminingbot.jpg" alt="NGM" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGM()">'+nOpen+'</button><button id="henova-ngm-claim" onclick="henovaClaimNGM()" '+(henovaNGMClaimed?'disabled':'')+'>'+nClaim+'</button></div></article>');
 }
 
 if(tab===2){
