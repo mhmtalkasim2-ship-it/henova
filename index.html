@@ -2966,30 +2966,6 @@ function henovaAttachAdsgramTask(){
  task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending)});
  task.addEventListener('onBannerNotFound',()=>{const status=document.getElementById('henova-adsgram-status');if(status)status.textContent=henovaAdsgramLabels().unavailable});
 }
-/* Voluntary AdsGram interstitial placement int-56730.
-   Closing an interstitial is not a verified reward event. */
-let henovaInterstitialBusy=false;
-function henovaInterstitialLabels(){
- return ({en:{name:'Watch Sponsored Ad',reward:'15 eggs',button:'Watch Ad',pending:'The ad was closed. Eggs are awarded only after verified eligibility.',unavailable:'Ad unavailable. Try again later.'},
- ar:{name:'شاهد الإعلان الممول',reward:'15 بيضة',button:'مشاهدة الإعلان',pending:'تم إغلاق الإعلان. صرف البيض يحتاج تأكيد إكمال مؤهّل.',unavailable:'الإعلان غير متوفر حالياً.'},
- tr:{name:'Sponsorlu Reklamı İzle',reward:'15 yumurta',button:'Reklamı İzle',pending:'Reklam kapatıldı. Yumurta ödülü için doğrulanmış tamamlama gerekir.',unavailable:'Reklam şu anda kullanılamıyor.'}})[s.lang]||{name:'Watch Sponsored Ad',reward:'15 eggs',button:'Watch Ad',pending:'Verification required',unavailable:'Ad unavailable'};
-}
-async function henovaWatchInterstitialTask(){
- if(henovaInterstitialBusy)return;
- const l=henovaInterstitialLabels();
- if(!window.Telegram?.WebApp?.initData){toast('Open HENOVA in Telegram');return}
- if(!window.Adsgram?.init){toast(l.unavailable);return}
- henovaInterstitialBusy=true;
- const btn=document.getElementById('henova-interstitial-task-btn');
- if(btn)btn.disabled=true;
- try{
-  const controller=window.Adsgram.init({blockId:'int-56730',debug:false});
-  const result=await controller.show();
-  // AdsGram interstitial resolves on normal close, so don't mint withdrawable eggs here.
-  toast(result?.done?l.pending:l.unavailable);
- }catch(e){toast(l.unavailable)}
- finally{henovaInterstitialBusy=false;if(btn)btn.disabled=false}
-}
 function render(){
 updateFarmIdentity();
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
@@ -3009,8 +2985,6 @@ if(tab===2){
  const a=henovaAdsgramLabels();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card"><span class="face hv-sponsored-icon" aria-hidden="true">📣</span><div class="grow hv-sponsored-copy"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
  henovaAttachAdsgramTask();
- const il=henovaInterstitialLabels();
- el.insertAdjacentHTML('beforeend','<article class="item"><span class="face">📺</span><div class="grow"><h3>'+il.name+'</h3><p>🥚 '+il.reward+'</p></div><button id="henova-interstitial-task-btn" onclick="henovaWatchInterstitialTask()">'+il.button+'</button></article>');
 }
 if(tab===3){
 const w=s.lang==='ar'?
