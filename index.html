@@ -2977,9 +2977,9 @@ function henovaAttachAdsgramTask(){
 /* AdsGram video reward-56732: client confirms display only; backend callback credits eggs. */
 let henovaRewardVideoBusy=false;
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Rewarded Video',desc:'15 eggs · Every 5 minutes',button:'Watch Ad',completed:'Video completed. Awaiting verified reward.',unavailable:'Ad unavailable or skipped. No reward credited.'},
- ar:{title:'شاهد فيديو المكافأة',desc:'15 بيضة · كل 5 دقائق',button:'شاهد الإعلان',completed:'اكتمل الفيديو، بانتظار تأكيد المكافأة.',unavailable:'الإعلان غير متاح أو تم تخطيه. لم تُصرف المكافأة.'},
- tr:{title:'Ödüllü Video İzle',desc:'15 yumurta · Her 5 dakikada bir',button:'Reklam İzle',completed:'Video tamamlandı. Ödül doğrulaması bekleniyor.',unavailable:'Reklam mevcut değil veya atlandı. Ödül verilmedi.'}})[s.lang]||({title:'Watch Rewarded Video',desc:'15 eggs · Every 5 minutes',button:'Watch Ad',completed:'Awaiting verified reward',unavailable:'Ad unavailable'});
+ return ({en:{title:'Watch Rewarded Video',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',completed:'Video completed. Awaiting verified reward.',unavailable:'Ad unavailable or skipped. No reward credited.'},
+ ar:{title:'شاهد فيديو المكافأة',desc:'5 بيضات · كل 5 دقائق',button:'شاهد الإعلان',completed:'اكتمل الفيديو، بانتظار تأكيد المكافأة.',unavailable:'الإعلان غير متاح أو تم تخطيه. لم تُصرف المكافأة.'},
+ tr:{title:'Ödüllü Video İzle',desc:'5 yumurta · Her 5 dakikada bir',button:'Reklam İzle',completed:'Video tamamlandı. Ödül doğrulaması bekleniyor.',unavailable:'Reklam mevcut değil veya atlandı. Ödül verilmedi.'}})[s.lang]||({title:'Watch Rewarded Video',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',completed:'Awaiting verified reward',unavailable:'Ad unavailable'});
 }
 async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
