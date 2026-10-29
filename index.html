@@ -2981,7 +2981,7 @@ async function henovaWatchRewardVideo(){
  henovaRewardVideoBusy=true;
  const btn=document.getElementById('henova-reward-video-btn');if(btn)btn.disabled=true;
  try{
-  const video=window.Adsgram.init({blockId:'reward-56732',debug:false});
+  const video=window.Adsgram.init({blockId:'56732',debug:false});
   const result=await video.show();
   if(result?.done===true&&!result.error){
    toast(l.completed);
