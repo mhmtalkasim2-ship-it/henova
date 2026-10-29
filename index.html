@@ -1980,7 +1980,7 @@ async function henovaAction(action,item){
   if(!henovaReady)return toast('Connecting to HENOVA server');
   if(henovaBusy)return;
   henovaBusy=true;
-  const previousEggs=s.eggs;
+  const previousEggs=s.eggs,previousCoins=s.coins;
   const hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());
   try{
     // Reuse the identical request ID after network failure: no duplicate payouts.
@@ -1999,7 +1999,7 @@ async function henovaAction(action,item){
     if(action==='collect'){
       const diff=Math.max(0,s.eggs-previousEggs);
       if(diff>0){playCollectEggs(hens,diff);toast('+'+diff+' eggs collected!')}
-    }else if(action==='daily')toast('+50 Coins!');
+    }else if(action==='daily'){if(s.coins>=previousCoins+50)henovaShowRewardCard(50,'coins');else toast('Daily reward already claimed')}
     else if(action==='purchase')toast('New hen added!');
     else if(action==='boost')toast('Power upgraded!');
   }catch(error){
@@ -2029,7 +2029,7 @@ const app=window.Telegram?.WebApp;
 if(!app?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
 try{
 const data=await henovaCall('join_channel',{requestId:crypto.randomUUID()});
-if(data.ok){const state=await henovaCall('state');henovaApplyState(state.state);render();toast('+20 Coins!')}
+if(data.ok){const oldCoins=s.coins;const state=await henovaCall('state');henovaApplyState(state.state);render();if(state.state.coins>=oldCoins+20)henovaShowRewardCard(20,'coins');else toast(s.lang==='ar'?'تم التحقق، لا توجد مكافأة جديدة':s.lang==='tr'?'Doğrulandı, yeni ödül yok':'Verified; no new reward')}
 else toast(hvError(data.error));
 }catch(e){toast(hvError(e.message))}
 }
@@ -2049,7 +2049,7 @@ async function henovaClaimNGM(){
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaNGMClaimed=true;
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
-  toast(result.claimed?(ar?'✅ أضيفت 20 عملة إلى رصيدك':tr?'✅ 20 jeton eklendi':'✅ 20 coins added'):(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed'));
+  if(result.claimed)henovaShowRewardCard(20,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaNGMClaimBusy=false;const current=document.getElementById('henova-ngm-claim');if(current)current.disabled=henovaNGMClaimed}
 }
@@ -2059,7 +2059,7 @@ async function henovaCheckWithdrawals(){
  try{
   const result=await henovaCall('verify_withdrawals_channel');
   const message=!result.joined?hvError('not_joined'):result.reward_claimed?(s.lang==='ar'?'✅ تم إضافة 20 عملة إلى رصيدك':s.lang==='tr'?'✅ Bakiyene 20 jeton eklendi':'✅ 20 coins added to your balance'):(s.lang==='ar'?'✅ تم تأكيد الاشتراك، المكافأة مستلمة سابقاً':s.lang==='tr'?'✅ Üyelik onaylandı, ödül daha önce alındı':'✅ Membership verified; reward already claimed');
-  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);}
+  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);render();henovaShowRewardCard(20,'coins')}
   if(field)field.textContent=message;
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
@@ -3017,7 +3017,7 @@ function henovaAttachAdsgramTask(){
  const task=document.getElementById('henova-adsgram-task');
  if(!task||task.dataset.henovaBound==='1')return;
  task.dataset.henovaBound='1';
- task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending)});
+ task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward()});
  task.addEventListener('onBannerNotFound',()=>{const status=document.getElementById('henova-adsgram-status');if(status)status.textContent=henovaAdsgramLabels().unavailable});
 }
 /* AdsGram video reward-56732: client confirms display only; backend callback credits eggs. */
@@ -3027,10 +3027,11 @@ function henovaVideoRewardText(){
  ar:{title:'شاهد الإعلان وانقر عليه',desc:'5 بيضات · كل 5 دقائق',button:'شاهد الإعلان',completed:'اكتمل الفيديو، بانتظار تأكيد المكافأة.',unavailable:'الإعلان غير متاح أو تم تخطيه. لم تُصرف المكافأة.'},
  tr:{title:'Reklamı İzle ve Tıkla',desc:'5 yumurta · Her 5 dakikada bir',button:'Reklam İzle',completed:'Video tamamlandı. Ödül doğrulaması bekleniyor.',unavailable:'Reklam mevcut değil veya atlandı. Ödül verilmedi.'}})[s.lang]||({title:'Watch Ad and Tap to Visit',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',completed:'Awaiting verified reward',unavailable:'Ad unavailable'});
 }
-function henovaShowVideoRewardCard(){
- const ar=s.lang==='ar',tr=s.lang==='tr';
+function henovaShowRewardCard(amount,unit){
+ const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
  const headline=ar?'تمت إضافة المكافأة!':tr?'Ödül eklendi!':'Reward Added!';
- const detail=ar?'تمت إضافة 5 بيضات إلى رصيدك بنجاح.':tr?'Bakiyene 5 yumurta eklendi.':'5 eggs have been added to your balance.';
+ const quantity=String(amount)+' '+(eggs?(ar?'بيضات':tr?'yumurta':'eggs'):(ar?'عملة':tr?'jeton':'coins'));
+ const detail=ar?'تمت إضافة '+quantity+' إلى رصيدك بنجاح.':tr?quantity+' bakiyene eklendi.':quantity+' added to your balance successfully.';
  const close=ar?'حسناً':tr?'Tamam':'Great!';
  document.getElementById('henova-video-reward-popup')?.remove();
  const shade=document.createElement('div');
@@ -3038,11 +3039,26 @@ function henovaShowVideoRewardCard(){
  shade.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(9,31,18,.57);display:flex;align-items:center;justify-content:center;padding:22px';
  const card=document.createElement('section');
  card.style.cssText='background:#fffdf4;color:#244c33;border:2px solid #e1c66f;border-radius:25px;max-width:360px;width:100%;padding:26px 22px;box-shadow:0 20px 55px #10291344;text-align:center';
- const icon=document.createElement('div');icon.textContent='🥚';icon.style.cssText='font-size:62px;margin-bottom:7px';
+ const ico=document.createElement('div');ico.textContent=eggs?'🥚':'🪙';ico.style.cssText='font-size:62px;margin-bottom:7px';
  const h=document.createElement('h2');h.textContent=headline;h.style.cssText='font-size:23px;margin:0 0 9px';
  const p=document.createElement('p');p.textContent=detail;p.style.cssText='font-size:17px;color:#58815c;margin:0 0 20px;line-height:1.5';
  const btn=document.createElement('button');btn.type='button';btn.textContent=close;btn.style.cssText='background:#f5c253;color:#283d24;border:0;border-radius:13px;padding:12px 34px;font-size:17px;font-weight:800';btn.onclick=()=>shade.remove();
- card.append(icon,h,p,btn);shade.appendChild(card);document.body.appendChild(shade);
+ card.append(ico,h,p,btn);shade.appendChild(card);document.body.appendChild(shade);
+}
+function henovaShowVideoRewardCard(){henovaShowRewardCard(5,'eggs')}
+async function henovaWatchSponsoredReward(){
+ try{
+  const initial=await henovaCall('state');
+  if(!Number.isFinite(initial?.state?.eggs))return;
+  for(let i=0;i<6;i++){
+   await new Promise(r=>setTimeout(r,2000));
+   const current=await henovaCall('state').catch(()=>null);
+   if(current?.state){
+    henovaApplyState(current.state);render();
+    if(current.state.eggs>=initial.state.eggs+25){henovaShowRewardCard(25,'eggs');break}
+   }
+  }
+ }catch(e){console.warn('Sponsored reward refresh',e)}
 }
 async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
