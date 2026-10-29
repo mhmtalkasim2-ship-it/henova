@@ -871,6 +871,12 @@ Deno.serve(async (request) => {
       sender:settings.data.payout_wallet_address,network:"-239"
     },requires_manual_tonkeeper_signature:true,not_chain_confirmed:true});
   }
+  if (action === "claim_ngm_once") {
+    // One-time external-bot visit reward; does not imply verified membership.
+    const { data, error } = await admin.rpc("henova_claim_ngm_once", {p_telegram_id: telegram.id});
+    if (error) { console.error("NGM claim failed", error.code); return reply({ok:false,error:"reward_unavailable"},503); }
+    return reply(data);
+  }
   if (action === "verify_withdrawals_channel") {
     // Verification only: do not grant coins until a separate audited reward
     // policy and idempotent reward ledger are configured.
