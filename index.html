@@ -2289,6 +2289,27 @@ function henovaRenderSigningQueue(items){
  recover.textContent='🔎 Recover grouped signing receipt';
  recover.onclick=()=>henovaRecoverAdminBatch();
  root.append(recover);
+ const verifyGroup=document.createElement('button');verifyGroup.type='button';verifyGroup.className='henova-wallet-save';
+ verifyGroup.textContent='🔎 Verify 5 TON transfers & publish proofs';
+ verifyGroup.onclick=async()=>{
+  verifyGroup.disabled=true;
+  try{
+   let prior=null;try{prior=JSON.parse(localStorage.getItem('henova-last-batch-pending')||'null')}catch{}
+   if(!prior?.batchId)throw Error('No saved batch on this device. Do not sign again.');
+   const res=await henovaCall('admin_batch_audit',{batchId:prior.batchId});
+   const finalized=res?.evidence?.finalization;
+   if(finalized?.ok===true){
+    localStorage.removeItem('henova-last-batch-pending');
+    const notices=res?.evidence?.notices||[];
+    alert('TON transfers confirmed and recorded. Proof publishing results: '+notices.filter(x=>x.notice?.sent).length+'/'+notices.length+'. Check the withdrawals channel.');
+   }else{
+    alert('TON verification is not complete. No new payment was sent.\\n\\n'+JSON.stringify({verified:res.recipient_credits_verified,evidence:res.evidence}).slice(0,700));
+   }
+   await henovaShowAdminPayouts();
+  }catch(e){alert('Verification pending: '+String(e.message||e).slice(0,180)+'\\nDo NOT send another payment.');}
+  finally{verifyGroup.disabled=false}
+ };
+ root.append(verifyGroup);
 
  const queue=Array.isArray(items)?items:window.henovaLastAdminQueue||[];
  const current=queue.find(x=>Number(x.id)===henovaSigningQueue[0]);
