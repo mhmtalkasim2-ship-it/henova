@@ -2770,9 +2770,13 @@ async function henovaSignAdminBatch(ids){
   reserved=true;
   localStorage.setItem('henova-last-batch-pending',JSON.stringify({batchId:intent.batch_id,ids,at:Date.now()}));
   if(intent.messages?.length!==5||intent.sender!==expected)throw Error('Batch intent mismatch; do not sign');
-  for(let i=0;i<5;i++){
-   const a=review.targets[i],b=intent.messages[i];
-   if(Number(a.id)!==Number(b.withdrawal_id)||a.destination!==b.address||a.amountNanograms!==b.amount)
+  // The server returns batch items sorted by withdrawal ID; the signing queue
+  // can have a different order. Match each item by ID, not by array position.
+  const reviewed=new Map(review.targets.map(x=>[Number(x.id),x]));
+  if(reviewed.size!==5)throw Error('Duplicate review ID; do not sign');
+  for(const b of intent.messages){
+   const a=reviewed.get(Number(b.withdrawal_id));
+   if(!a||a.destination!==b.address||a.amountNanograms!==b.amount)
     throw Error('Batch content changed; do not sign');
   }
   const result=await henovaTonUI.sendTransaction({
