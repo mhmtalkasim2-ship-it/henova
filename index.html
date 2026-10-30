@@ -2161,7 +2161,7 @@ function henovaStartAutomaticTONMonitor(){
   if(!document.body.classList.contains('henova-payout-admin-active')){
    clearInterval(henovaAutoMonitorInterval);henovaAutoMonitorInterval=null;return;
   }
-  if(document.hidden||henovaAutoCheckBusy)return;
+  if(document.hidden||henovaAutoCheckBusy||henovaReconcileBusy)return;
   void henovaShowAdminPayouts();
  },30000);
 }
