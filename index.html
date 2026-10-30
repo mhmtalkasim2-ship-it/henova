@@ -2736,10 +2736,15 @@ async function henovaSignAdminBatch(ids){
    if(signedReceipt||!Array.isArray(old.ids)||old.ids.length!==5)
     throw Error('Prior grouped signing requires recovery. Never sign twice.');
    const fresh=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:old.ids});
-   const confirmed=fresh.all_confirmed===true;
-   if(!confirmed)throw Error('Prior grouped signing is not fully confirmed. Check its TON payments first.');
-   localStorage.removeItem('henova-last-batch-pending');
-   toast('Earlier 5 transfers confirmed on TON. Old local signing lock cleared.');
+   if(fresh.all_confirmed===true){
+    localStorage.removeItem('henova-last-batch-pending');
+    toast('Earlier five transfers verified. Local lock cleared.');
+   }else if(!old.batchId||old.ids.some((x,i)=>!ids.includes(x))){
+    throw Error('An earlier different batch remains reserved. Do not sign again.');
+   }else{
+    // The same reserved batch may be resumed, never claimed twice.
+    toast('Existing reserved batch found. Reusing its signing attempt.');
+   }
   }
   if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect unavailable');
   if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
@@ -2766,9 +2771,15 @@ async function henovaSignAdminBatch(ids){
    '\n\nTotal: '+(Number(total)/1e9).toFixed(9)+' GRAM + network fees'+
    '\n\nReview all 5 recipients in Tonkeeper. Only sign once. Continue?'))return;
   // Lock the whole group atomically; never unlock automatically on cancel or timeout.
-  const intent=await henovaCall('admin_batch_intent',{withdrawalIds:ids});
+  const saved=localStorage.getItem('henova-last-batch-pending');
+  let prior=null;try{prior=saved?JSON.parse(saved):null}catch{}
+  const reuse=prior?.batchId&&Array.isArray(prior.ids)&&prior.ids.length===5
+    &&prior.ids.every(x=>ids.includes(x));
+  const intent=reuse
+    ?await henovaCall('admin_batch_resume',{batchId:prior.batchId,withdrawalIds:ids})
+    :await henovaCall('admin_batch_intent',{withdrawalIds:ids});
   reserved=true;
-  localStorage.setItem('henova-last-batch-pending',JSON.stringify({batchId:intent.batch_id,ids,at:Date.now()}));
+  if(!reuse)localStorage.setItem('henova-last-batch-pending',JSON.stringify({batchId:intent.batch_id,ids,at:Date.now()}));
   if(intent.messages?.length!==5||intent.sender!==expected)throw Error('Batch intent mismatch; do not sign');
   // The server returns batch items sorted by withdrawal ID; the signing queue
   // can have a different order. Match each item by ID, not by array position.
