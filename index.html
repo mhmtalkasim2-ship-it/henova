@@ -2771,24 +2771,29 @@ async function henovaSignAdminBatch(ids){
   const previous=localStorage.getItem('henova-last-batch-pending');
   const signedReceipt=localStorage.getItem('henova-last-batch-signing');
   if(previous||signedReceipt){
-   let old;try{old=JSON.parse(previous||'{}')}catch{old={}}
-   let receipt;try{receipt=JSON.parse(signedReceipt||'null')}catch{receipt=null}
-   const recorded=Array.isArray(old.ids)&&old.ids.length===5?old:receipt;
-   if(!recorded?.batchId||!Array.isArray(recorded.ids)||recorded.ids.length!==5
-     ||new Set(recorded.ids.map(Number)).size!==5
-     ||(receipt&&old.batchId&&receipt.batchId!==old.batchId))
-    throw Error('Prior grouped signing requires recovery. Never sign twice.');
-   const fresh=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:recorded.ids});
-   if(fresh.all_confirmed===true){
-    localStorage.removeItem('henova-last-batch-pending');
-    localStorage.removeItem('henova-last-batch-signing');
-    toast('Earlier five verified TON transfers confirmed. Stale local receipts cleared.');
-   }else if(receipt){
-    throw Error('Previously signed batch is not fully confirmed. Recover or verify it; never sign twice.');
-   }else if(recorded.ids.some(x=>!ids.includes(Number(x)))){
-    throw Error('An earlier different batch remains reserved. Do not sign again.');
-   }else{
-    toast('Existing reserved batch found. Reusing its signing attempt.');
+   const records=[];
+   for(const [key,value] of [['henova-last-batch-pending',previous],['henova-last-batch-signing',signedReceipt]]){
+    if(!value)continue;
+    let record=null;try{record=JSON.parse(value)}catch{}
+    if(!record?.batchId||!Array.isArray(record.ids)||record.ids.length!==5
+       ||new Set(record.ids.map(Number)).size!==5)
+     throw Error('Old batch record needs manual review; do not sign again.');
+    records.push({key,...record});
+   }
+   // Different old batches can be saved under the two keys. Check and clear
+   // EACH only after the authoritative server verifies all five payments.
+   for(const record of records){
+    const result=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:record.ids.map(Number)});
+    if(result.all_confirmed===true){
+     localStorage.removeItem(record.key);
+     toast('Five previously paid withdrawals verified; stale receipt cleared.');
+    }else if(record.key==='henova-last-batch-signing'){
+     throw Error('Previous signed batch still needs settlement review; never sign twice.');
+    }else if(record.ids.some(x=>!ids.includes(Number(x)))){
+     throw Error('Different reserved batch still pending; never sign twice.');
+    }else{
+     toast('Existing reserved batch found. Reusing its signing attempt.');
+    }
    }
   }
   if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect unavailable');
