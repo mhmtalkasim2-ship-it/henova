@@ -2236,8 +2236,8 @@ function henovaRenderSigningQueue(items){
   try{
    const ids=henovaSigningQueue.slice(0,5);
    const result=await henovaCall('admin_batch_preview',{withdrawalIds:ids});
-   const description=result.targets.map(x=>'#'+x.id+' · '+x.gram+' GRAM').join('\\n');
-   alert('Batch preview — NO PAYMENT will be sent\\n\\n'+description+'\\n\\nA single Tonkeeper signature will be enabled only after independent on-chain proof for every recipient is complete.');
+   const description=result.targets.map(x=>'#'+x.id+' · '+x.gram+' GRAM').join('\n');
+   alert('Batch preview — NO PAYMENT will be sent\n\n'+description+'\n\nA single Tonkeeper signature will be enabled only after independent on-chain proof for every recipient is complete.');
   }catch(e){toast('Batch preview: '+String(e.message||e).slice(0,85))}
   finally{batch.disabled=false}
  };
