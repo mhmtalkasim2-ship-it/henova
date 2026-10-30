@@ -3323,7 +3323,22 @@ function setupTelegram(){
   }
 }
 setupTelegram();
-if(window.Telegram?.WebApp?.initData){henovaMathGate('entry').catch(e=>{if(e?.message!=='verification_cancelled')console.warn('Entry verification unavailable',e)})}
+// Telegram can provide initData after the first script tick; retry briefly instead of silently skipping.
+let henovaEntryCheckLaunched=false;
+function henovaStartEntryCheck(tries=0){
+ if(henovaEntryCheckLaunched)return;
+ if(!window.Telegram?.WebApp?.initData){
+  if(tries<24)setTimeout(()=>henovaStartEntryCheck(tries+1),500);
+  return;
+ }
+ henovaEntryCheckLaunched=true;
+ henovaMathGate('entry').catch(e=>{
+  console.warn('HENOVA entry verification',e);
+  toast(s.lang==='ar'?'تعذر تحميل التحقق الأمني، حاول إعادة فتح البوت':'Security check unavailable. Please reopen HENOVA.');
+ });
+}
+setTimeout(()=>henovaStartEntryCheck(),350);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)henovaStartEntryCheck()});
 if(new URLSearchParams(location.search).get('admin')==='payouts'){
   // Render after Telegram initialization; no server access without valid initData.
   setTimeout(henovaShowAdminPayouts,100);
