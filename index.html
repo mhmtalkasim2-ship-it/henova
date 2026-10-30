@@ -2420,7 +2420,7 @@ async function henovaShowAdminPayouts(){
   renderHenovaBatchStatus();
   // Only actionable requests belong in the primary queue. Broadcast payments
   // stay in the backend for automatic TON verification, not manual approval.
-  for(const item of data.items.filter(x=>x.status==='pending'||(x.status==='approved'&&!x.signing_claimed_at&&!x.signed_boc_hash))){
+  for(const item of data.items.filter(x=>x.status==='pending'||x.status==='approved')){
    const card=document.createElement('section');card.className='henova-wallet-card';
    if(item.status==='pending'){
     const label=document.createElement('label');label.style.cssText='display:flex;gap:9px;align-items:center;margin-bottom:10px';
