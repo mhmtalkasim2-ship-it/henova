@@ -2763,7 +2763,19 @@ async function henovaSignAdminBatch(ids){
   const wc=bytes[1]>127?bytes[1]-256:bytes[1];
   const treasury=wc+':'+Array.from(bytes.slice(2,34),x=>x.toString(16).padStart(2,'0')).join('');
   if(String(w.account.address||'').toLowerCase()!==treasury)throw Error('Wrong wallet. Connect HENOVA Payouts.');
-  const review=await henovaCall('admin_batch_preview',{withdrawalIds:ids});
+  const saved=localStorage.getItem('henova-last-batch-pending');
+  let prior=null;try{prior=saved?JSON.parse(saved):null}catch{}
+  const reuse=!!(prior?.batchId&&Array.isArray(prior.ids)&&prior.ids.length===5
+    &&prior.ids.every(x=>ids.includes(x)));
+  // Reserved requests deliberately fail the fresh-batch preview. For an existing
+  // signing reservation, retrieve the authoritative stored transfer details.
+  const resumed=reuse
+    ?await henovaCall('admin_batch_resume',{batchId:prior.batchId,withdrawalIds:ids})
+    :null;
+  const review=resumed
+    ?{targets:resumed.messages.map(x=>({id:x.withdrawal_id,destination:x.address,
+       amountNanograms:x.amount,gram:(Number(BigInt(x.amount))/1e9).toString()}))}
+    :await henovaCall('admin_batch_preview',{withdrawalIds:ids});
   if(review.targets.length!==5)throw Error('Incomplete batch preview');
   const detail=review.targets.map(x=>'#'+x.id+' · '+x.gram+' GRAM · '+x.destination).join('\n');
   const total=review.targets.reduce((sum,x)=>sum+BigInt(x.amountNanograms),0n);
@@ -2771,13 +2783,7 @@ async function henovaSignAdminBatch(ids){
    '\n\nTotal: '+(Number(total)/1e9).toFixed(9)+' GRAM + network fees'+
    '\n\nReview all 5 recipients in Tonkeeper. Only sign once. Continue?'))return;
   // Lock the whole group atomically; never unlock automatically on cancel or timeout.
-  const saved=localStorage.getItem('henova-last-batch-pending');
-  let prior=null;try{prior=saved?JSON.parse(saved):null}catch{}
-  const reuse=prior?.batchId&&Array.isArray(prior.ids)&&prior.ids.length===5
-    &&prior.ids.every(x=>ids.includes(x));
-  const intent=reuse
-    ?await henovaCall('admin_batch_resume',{batchId:prior.batchId,withdrawalIds:ids})
-    :await henovaCall('admin_batch_intent',{withdrawalIds:ids});
+  const intent=resumed||await henovaCall('admin_batch_intent',{withdrawalIds:ids});
   reserved=true;
   if(!reuse)localStorage.setItem('henova-last-batch-pending',JSON.stringify({batchId:intent.batch_id,ids,at:Date.now()}));
   if(intent.messages?.length!==5||intent.sender!==expected)throw Error('Batch intent mismatch; do not sign');
