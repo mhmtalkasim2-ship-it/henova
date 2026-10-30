@@ -2245,7 +2245,8 @@ function henovaRenderSigningQueue(items){
    await henovaShowAdminPayouts();return;
   }
   try{
-   const result=await henovaCall(current.signed_boc_hash?'admin_track_signed_payout':'admin_verify_known_payout',{withdrawalId:current.id});
+   if(!current.signed_boc_hash){toast('No signed receipt recorded. Review Tonkeeper history manually; do not sign again.');return;}
+   const result=await henovaCall('admin_track_signed_payout',{withdrawalId:current.id});
    if(result?.confirmed){
     henovaSigningQueue.shift();henovaSaveSigningQueue();
     toast('Confirmed #'+current.id+'. Next signature is available.');
