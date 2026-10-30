@@ -1900,6 +1900,24 @@ main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action{width:100%;max
 main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action button{display:block;width:100%;max-width:none}
 main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-action{width:100%!important;min-width:0!important;max-width:100%!important}
 main.hv-tasks-mode #view adsgram-task{display:block;max-width:100%;width:100%;min-width:0}
+/* Sponsored AdsGram task: match HENOVA yellow action button without changing ad handling. */
+main.hv-tasks-mode #henova-adsgram-task::part(button),
+main.hv-tasks-mode #henova-adsgram-task::part(action),
+main.hv-tasks-mode #henova-adsgram-task::part(task-button),
+main.hv-tasks-mode #henova-adsgram-task button,
+main.hv-tasks-mode #henova-adsgram-task [role="button"],
+main.hv-tasks-mode .hv-sponsored-task-vertical .hv-sponsored-action button{
+ background:#fac756!important;
+ background-color:#fac756!important;
+ color:#211b0d!important;
+ border:0!important;
+ border-radius:16px!important;
+ font-weight:700!important;
+ box-shadow:none!important;
+}
+main.hv-tasks-mode #henova-adsgram-task [slot="button"],
+main.hv-tasks-mode #henova-adsgram-task [slot="claim"]{color:#211b0d!important;font-weight:700!important}
+
 @media(max-width:390px){
  main.hv-tasks-mode #view>.item{gap:9px;padding:12px}
  main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:48px!important;height:48px!important;flex-basis:48px!important}
