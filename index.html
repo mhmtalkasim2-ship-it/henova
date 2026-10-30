@@ -2228,7 +2228,22 @@ function henovaRenderSigningQueue(items){
  if(!root)return;
  root.replaceChildren();
  if(!henovaSigningQueue.length){root.textContent='No signing queue selected.';return}
- const title=document.createElement('strong');title.textContent='🔐 Sequential Tonkeeper signing · '+henovaSigningQueue.length+' left';root.append(title);
+ const title=document.createElement('strong');title.textContent='🔐 Sequential Tonkeeper signing · '+henovaSigningQueue.length+' left';root.append(title); 
+ const batch=document.createElement('button');batch.type='button';batch.className='henova-wallet-save';
+ batch.textContent='🧾 Preview one-signature batch ('+Math.min(henovaSigningQueue.length,5)+' requests)';
+ batch.onclick=async()=>{
+  batch.disabled=true;
+  try{
+   const ids=henovaSigningQueue.slice(0,5);
+   const result=await henovaCall('admin_batch_preview',{withdrawalIds:ids});
+   const description=result.targets.map(x=>'#'+x.id+' · '+x.gram+' GRAM').join('\\n');
+   alert('Batch preview — NO PAYMENT will be sent\\n\\n'+description+'\\n\\nA single Tonkeeper signature will be enabled only after independent on-chain proof for every recipient is complete.');
+  }catch(e){toast('Batch preview: '+String(e.message||e).slice(0,85))}
+  finally{batch.disabled=false}
+ };
+ batch.disabled=henovaSigningQueue.length<2;
+ root.append(batch);
+
  const queue=Array.isArray(items)?items:window.henovaLastAdminQueue||[];
  const current=queue.find(x=>Number(x.id)===henovaSigningQueue[0]);
  if(!current){const note=document.createElement('p');note.textContent='Refresh the admin queue to check the next withdrawal.';root.append(note);return}
