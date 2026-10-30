@@ -2310,6 +2310,24 @@ function henovaRenderSigningQueue(items){
   finally{verifyGroup.disabled=false}
  };
  root.append(verifyGroup);
+ const publish=document.createElement('button');publish.type='button';publish.className='henova-wallet-save';
+ publish.textContent='📢 Publish 5 verified withdrawal proofs';
+ publish.onclick=async()=>{
+  publish.disabled=true;
+  try{
+   let prior=null;try{prior=JSON.parse(localStorage.getItem('henova-last-batch-pending')||'null')}catch{}
+   if(!prior?.batchId)throw Error('No saved batch identifier on this device');
+   const res=await henovaCall('admin_batch_publish_verified',{batchId:prior.batchId});
+   const results=res.results||[];
+   const complete=results.filter(x=>x.already_published||x.notice?.stored).length;
+   alert('Verified withdrawals: '+results.length+'\\nProof notices published or already recorded: '+complete+
+    '\\nNo new transfer was sent.');
+   if(complete===results.length&&results.length===5)localStorage.removeItem('henova-last-batch-pending');
+   await henovaShowAdminPayouts();
+  }catch(e){alert('Proof publication: '+String(e.message||e).slice(0,180)+'\\nNo new payment was sent.')}
+  finally{publish.disabled=false}
+ };
+ root.append(publish);
 
  const queue=Array.isArray(items)?items:window.henovaLastAdminQueue||[];
  const current=queue.find(x=>Number(x.id)===henovaSigningQueue[0]);
