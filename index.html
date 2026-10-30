@@ -2243,6 +2243,31 @@ function henovaRenderSigningQueue(items){
  };
  batch.disabled=henovaSigningQueue.length<2;
  root.append(batch);
+ const capability=document.createElement('button');capability.type='button';capability.className='henova-wallet-save';
+ capability.textContent='🔎 Check Tonkeeper 5-payment support';
+ capability.onclick=async()=>{
+  capability.disabled=true;
+  try{
+   if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TonConnect unavailable');
+   if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
+    manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
+   });
+   if(!henovaTonUI.wallet){
+    await henovaTonUI.openModal();
+    toast('Connect HENOVA Payouts, then check again.');
+    return;
+   }
+   const w=henovaTonUI.wallet;
+   const feature=(w.device?.features||[]).find(f=>typeof f==='object'&&f.name==='SendTransaction');
+   const limit=Number(feature?.maxMessages||0);
+   const app=String(w.device?.appName||'Wallet');
+   alert(app+' supports '+limit+' transfers in one signature.\n'+
+    (limit>=5?'Five-message signing is supported by this wallet. No payment has been sent.':
+    'This wallet does not advertise support for five transfers. No payment has been sent.'));
+  }catch(e){toast('Wallet capability: '+String(e.message||e).slice(0,90))}
+  finally{capability.disabled=false}
+ };
+ root.append(capability);
 
  const queue=Array.isArray(items)?items:window.henovaLastAdminQueue||[];
  const current=queue.find(x=>Number(x.id)===henovaSigningQueue[0]);
