@@ -1966,7 +1966,7 @@ async function henovaCall(action,details={}){
     body:JSON.stringify({initData,action,...details}),cache:'no-store'
   });
   const data=await response.json();
-  if(!response.ok || data?.ok===false)throw Error(String(data?.error||'server_unavailable'));
+  if(!response.ok || data?.ok===false){const err=new Error(String(data?.error||'server_unavailable'));err.diagnostics=data?.diagnostics;throw err;}
   return data;
 }
 async function henovaLoad(){
@@ -2258,7 +2258,7 @@ async function henovaVerifyKnownTONHash(){
  try{
   const result=await henovaCall('admin_verify_payout',{withdrawalId:id,txHash:hash});
   if(out)out.textContent=result.confirmed?'✅ TON confirmed. Proof posting attempted: '+JSON.stringify(result.notice||{}):JSON.stringify(result);
- }catch(e){if(out)out.textContent='Verification rejected: '+String(e.message||e)}
+ }catch(e){if(out)out.textContent='Verification rejected: '+String(e.message||e)+(e.diagnostics?' · TON checks: '+JSON.stringify(e.diagnostics):'')}
  finally{if(btn)btn.disabled=false}
 }
 async function henovaShowAdminPayouts(){
