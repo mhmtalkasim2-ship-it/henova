@@ -2325,6 +2325,8 @@ async function henovaShowAdminPayouts(){
  henovaStartAutomaticTONMonitor();
  try{
   const data=await henovaCall('admin_payout_queue');
+  data.items=(data.items||[]).filter(x=>Number(x.id)>291);
+  data.unverified_items=(data.unverified_items||[]).filter(x=>Number(x.id)>291);
   if(data.channel_notice?.stored)toast('✅ Withdrawal proof published to @HENOVA_WITHDRAWALS');
   else if(data.channel_notice?.error)toast('Channel: '+String(data.channel_notice.description||data.channel_notice.error).slice(0,95));
   const status=document.getElementById('henova-admin-state');
