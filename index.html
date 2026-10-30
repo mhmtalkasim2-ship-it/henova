@@ -2349,8 +2349,8 @@ async function henovaShowAdminPayouts(){
    finally{audit.disabled=false}
   };
   document.querySelector('.henova-admin-head')?.append(audit);
-  window.henovaLastAdminQueue=data.items||[];
-  henovaRenderSigningQueue(data.items||[]);
+  window.henovaLastAdminQueue=(data.items||[]).filter(x=>Number(x.id)>291);
+  henovaRenderSigningQueue((data.items||[]).filter(x=>Number(x.id)>291));
   const list=document.getElementById('henova-admin-list');
   if(!list)return;
   list.replaceChildren();
@@ -2380,7 +2380,7 @@ async function henovaShowAdminPayouts(){
   // Test-only signing: this does not unlock production payout authorization.
   try{
    const tests=await henovaCall('admin_test_queue');
-   const test=(tests.items||[]).find(x=>Number(x.id)===3);
+   const test=null; // Hide test request #3 from admin view; records remain intact.
    if(test){
     const t=document.createElement('section');t.className='henova-wallet-card';
     const title=document.createElement('h3');title.textContent='🧪 TEST #3 · '+test.status;t.append(title);
@@ -2420,7 +2420,7 @@ async function henovaShowAdminPayouts(){
   renderHenovaBatchStatus();
   // Only actionable requests belong in the primary queue. Broadcast payments
   // stay in the backend for automatic TON verification, not manual approval.
-  for(const item of data.items.filter(x=>x.status==='pending'||x.status==='approved')){
+  for(const item of data.items.filter(x=>Number(x.id)>291&&(x.status==='pending'||x.status==='approved'))){
    const card=document.createElement('section');card.className='henova-wallet-card';
    if(item.status==='pending'){
     const label=document.createElement('label');label.style.cssText='display:flex;gap:9px;align-items:center;margin-bottom:10px';
