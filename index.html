@@ -2460,11 +2460,36 @@ async function henovaDiagnoseJetton(){
   if(out)out.textContent='Request #'+id+' · '+(r.matched||[]).length+' candidate transfers · '+(r.scanned||0)+' checked · '+JSON.stringify({matches:r.matched||[],sample:r.sample||[],window:r.search_window||null}).slice(0,1600);
  }catch(err){if(out)out.textContent='Jetton lookup: '+String(err.message||err).slice(0,120)}
 }
+async function henovaFindWithdrawal(){
+ const field=document.getElementById('henova-find-request-id');
+ const output=document.getElementById('henova-find-request-result');
+ if(!field||!output)return;
+ const id=Number(field.value);
+ if(!Number.isSafeInteger(id)||id<1){output.textContent='Enter a valid request number.';return}
+ output.textContent='Searching…';
+ try{
+  const result=await henovaCall('admin_find_withdrawal',{withdrawalId:id});
+  const r=result.request;
+  if(!r){output.textContent='No withdrawal found for #'+id;return}
+  output.innerHTML='';
+  const panel=document.createElement('div');
+  panel.style.cssText='padding:12px;border:1px solid #b4d0b6;border-radius:10px;background:#fff;color:#244b36;line-height:1.7';
+  const add=(label,value)=>{const line=document.createElement('div');const b=document.createElement('strong');b.textContent=label+': ';line.append(b,document.createTextNode(String(value??'—')));panel.append(line)};
+  add('Request','#'+r.id);add('Status',r.status);add('Telegram user',r.telegram_id);
+  add('Eggs',r.eggs_amount);add('GRAM',r.gram_amount);
+  add('Submitted',r.created_at?new Date(r.created_at).toLocaleString():'—');
+  add('Wallet',r.destination_address);
+  add('Signing started',r.signing_claimed_at?'Yes':'No');
+  add('TON verified',r.blockchain_verified_at?'Yes':'No');
+  add('Proof published',r.notice_message_id?'Yes · message #'+r.notice_message_id:'No');
+  output.append(panel);
+ }catch(error){output.textContent='Search failed: '+String(error.message||error).slice(0,120)}
+}
 async function henovaShowAdminPayouts(){
  document.body.classList.add('henova-payout-admin-active');
  const root=document.getElementById('view');
  if(!root)return;
- root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div class="henova-wallet-card"><strong>🔎 Review unsigned proofs</strong><p>Verify signed transfers on TON, then post missing confirmed proofs. No new transfer.</p><button id="henova-reconcile-btn" onclick="henovaReconcileBroadcast()">Verify older payouts</button><p id="henova-reconcile-status" role="status"></p><div style="display:grid;gap:8px;padding-top:12px"><strong>Verify a known TON transaction</strong><input id="henova-manual-withdrawal-id" class="henova-wallet-input" type="number" placeholder="Request number (e.g. 230)" value="230"><input id="henova-manual-tx-hash" class="henova-wallet-input" type="text" placeholder="64-character TON transaction hash" maxlength="64"><button id="henova-manual-verify-btn" onclick="henovaVerifyKnownTONHash()">Verify transaction on TON & publish proven receipt</button><p id="henova-manual-verification-status" role="status" style="overflow-wrap:anywhere;font-size:12px"></p><p style="font-size:12px;color:#526b54">GRAM is the native TON coin. Verify using the transaction hash above; recipient-chain diagnostics are shown if matching fails.</p></div></div><div class="henova-wallet-card" id="henova-signing-queue" style="border:2px solid #a6c891;padding:14px;margin:12px 0"></div><div class="henova-wallet-card"><strong>✅ Batch approvals (max 5)</strong><p id="henova-batch-status">0/5 selected · approval only; sign payments individually</p><button id="henova-batch-approve" type="button" class="henova-wallet-save" onclick="henovaBatchApprove()" disabled>Approve selected (up to 5)</button></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
+ root.innerHTML='<section class="henova-admin-payout-page"><header class="henova-admin-head"><button type="button" class="henova-admin-back" onclick="openTab(4)">← Wallet</button><h2>🐔 HENOVA · Payout Approvals</h2><p id="henova-admin-state">Loading…</p></header><div id="henova-admin-activity" style="padding:14px;margin:10px 0;border-radius:14px;background:#fff;color:#294a35;line-height:1.6" role="status">Loading activity stats…</div><div style="padding:10px"><button id="henova-repost-proof-btn" type="button" onclick="henovaRepostSelectedProofs()">📣 Repost proofs #14–#16</button><p id="henova-repost-proof-result" style="font-size:12px"></p></div><div class="henova-wallet-card"><strong>🔎 Review unsigned proofs</strong><p>Verify signed transfers on TON, then post missing confirmed proofs. No new transfer.</p><button id="henova-reconcile-btn" onclick="henovaReconcileBroadcast()">Verify older payouts</button><p id="henova-reconcile-status" role="status"></p><div style="display:grid;gap:8px;padding-top:12px"><strong>Verify a known TON transaction</strong><input id="henova-manual-withdrawal-id" class="henova-wallet-input" type="number" placeholder="Request number (e.g. 230)" value="230"><input id="henova-manual-tx-hash" class="henova-wallet-input" type="text" placeholder="64-character TON transaction hash" maxlength="64"><button id="henova-manual-verify-btn" onclick="henovaVerifyKnownTONHash()">Verify transaction on TON & publish proven receipt</button><p id="henova-manual-verification-status" role="status" style="overflow-wrap:anywhere;font-size:12px"></p><p style="font-size:12px;color:#526b54">GRAM is the native TON coin. Verify using the transaction hash above; recipient-chain diagnostics are shown if matching fails.</p></div></div><div class="henova-wallet-card" style="padding:14px;margin:12px 0"><strong>🔎 Search withdrawal by request number</strong><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:9px"><input id="henova-find-request-id" class="henova-wallet-input" type="number" min="1" step="1" placeholder="Request # e.g. 763" style="flex:1;min-width:140px"><button type="button" class="henova-wallet-save" onclick="henovaFindWithdrawal()">Search</button></div><div id="henova-find-request-result" role="status" style="margin-top:10px;overflow-wrap:anywhere"></div></div><div class="henova-wallet-card" id="henova-signing-queue" style="border:2px solid #a6c891;padding:14px;margin:12px 0"></div><div class="henova-wallet-card"><strong>✅ Batch approvals (max 5)</strong><p id="henova-batch-status">0/5 selected · approval only; sign payments individually</p><button id="henova-batch-approve" type="button" class="henova-wallet-save" onclick="henovaBatchApprove()" disabled>Approve selected (up to 5)</button></div><div id="henova-admin-list" class="henova-admin-list"></div><button class="henova-admin-refresh" onclick="henovaShowAdminPayouts()">↻ Refresh</button></section>';
  henovaStartActivityMonitor();
  henovaStartAutomaticTONMonitor();
  try{
