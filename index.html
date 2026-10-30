@@ -2735,11 +2735,8 @@ async function henovaSignAdminBatch(ids){
    let old;try{old=JSON.parse(previous||'{}')}catch{old={}}
    if(signedReceipt||!Array.isArray(old.ids)||old.ids.length!==5)
     throw Error('Prior grouped signing requires recovery. Never sign twice.');
-   const fresh=await henovaCall('admin_payout_queue');
-   const confirmed=old.ids.every(id=>{
-    const item=(fresh.items||[]).find(x=>Number(x.id)===Number(id));
-    return item?.status==='confirmed'&&!!item.blockchain_verified_at;
-   });
+   const fresh=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:old.ids});
+   const confirmed=fresh.all_confirmed===true;
    if(!confirmed)throw Error('Prior grouped signing is not fully confirmed. Check its TON payments first.');
    localStorage.removeItem('henova-last-batch-pending');
    toast('Earlier 5 transfers confirmed on TON. Old local signing lock cleared.');
