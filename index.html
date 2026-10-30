@@ -2772,16 +2772,22 @@ async function henovaSignAdminBatch(ids){
   const signedReceipt=localStorage.getItem('henova-last-batch-signing');
   if(previous||signedReceipt){
    let old;try{old=JSON.parse(previous||'{}')}catch{old={}}
-   if(signedReceipt||!Array.isArray(old.ids)||old.ids.length!==5)
+   let receipt;try{receipt=JSON.parse(signedReceipt||'null')}catch{receipt=null}
+   const recorded=Array.isArray(old.ids)&&old.ids.length===5?old:receipt;
+   if(!recorded?.batchId||!Array.isArray(recorded.ids)||recorded.ids.length!==5
+     ||new Set(recorded.ids.map(Number)).size!==5
+     ||(receipt&&old.batchId&&receipt.batchId!==old.batchId))
     throw Error('Prior grouped signing requires recovery. Never sign twice.');
-   const fresh=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:old.ids});
+   const fresh=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:recorded.ids});
    if(fresh.all_confirmed===true){
     localStorage.removeItem('henova-last-batch-pending');
-    toast('Earlier five transfers verified. Local lock cleared.');
-   }else if(!old.batchId||old.ids.some((x,i)=>!ids.includes(x))){
+    localStorage.removeItem('henova-last-batch-signing');
+    toast('Earlier five verified TON transfers confirmed. Stale local receipts cleared.');
+   }else if(receipt){
+    throw Error('Previously signed batch is not fully confirmed. Recover or verify it; never sign twice.');
+   }else if(recorded.ids.some(x=>!ids.includes(Number(x)))){
     throw Error('An earlier different batch remains reserved. Do not sign again.');
    }else{
-    // The same reserved batch may be resumed, never claimed twice.
     toast('Existing reserved batch found. Reusing its signing attempt.');
    }
   }
