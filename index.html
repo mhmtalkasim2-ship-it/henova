@@ -2744,6 +2744,46 @@ function henovaUpdateSimpleWithdrawal(){
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+hvMaxEggs+' 🥚';
  button.disabled=!valid||!hvPayoutReady||!Boolean(document.getElementById('henova-ton-wallet')?.value.trim());
 }
+// Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
+async function henovaMathGate(scope){
+ const challenge=await henovaCall('math_challenge',{scope});
+ if(!challenge?.challengeId)throw Error('challenge_unavailable');
+ return new Promise((resolve,reject)=>{
+  const shade=document.createElement('div');
+  shade.style.cssText='position:fixed;inset:0;z-index:2147483640;background:#0009;display:flex;align-items:center;justify-content:center;padding:20px';
+  const panel=document.createElement('form');
+  panel.style.cssText='max-width:340px;width:100%;background:#f8fff1;color:#255137;border:2px solid #98c698;border-radius:19px;padding:23px;box-shadow:0 15px 50px #0005;text-align:center;direction:ltr';
+  const title=document.createElement('h3');
+  title.textContent=s.lang==='ar'?'تحقق أمني':s.lang==='tr'?'Güvenlik doğrulaması':'Security check';
+  const explanation=document.createElement('p');
+  explanation.textContent=s.lang==='ar'?'حل العملية الحسابية للمتابعة':s.lang==='tr'?'Devam etmek için işlemi çözün':'Solve the math question to continue';
+  const question=document.createElement('div');
+  question.textContent=challenge.question+' = ?';
+  question.style.cssText='font-size:30px;font-weight:800;margin:16px 0';
+  const input=document.createElement('input');
+  input.type='number';input.inputMode='numeric';input.required=true;input.autocomplete='off';
+  input.style.cssText='width:100%;box-sizing:border-box;border:1px solid #9dba9e;border-radius:10px;padding:12px;font-size:22px;text-align:center;background:white;color:#203e2a';
+  const error=document.createElement('p');error.style.cssText='min-height:1.3em;color:#b42318;font-size:13px';
+  const submit=document.createElement('button');submit.type='submit';submit.textContent=s.lang==='ar'?'تحقق':s.lang==='tr'?'Doğrula':'Verify';submit.style.cssText='background:#2e7e42;color:white;border:0;border-radius:10px;padding:12px 20px;font-weight:800;width:100%';
+  const cancel=document.createElement('button');cancel.type='button';cancel.textContent=s.lang==='ar'?'إلغاء':s.lang==='tr'?'İptal':'Cancel';cancel.style.cssText='margin-top:12px;background:transparent;border:0;color:#58675a;padding:8px';
+  const finish=(ok,value)=>{shade.remove();if(ok)resolve(value);else reject(Error('verification_cancelled'))};
+  cancel.onclick=()=>finish(false);
+  panel.onsubmit=async ev=>{
+   ev.preventDefault();
+   const answer=Number(input.value);
+   if(!Number.isSafeInteger(answer))return;
+   submit.disabled=true;
+   try{
+    if(scope==='entry'){
+     await henovaCall('math_verify_entry',{challengeId:challenge.challengeId,answer});
+     finish(true,{});
+    }else finish(true,{mathChallengeId:challenge.challengeId,mathAnswer:answer});
+   }catch(e){error.textContent=s.lang==='ar'?'إجابة غير صحيحة، أعد فتح التحقق للمحاولة':s.lang==='tr'?'Yanlış cevap. Tekrar deneyin.':'Incorrect answer. Please retry.';submit.disabled=false;}
+  };
+  panel.append(title,explanation,question,input,error,submit,cancel);shade.append(panel);document.body.append(shade);
+  input.focus();
+ });
+}
 async function henovaSubmitSimpleWithdrawal(){
  const amount=Number(document.getElementById('hv-withdraw-eggs')?.value);
  if(!hvPayoutReady)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
@@ -2751,8 +2791,9 @@ async function henovaSubmitSimpleWithdrawal(){
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
  try{
+  const math=await henovaMathGate('withdraw');
   const requestId=crypto.randomUUID();
-  const result=await henovaCall('request_gram_withdrawal',{requestId,eggs:amount});
+  const result=await henovaCall('request_gram_withdrawal',{requestId,eggs:amount,...math});
   if(!result?.ok)throw Error(result?.error||'withdrawal_unavailable');
   toast(s.lang==='ar'?'تم إرسال طلب السحب':'Withdrawal request submitted');
   await henovaRefreshPayoutSetup();
@@ -3281,6 +3322,7 @@ function setupTelegram(){
   }
 }
 setupTelegram();
+if(window.Telegram?.WebApp?.initData){henovaMathGate('entry').catch(e=>{if(e?.message!=='verification_cancelled')console.warn('Entry verification unavailable',e)})}
 if(new URLSearchParams(location.search).get('admin')==='payouts'){
   // Render after Telegram initialization; no server access without valid initData.
   setTimeout(henovaShowAdminPayouts,100);
