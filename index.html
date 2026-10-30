@@ -2268,7 +2268,7 @@ async function henovaDiagnoseJetton(){
  if(out)out.textContent='Reading GRAM Jetton transfers on TON…';
  try{
   const r=await henovaCall('admin_jetton_diagnose',{withdrawalId:id});
-  if(out)out.textContent='Request #'+id+' · '+(r.matched||[]).length+' candidate transfers · '+JSON.stringify(r.matched||[]).slice(0,1400);
+  if(out)out.textContent='Request #'+id+' · '+(r.matched||[]).length+' candidate transfers · '+(r.scanned||0)+' checked · '+JSON.stringify({matches:r.matched||[],sample:r.sample||[],window:r.search_window||null}).slice(0,1600);
  }catch(err){if(out)out.textContent='Jetton lookup: '+String(err.message||err).slice(0,120)}
 }
 async function henovaShowAdminPayouts(){
