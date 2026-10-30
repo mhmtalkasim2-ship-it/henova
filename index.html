@@ -2768,6 +2768,7 @@ async function henovaMathGate(scope){
   const cancel=document.createElement('button');cancel.type='button';cancel.textContent=s.lang==='ar'?'إلغاء':s.lang==='tr'?'İptal':'Cancel';cancel.style.cssText='margin-top:12px;background:transparent;border:0;color:#58675a;padding:8px';
   const finish=(ok,value)=>{shade.remove();if(ok)resolve(value);else reject(Error('verification_cancelled'))};
   cancel.onclick=()=>finish(false);
+  if(scope==='entry')cancel.style.display='none';
   panel.onsubmit=async ev=>{
    ev.preventDefault();
    const answer=Number(input.value);
