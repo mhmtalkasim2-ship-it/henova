@@ -2289,6 +2289,30 @@ function henovaRenderSigningQueue(items){
  recover.textContent='🔎 Recover grouped signing receipt';
  recover.onclick=()=>henovaRecoverAdminBatch();
  root.append(recover);
+ const reconcile=document.createElement('button');reconcile.type='button';reconcile.className='henova-wallet-save';
+ reconcile.textContent='🔄 Clear verified old signing locks';
+ reconcile.onclick=async()=>{
+  reconcile.disabled=true;
+  const report=[];
+  try{
+   for(const key of ['henova-last-batch-pending','henova-last-batch-signing']){
+    const stored=localStorage.getItem(key);
+    if(!stored){report.push(key+': none');continue}
+    let record;try{record=JSON.parse(stored)}catch{report.push(key+': unreadable; kept locked');continue}
+    if(!record?.batchId){report.push(key+': missing batch ID; kept locked');continue}
+    try{
+     const data=await henovaCall('admin_batch_reconcile_local',{batchId:record.batchId});
+     if(data.can_clear_local_receipt===true&&data.all_confirmed===true){
+      localStorage.removeItem(key);
+      report.push(record.batchId+': 5/5 chain-confirmed; old lock cleared');
+     }else report.push(record.batchId+': not fully verified; lock kept');
+    }catch(e){report.push(record.batchId+': '+String(e.message||e).slice(0,65)+'; lock kept')}
+   }
+   alert('HENOVA signing safety check\\n\\n'+report.join('\\n')+
+    '\\n\\nThis operation never sends GRAM.');
+  }finally{reconcile.disabled=false}
+ };
+ root.append(reconcile);
  const verifyGroup=document.createElement('button');verifyGroup.type='button';verifyGroup.className='henova-wallet-save';
  verifyGroup.textContent='🔎 Verify 5 TON transfers & publish proofs';
  verifyGroup.onclick=async()=>{
