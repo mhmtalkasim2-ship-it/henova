@@ -2089,7 +2089,7 @@ else toast(hvError(data.error));
 let henovaNGMOpened=false,henovaNGMClaimBusy=false,henovaNGMClaimed=false;
 function henovaOpenNGM(){
  henovaNGMOpened=true;
- window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/NGMCloudeminingbot?start=ref_7X9GZR7H');
+ window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/PickaxeEmpireApp/app?startapp=r_IhKFawc862wR');
 }
 async function henovaClaimNGM(){
  if(henovaNGMClaimBusy||henovaNGMClaimed)return;
@@ -3554,7 +3554,7 @@ if(tab===2){
  const nOpen=s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot';
  const nClaim=s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim';
  const nPending=s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward';
- el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/NGMCloudeminingbot.jpg" alt="NGM" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGM()">'+nOpen+'</button><button id="henova-ngm-claim" onclick="henovaClaimNGM()" '+(henovaNGMClaimed?'disabled':'')+'>'+nClaim+'</button></div></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/PickaxeEmpireApp.jpg" alt="PickaxeEmpire" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGM()">'+nOpen+'</button><button id="henova-ngm-claim" onclick="henovaClaimNGM()" '+(henovaNGMClaimed?'disabled':'')+'>'+nClaim+'</button></div></article>');
 }
 
 if(tab===2){
