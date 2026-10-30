@@ -3386,21 +3386,7 @@ function setupTelegram(){
     console.warn('Telegram fullscreen setup error:',error);
   }
 }
-// Record a limited, pseudonymous activity signal once per app launch.
-async function henovaRecordSecuritySession(){
- if(!window.Telegram?.WebApp?.initData)return;
- try{
-  const key='henova-security-session-v1';
-  let record=JSON.parse(localStorage.getItem(key)||'null');
-  if(!record||typeof record.token!=='string'||Date.now()-Number(record.created||0)>86400000){
-   record={token:crypto.randomUUID(),created:Date.now()};
-   localStorage.setItem(key,JSON.stringify(record));
-  }
-  await henovaCall('security_session',{sessionToken:record.token,platform:window.Telegram?.WebApp?.platform||'unknown',language:window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code||'en'});
- }catch(e){console.warn('Optional HENOVA security signal unavailable',String(e?.message||e).slice(0,70))}
-}
 setupTelegram();
-setTimeout(()=>void henovaRecordSecuritySession(),1500);
 // Telegram can provide initData after the first script tick; retry briefly instead of silently skipping.
 let henovaEntryCheckLaunched=false;
 function henovaStartEntryCheck(tries=0){
