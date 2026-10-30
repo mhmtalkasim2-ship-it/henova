@@ -2236,8 +2236,23 @@ function henovaRenderSigningQueue(items){
  desc.textContent='#'+current.id+' · '+current.gram_amount+' GRAM · '+current.status;root.append(desc);
  const btn=document.createElement('button');btn.className='henova-wallet-save';btn.type='button';
  btn.textContent=current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash?'🔐 Open Tonkeeper: sign #'+current.id:'🔎 Check payment #'+current.id+' before next signature';
- btn.disabled=!(current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash);
- btn.onclick=()=>henovaSignAdminPayout(current.id);root.append(btn);
+ const ready=current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash;
+ btn.disabled=!(ready || current.status==='broadcast' || current.signing_claimed_at || current.status==='confirmed');
+ btn.onclick=async()=>{
+  if(ready)return henovaSignAdminPayout(current.id);
+  if(current.status==='confirmed'){
+   henovaSigningQueue.shift();henovaSaveSigningQueue();
+   await henovaShowAdminPayouts();return;
+  }
+  try{
+   const result=await henovaCall(current.signed_boc_hash?'admin_track_signed_payout':'admin_verify_known_payout',{withdrawalId:current.id});
+   if(result?.confirmed){
+    henovaSigningQueue.shift();henovaSaveSigningQueue();
+    toast('Confirmed #'+current.id+'. Next signature is available.');
+   }else toast('Payment not yet confirmed. Do not sign again.');
+  }catch(e){toast('TON check pending. Review payment history; do not sign again.')}
+  await henovaShowAdminPayouts();
+ };root.append(btn);
  const info=document.createElement('p');
  info.style.cssText='font-size:13px;line-height:1.5;color:#755424';
  info.textContent='One Tonkeeper signature per request. After signing, verify its status on TON before continuing; never sign the same ID twice.';
