@@ -2268,6 +2268,15 @@ function henovaRenderSigningQueue(items){
   finally{capability.disabled=false}
  };
  root.append(capability);
+ const pay=document.createElement('button');pay.type='button';pay.className='henova-wallet-save';
+ pay.textContent='💸 Pay 5 Withdrawals — one Tonkeeper signature';
+ pay.disabled=henovaSigningQueue.length!==5;
+ pay.onclick=()=>henovaSignAdminBatch(henovaSigningQueue.slice(0,5));
+ root.append(pay);
+ const recover=document.createElement('button');recover.type='button';recover.className='henova-wallet-save';
+ recover.textContent='🔎 Recover grouped signing receipt';
+ recover.onclick=()=>henovaRecoverAdminBatch();
+ root.append(recover);
 
  const queue=Array.isArray(items)?items:window.henovaLastAdminQueue||[];
  const current=queue.find(x=>Number(x.id)===henovaSigningQueue[0]);
@@ -2689,6 +2698,73 @@ async function henovaSignTestThree(){
   toast('TEST signed. Check TON history before retrying. This is not yet recorded as paid.');
  }catch(e){toast('TEST: '+String(e.message||e).slice(0,120));}
  finally{henovaSignTestThree.inProgress=false;}
+}
+async function henovaRecoverAdminBatch(){
+ const raw=localStorage.getItem('henova-last-batch-signing');
+ if(!raw)return toast('No locally saved grouped signing receipt');
+ let data;try{data=JSON.parse(raw)}catch{return toast('Grouped receipt is invalid')}
+ if(!data.batchId||!data.signedBoc)return toast('No signed receipt; check TON before retrying');
+ try{
+  const response=await henovaCall('admin_batch_signed',{batchId:data.batchId,signedBoc:data.signedBoc});
+  if(response.ok){toast('Grouped receipt recorded. Verify TON before any further transfer.');await henovaShowAdminPayouts();}
+ }catch(e){toast('Recovery pending: '+String(e.message||e).slice(0,90))}
+}
+async function henovaSignAdminBatch(ids){
+ if(henovaSignAdminBatch.inProgress)return toast('Batch signing already in progress');
+ henovaSignAdminBatch.inProgress=true;
+ let reserved=false;
+ try{
+  if(!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5)throw Error('Select exactly five approved requests');
+  if(localStorage.getItem('henova-last-batch-pending')||localStorage.getItem('henova-last-batch-signing'))
+   throw Error('A prior grouped signing needs review or recovery. Never sign twice.');
+  if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect unavailable');
+  if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
+   manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
+  });
+  if(!henovaTonUI.wallet){await henovaTonUI.openModal();toast('Connect HENOVA Payouts then press Pay again.');return}
+  const w=henovaTonUI.wallet;
+  const feature=(w.device?.features||[]).find(f=>typeof f==='object'&&f.name==='SendTransaction');
+  if(Number(feature?.maxMessages||0)<5)throw Error('Connected wallet does not support 5 messages');
+  if(String(w.account.chain)!=='-239')throw Error('Connect TON mainnet wallet');
+  const queue=await henovaCall('admin_payout_queue');
+  if(queue.payments_enabled!==true)throw Error('Real Tonkeeper payouts disabled');
+  const expected=String(queue.payout_wallet_address||'');
+  const bytes=Uint8Array.from(atob(expected.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+  if(bytes.length!==36)throw Error('Invalid treasury address');
+  const wc=bytes[1]>127?bytes[1]-256:bytes[1];
+  const treasury=wc+':'+Array.from(bytes.slice(2,34),x=>x.toString(16).padStart(2,'0')).join('');
+  if(String(w.account.address||'').toLowerCase()!==treasury)throw Error('Wrong wallet. Connect HENOVA Payouts.');
+  const review=await henovaCall('admin_batch_preview',{withdrawalIds:ids});
+  if(review.targets.length!==5)throw Error('Incomplete batch preview');
+  const detail=review.targets.map(x=>'#'+x.id+' · '+x.gram+' GRAM · '+x.destination).join('\n');
+  const total=review.targets.reduce((sum,x)=>sum+BigInt(x.amountNanograms),0n);
+  if(!confirm('SEND 5 REAL GRAM PAYOUTS WITH ONE SIGNATURE\n\n'+detail+
+   '\n\nTotal: '+(Number(total)/1e9).toFixed(9)+' GRAM + network fees'+
+   '\n\nReview all 5 recipients in Tonkeeper. Only sign once. Continue?'))return;
+  // Lock the whole group atomically; never unlock automatically on cancel or timeout.
+  const intent=await henovaCall('admin_batch_intent',{withdrawalIds:ids});
+  reserved=true;
+  localStorage.setItem('henova-last-batch-pending',JSON.stringify({batchId:intent.batch_id,ids,at:Date.now()}));
+  if(intent.messages?.length!==5||intent.sender!==expected)throw Error('Batch intent mismatch; do not sign');
+  for(let i=0;i<5;i++){
+   const a=review.targets[i],b=intent.messages[i];
+   if(Number(a.id)!==Number(b.withdrawal_id)||a.destination!==b.address||a.amountNanograms!==b.amount)
+    throw Error('Batch content changed; do not sign');
+  }
+  const result=await henovaTonUI.sendTransaction({
+   validUntil:Math.floor(Date.now()/1000)+300,network:'-239',from:intent.sender,
+   messages:intent.messages.map(x=>({address:x.address,amount:x.amount}))
+  });
+  const signedBoc=String(result?.boc||'');
+  if(!signedBoc)throw Error('No wallet receipt; inspect TON, never sign twice');
+  localStorage.setItem('henova-last-batch-signing',JSON.stringify({batchId:intent.batch_id,signedBoc,ids}));
+  const receipt=await henovaCall('admin_batch_signed',{batchId:intent.batch_id,signedBoc});
+  if(!receipt.ok)throw Error('Receipt recording pending. Use Recover grouped signing receipt.');
+  localStorage.removeItem('henova-last-batch-signing');
+  toast('Five-message transaction signed. Check TON settlement; do not sign again.');
+  await henovaShowAdminPayouts();
+ }catch(e){toast((reserved?'Batch reserved; DO NOT SIGN AGAIN. ':'')+String(e.message||e).slice(0,100))}
+ finally{henovaSignAdminBatch.inProgress=false}
 }
 async function henovaSignAdminPayout(id){
  if(henovaSignAdminPayout.inProgress)return toast('Signing request already in progress');
