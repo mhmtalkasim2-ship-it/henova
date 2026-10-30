@@ -2727,8 +2727,23 @@ async function henovaSignAdminBatch(ids){
  let reserved=false;
  try{
   if(!Array.isArray(ids)||ids.length!==5||new Set(ids).size!==5)throw Error('Select exactly five approved requests');
-  if(localStorage.getItem('henova-last-batch-pending')||localStorage.getItem('henova-last-batch-signing'))
-   throw Error('A prior grouped signing needs review or recovery. Never sign twice.');
+  // Only clear an old local reservation when the SERVER verifies every old request
+  // is already confirmed on TON. A device-side cancellation alone is insufficient.
+  const previous=localStorage.getItem('henova-last-batch-pending');
+  const signedReceipt=localStorage.getItem('henova-last-batch-signing');
+  if(previous||signedReceipt){
+   let old;try{old=JSON.parse(previous||'{}')}catch{old={}}
+   if(signedReceipt||!Array.isArray(old.ids)||old.ids.length!==5)
+    throw Error('Prior grouped signing requires recovery. Never sign twice.');
+   const fresh=await henovaCall('admin_payout_queue');
+   const confirmed=old.ids.every(id=>{
+    const item=(fresh.items||[]).find(x=>Number(x.id)===Number(id));
+    return item?.status==='confirmed'&&!!item.blockchain_verified_at;
+   });
+   if(!confirmed)throw Error('Prior grouped signing is not fully confirmed. Check its TON payments first.');
+   localStorage.removeItem('henova-last-batch-pending');
+   toast('Earlier 5 transfers confirmed on TON. Old local signing lock cleared.');
+  }
   if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect unavailable');
   if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
    manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
