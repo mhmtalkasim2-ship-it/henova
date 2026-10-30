@@ -2268,6 +2268,18 @@ function henovaRenderSigningQueue(items){
   finally{capability.disabled=false}
  };
  root.append(capability);
+ const switchWallet=document.createElement('button');switchWallet.type='button';switchWallet.className='henova-wallet-save';
+ switchWallet.textContent='🔄 Switch Tonkeeper payout wallet';
+ switchWallet.onclick=async()=>{
+  try{
+   if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect unavailable');
+   if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'});
+   if(henovaTonUI.wallet)await henovaTonUI.disconnect();
+   await henovaTonUI.openModal();
+   toast('Select HENOVA Payouts (UQAlo19...), not Wallet 2. Existing reservation remains locked.');
+  }catch(e){toast('Switch wallet: '+String(e.message||e).slice(0,80))}
+ };
+ root.append(switchWallet);
  const pay=document.createElement('button');pay.type='button';pay.className='henova-wallet-save';
  pay.textContent='💸 Pay 5 Withdrawals — one Tonkeeper signature';
  pay.disabled=henovaSigningQueue.length!==5;
