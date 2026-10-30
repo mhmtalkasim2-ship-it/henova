@@ -2783,8 +2783,8 @@ async function henovaSignAdminBatch(ids){
    // Different old batches can be saved under the two keys. Check and clear
    // EACH only after the authoritative server verifies all five payments.
    for(const record of records){
-    const result=await henovaCall('admin_batch_prior_confirmed',{withdrawalIds:record.ids.map(Number)});
-    if(result.all_confirmed===true){
+    const result=await henovaCall('admin_batch_reconcile_local',{batchId:record.batchId});
+    if(result.can_clear_local_receipt===true){
      localStorage.removeItem(record.key);
      toast('Five previously paid withdrawals verified; stale receipt cleared.');
     }else if(record.key==='henova-last-batch-signing'){
