@@ -2235,9 +2235,13 @@ function henovaRenderSigningQueue(items){
  const desc=document.createElement('p');
  desc.textContent='#'+current.id+' · '+current.gram_amount+' GRAM · '+current.status;root.append(desc);
  const btn=document.createElement('button');btn.className='henova-wallet-save';btn.type='button';
- btn.textContent=current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash?'🔐 Sign next withdrawal #'+current.id:'🔎 Next payment needs review (#'+current.id+')';
+ btn.textContent=current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash?'🔐 Open Tonkeeper: sign #'+current.id:'🔎 Check payment #'+current.id+' before next signature';
  btn.disabled=!(current.status==='approved'&&!current.signing_claimed_at&&!current.signed_boc_hash);
  btn.onclick=()=>henovaSignAdminPayout(current.id);root.append(btn);
+ const info=document.createElement('p');
+ info.style.cssText='font-size:13px;line-height:1.5;color:#755424';
+ info.textContent='One Tonkeeper signature per request. After signing, verify its status on TON before continuing; never sign the same ID twice.';
+ root.append(info);
  const stop=document.createElement('button');stop.type='button';stop.textContent='Stop sequence';stop.onclick=henovaClearSigningQueue;root.append(stop);
 }
 henovaLoadSigningQueue();
@@ -2686,11 +2690,18 @@ async function henovaSignAdminPayout(id){
   });
   if(!receipt?.ok)throw Error('Receipt not saved. Use Recover receipt; do not sign again.');
   try{localStorage.removeItem('henova-signed-receipt-'+id);}catch{}
-  if(henovaSigningQueue[0]===Number(id)){
-    henovaSigningQueue.shift();henovaSaveSigningQueue();
-  }
-  toast('Signed transfer recorded. Checking TON. Next selected withdrawal is ready in the same panel.');
-  void henovaTrackAdminPayout(id);
+  // Keep the sequence paused until on-chain settlement is confirmed.
+  // Signed BOC alone does not prove the transfer was credited.
+  toast('Tonkeeper signed #'+id+'. Verifying TON; next payment remains paused.');
+  try{
+    const chain=await henovaCall('admin_track_signed_payout',{withdrawalId:id});
+    if(chain?.confirmed){
+      if(henovaSigningQueue[0]===Number(id)){
+        henovaSigningQueue.shift();henovaSaveSigningQueue();
+      }
+      toast('✅ #'+id+' confirmed on TON. Open the next signature from the queue.');
+    }else toast('TON verification pending for #'+id+'. Do not sign next yet.');
+  }catch(e){toast('TON verification pending. Do not sign next yet.')}
   await henovaShowAdminPayouts();
  }catch(e){
   toast((locked?'Do NOT sign this request again. ':'')+String(e.message||e).slice(0,118));
