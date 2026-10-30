@@ -2808,7 +2808,11 @@ async function henovaSignAdminBatch(ids){
   localStorage.removeItem('henova-last-batch-signing');
   toast('Five-message transaction signed. Check TON settlement; do not sign again.');
   await henovaShowAdminPayouts();
- }catch(e){toast((reserved?'Batch reserved; DO NOT SIGN AGAIN. ':'')+String(e.message||e).slice(0,100))}
+ }catch(e){
+  const message=String(e?.message||e||'Unknown error');
+  toast((reserved?'Batch reserved; DO NOT SIGN AGAIN. ':'')+message.slice(0,100));
+  alert('HENOVA grouped payout stopped BEFORE confirmation.\n\n'+message+'\n\nDo not create a second payment attempt.');
+ }
  finally{henovaSignAdminBatch.inProgress=false}
 }
 async function henovaSignAdminPayout(id){
