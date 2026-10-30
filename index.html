@@ -1880,6 +1880,33 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 .henova-admin-empty{padding:30px 14px;text-align:center;border-radius:20px;background:white;border:1px dashed #b9d9b7;font-weight:800;color:#507e58}
 .henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
 .henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
+</style><style id="henova-tasks-layout-fix">
+/* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
+main.hv-tasks-mode .stats{display:none!important}
+main.hv-tasks-mode #view{padding-top:2px}
+main.hv-tasks-mode #view>.title{margin:12px 6px 16px;font-size:27px}
+main.hv-tasks-mode #view>.item{display:flex;align-items:center;gap:12px;padding:14px;margin:10px 0;border-radius:20px;min-height:96px;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
+main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:56px!important;height:56px!important;flex:0 0 56px!important;object-fit:cover}
+main.hv-tasks-mode #view>.item .grow{min-width:0;flex:1 1 0;overflow-wrap:anywhere}
+main.hv-tasks-mode #view>.item h3{font-size:17px;line-height:1.25;margin:0 0 5px}
+main.hv-tasks-mode #view>.item p{font-size:14px;line-height:1.35;margin:0 0 4px}
+main.hv-tasks-mode #view>.item small{font-size:12px;line-height:1.35}
+main.hv-tasks-mode #view>.item button{min-width:0;max-width:132px;flex-shrink:0;font-size:13px;padding:11px 10px;line-height:1.2;border-radius:13px;white-space:normal;overflow-wrap:break-word}
+main.hv-tasks-mode #view>.item>div[style*="display:grid"]{flex:0 0 116px!important;width:116px;min-width:0}
+main.hv-tasks-mode #view>.item>div[style*="display:grid"] button{width:100%}
+main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:11px!important;overflow:visible}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-task-top{display:flex;gap:12px;align-items:center;min-width:0}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action{width:100%;max-width:none}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action button{display:block;width:100%;max-width:none}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-action{width:100%!important;min-width:0!important;max-width:100%!important}
+main.hv-tasks-mode #view adsgram-task{display:block;max-width:100%;width:100%;min-width:0}
+@media(max-width:390px){
+ main.hv-tasks-mode #view>.item{gap:9px;padding:12px}
+ main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:48px!important;height:48px!important;flex-basis:48px!important}
+ main.hv-tasks-mode #view>.item h3{font-size:15px}
+ main.hv-tasks-mode #view>.item>div[style*="display:grid"]{flex-basis:104px!important;width:104px}
+ main.hv-tasks-mode #view>.item button{font-size:12px;padding:10px 7px}
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script><style id="henova-sponsored-task-card-style-v1">
 /* Match native HENOVA task-card layout without changing AdsGram verification. */
 #view .hv-sponsored-card{display:grid;grid-template-columns:58px minmax(0,1fr) minmax(115px,41%);align-items:center;gap:12px;min-height:124px;padding:17px 15px}
@@ -3198,6 +3225,8 @@ const el=document.getElementById('view');document.getElementById('balance').text
 const names=t(),icons=['🏡','🐣','📋','👥','💰'];
 const labels=document.querySelectorAll('.stats small');if(labels.length===2){labels[0].textContent=s.lang==='ar'?'بيض':s.lang==='tr'?'YUMURTA':'EGGS';labels[1].textContent=s.lang==='ar'?'عملات':s.lang==='tr'?'JETON':'COINS';}document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
+// Task layout only: hide header balances without modifying player data.
+document.querySelector('main').classList.toggle('hv-tasks-mode',tab===2);
 if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking" draggable="false"></div></div></div>'+henovaOwnedHensMarkup()+'<div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+hvText('unit')+'</strong><small id="clock">'+(secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+hvText('collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
 if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">'+hvText('packInfo')+'</p><p class="muted">'+({ar:'🐔 أول دجاجة مجانية، وكل دجاجة أساسية إضافية 200 عملة. يمكنك شراء 5 دجاجات كحد أقصى من كل نوع، ولكل نوع لون خاص به.',tr:'🐔 İlk tavuk ücretsiz. Her ek başlangıç tavuğu 200 jeton. Her türden en fazla 5 tavuk alabilirsin; her türün rengi farklıdır.',en:'🐔 Your first starter hen is free; each extra starter hen costs 200 coins. You can own up to 5 hens of each type. Every breed has a different color.'}[s.lang]||'')+'</p>'+H.map(h=>'<article class="item"><div class="face hv-breed-face"><img src="'+henovaBreedImage(h[0])+'" alt="'+h[2]+'" loading="lazy"></div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+(h[3]*6)+' '+(s.lang==='ar'?'بيضة كل 6 ساعات':s.lang==='tr'?'yumurta / 6 saat':'eggs / 6 hours')+' <small>('+h[3]+' '+hvText('eggsHour')+')</small></p><small>'+hvText('owned')+': '+ (s.hen[h[0]]||0)+'/5</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')" '+((s.hen[h[0]]||0)>=5?'disabled':'')+'>'+((s.hen[h[0]]||0)>=5?(s.lang==='ar'?'اكتمل 5/5':s.lang==='tr'?'Dolu 5/5':'Full 5/5'):(num(h[4])+' 🪙<br>'+names[6]))+'</button>':'<b>'+hvText('free')+'</b>')+'</article>').join('')+'<p class="warning">'+hvText('packWarning')+'</p>';
 if(tab===2){
