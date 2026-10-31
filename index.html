@@ -2098,6 +2098,62 @@ main.hv-tasks-mode #view .primary{padding:9px 12px!important;font-size:14px!impo
  main.hv-tasks-mode #view>.item button{border-radius:11px!important}
 }
 </style>
+<style id="henova-farm-visual-polish-20261101">
+/* Decorative refresh: retain the existing original HENOVA illustration and all actions. */
+main.farm-mode #farm-scene.farm-v3{
+ background-image:linear-gradient(180deg,rgba(47,102,22,.06),rgba(54,112,20,.12)),url('./assets/henova-game-scene-v1.svg?v=3')!important;
+ background-position:center center!important;
+ background-size:100% 100%!important;
+}
+main.farm-mode .farm-toolbar{
+ gap:8px!important;
+}
+main.farm-mode .farm-user{
+ border:2px solid rgba(255,251,221,.92)!important;
+ box-shadow:0 3px 0 rgba(55,93,34,.38),0 8px 15px rgba(36,73,23,.16)!important;
+ background:rgba(249,251,225,.91)!important;
+}
+main.farm-mode .farm-tools button{
+ border-radius:17px!important;
+ background:linear-gradient(165deg,#fffdeb,#e1edc7)!important;
+ border:2px solid #fff7da!important;
+ box-shadow:0 3px 0 rgba(71,109,40,.42),0 5px 11px #193d2229!important;
+}
+html.telegram-fullscreen main.farm-mode .stats{
+ top:218px!important;
+ gap:9px!important;
+}
+main.farm-mode .stats>div{
+ background:linear-gradient(165deg,rgba(255,254,231,.96),rgba(227,240,202,.94))!important;
+ border:2px solid #fff6cb!important;
+ box-shadow:0 4px 0 rgba(76,113,37,.45),0 8px 14px rgba(28,60,25,.16)!important;
+ border-radius:27px!important;
+}
+main.farm-mode .stats b{font-weight:900!important;letter-spacing:-.5px}
+main.farm-mode .collect-dock{
+ background:linear-gradient(160deg,rgba(245,253,219,.95),rgba(215,238,189,.97))!important;
+ border:2px solid rgba(255,248,210,.96)!important;
+ border-radius:27px!important;
+ box-shadow:0 4px 0 #608d3da8,0 11px 25px #213b2433!important;
+}
+main.farm-mode .collect-action button{
+ background:linear-gradient(180deg,#ffe879,#ffcb45)!important;
+ color:#52370f!important;
+ border:2px solid #fff0ad!important;
+ border-radius:24px!important;
+ box-shadow:0 5px 0 #c58b23!important;
+ font-weight:900!important;
+}
+main.farm-mode .collect-info{color:#3c6c2b!important}
+main.farm-mode .collect-info strong{font-weight:900!important}
+main.farm-mode~nav{
+ background:linear-gradient(180deg,#f4f8de,#dfeccc)!important;
+ border-top:2px solid #fcf6d5!important;
+ box-shadow:0 -6px 15px rgba(42,78,27,.12)!important;
+}
+main.farm-mode~nav button{font-weight:800!important}
+main.farm-mode~nav button.active{color:#2c742e!important}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
