@@ -2241,7 +2241,7 @@ async function henovaClaimPost80(){
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaPost80Claimed=true;
   const state=await henovaCall('state');if(state?.state){henovaApplyState(state.state);render();}
-  if(result.claimed)henovaShowRewardCard(5,'eggs');
+  if(result.claimed)henovaShowRewardCard(50,'coins');
   else toast(s.lang==='ar'?'المكافأة مستلمة مسبقاً':s.lang==='tr'?'Ödül zaten alındı':'Reward already claimed');
  }catch(e){toast(String(e?.message||e));}
  finally{henovaPost80Busy=false;const b=document.getElementById('henova-post80-claim');if(b)b.disabled=henovaPost80Claimed;}
@@ -3686,11 +3686,11 @@ function henovaOwnedHensMarkup(){
 const HENOVA_ADSGRAM_TASK='task-56216';
 function henovaAdsgramLabels(){
 return ({
- en:{name:'Complete Sponsored Task',reward:'5 eggs',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
- ar:{name:'أكمل المهمة الممولة',reward:'5 بيضات',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
- tr:{name:'Sponsorlu Görevi Tamamla',reward:'5 yumurta',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
+ en:{name:'Complete Sponsored Task',reward:'50 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
+ ar:{name:'أكمل المهمة الممولة',reward:'50 عملة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
+ tr:{name:'Sponsorlu Görevi Tamamla',reward:'50 jeton',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
 })[s.lang]||({
-name:'Complete Sponsored Task',reward:'5 eggs',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
+name:'Complete Sponsored Task',reward:'50 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
 });
 }
 let henovaSponsoredExpires=Infinity;
@@ -3747,9 +3747,9 @@ async function henovaVideoCooldownRefresh(){
 setInterval(henovaVideoCooldownDraw,1000);
 
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Advertisement',desc:'5 eggs · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
- ar:{title:'شاهد الإعلان',desc:'5 بيضات · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'5 yumurta · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
+ return ({en:{title:'Watch Advertisement',desc:'50 coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
+ ar:{title:'شاهد الإعلان',desc:'50 عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
+ tr:{title:'Reklam İzle',desc:'50 jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -3783,7 +3783,7 @@ async function henovaWatchSponsoredReward(){
      localStorage.setItem(key,String(entry.id));
      const fresh=await henovaCall('state').catch(()=>null);
      if(fresh?.state){henovaApplyState(fresh.state);render();}
-     henovaShowRewardCard(5,'eggs');
+     henovaShowRewardCard(50,'coins');
      return;
     }
    }
