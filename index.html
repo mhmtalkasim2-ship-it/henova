@@ -1936,6 +1936,40 @@ main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task{width:100%!importan
 main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(button),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(action),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(task-button),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(claim-button),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(complete-button){background:#fac756!important;color:#211b0d!important;border:0!important;border-radius:16px!important;font-weight:700!important;min-height:46px!important}
 main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task button,main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task [role="button"]{background:#fac756!important;color:#211b0d!important;border-radius:16px!important;border:0!important;font-weight:700!important;min-height:46px!important}
 main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task [slot="button"],main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task [slot="claim"]{color:#211b0d!important;font-weight:800!important}
+
+/* Compact ad-task cards for mobile. External AdsGram content remains interactive. */
+main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{
+ padding:14px 15px!important;margin:9px 0!important;border-radius:22px!important;gap:10px!important;
+ box-shadow:0 2px 10px rgba(35,66,35,.035)!important;
+}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-task-top,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical>div:first-child{display:flex!important;align-items:center!important;gap:12px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-task-avatar,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical>div:first-child img{height:52px!important;width:52px!important;flex:0 0 52px!important;border-radius:15px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-copy h3,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-copy h3{
+ font-size:16px!important;line-height:1.25!important;margin:0 0 4px!important;
+}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-copy p,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-copy p{font-size:14px!important;margin:0 0 3px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-video-task-action{justify-content:stretch!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-video-task-action button{
+ width:100%!important;max-width:100%!important;min-height:48px!important;
+ background:#fac756!important;color:#211b0d!important;border-radius:15px!important;font-size:15px!important;
+}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-action{padding:0!important;min-height:0!important}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task{
+ display:block!important;width:100%!important;min-height:52px!important;
+ --primary-color:#fac756;--button-background:#fac756;--button-color:#211b0d;
+}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(button),
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-button){
+ background:#fac756!important;color:#211b0d!important;border-radius:15px!important;
+}
+@media(max-width:390px){
+ main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{padding:12px!important}
+ main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-copy h3{font-size:15px!important}
+}
 </style><script src="https://telegram.org/js/telegram-web-app.js"></script><style id="henova-sponsored-task-card-style-v1">
 /* Match native HENOVA task-card layout without changing AdsGram verification. */
 #view .hv-sponsored-card{display:grid;grid-template-columns:58px minmax(0,1fr) minmax(115px,41%);align-items:center;gap:12px;min-height:124px;padding:17px 15px}
