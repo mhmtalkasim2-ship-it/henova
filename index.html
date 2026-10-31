@@ -2027,11 +2027,41 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
 @media(max-width:430px){#view .hv-sponsored-task-vertical{padding:14px 12px!important}#view .hv-sponsored-task-vertical>.hv-sponsored-action{margin:0!important}#view .hv-sponsored-task-vertical adsgram-task{font-size:13px!important}}
 </style>
 <style id="henova-telegram-fullscreen-safe-layout">
-/* Keep native Telegram fullscreen close/menu controls clear of HENOVA content. */
-html.telegram-fullscreen main:not(.farm-mode){padding-top:max(130px,calc(env(safe-area-inset-top,0px) + 106px))!important}
+/* Telegram draws native close/menu controls over the top ~150px in fullscreen.
+   Keep the shared profile/tools toolbar beneath them on EVERY tab. */
+html.telegram-fullscreen main:not(.farm-mode){
+ padding-top:12px!important;
+}
+html.telegram-fullscreen main:not(.farm-mode)>header.farm-toolbar{
+ position:relative!important;
+ inset:auto!important;
+ top:auto!important;
+ left:auto!important;
+ right:auto!important;
+ margin:145px 0 14px!important;
+ width:100%!important;
+ z-index:20!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:space-between!important;
+ gap:8px!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ padding:0!important;
+}
+html.telegram-fullscreen main:not(.farm-mode)>header .farm-user{min-width:0;flex:1 1 auto;max-width:52%;overflow:hidden}
+html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools{flex:0 0 auto;display:flex;gap:5px}
 html.telegram-fullscreen main.farm-mode .farm-toolbar,
-html.telegram-fullscreen main.farm-mode>header{top:max(130px,calc(env(safe-area-inset-top,0px) + 106px))!important}
-html.telegram-fullscreen main.farm-mode .stats{top:max(200px,calc(env(safe-area-inset-top,0px) + 176px))!important}
+html.telegram-fullscreen main.farm-mode>header{
+ top:max(155px,calc(env(safe-area-inset-top,0px) + 130px))!important;
+}
+html.telegram-fullscreen main.farm-mode .stats{
+ top:max(230px,calc(env(safe-area-inset-top,0px) + 205px))!important;
+}
+html.telegram-fullscreen #nav{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))!important}
+@media(max-width:380px){
+ html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools button{min-width:35px!important;padding:5px!important}
+}
 </style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
