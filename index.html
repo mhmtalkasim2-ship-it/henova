@@ -2026,6 +2026,13 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
 #view .hv-video-task-card{min-height:0!important;margin-bottom:13px!important}
 @media(max-width:430px){#view .hv-sponsored-task-vertical{padding:14px 12px!important}#view .hv-sponsored-task-vertical>.hv-sponsored-action{margin:0!important}#view .hv-sponsored-task-vertical adsgram-task{font-size:13px!important}}
 </style>
+<style id="henova-telegram-fullscreen-safe-layout">
+/* Keep native Telegram fullscreen close/menu controls clear of HENOVA content. */
+html.telegram-fullscreen main:not(.farm-mode){padding-top:max(130px,calc(env(safe-area-inset-top,0px) + 106px))!important}
+html.telegram-fullscreen main.farm-mode .farm-toolbar,
+html.telegram-fullscreen main.farm-mode>header{top:max(130px,calc(env(safe-area-inset-top,0px) + 106px))!important}
+html.telegram-fullscreen main.farm-mode .stats{top:max(200px,calc(env(safe-area-inset-top,0px) + 176px))!important}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
@@ -3913,6 +3920,7 @@ function setupTelegram(){
   const app=window.Telegram?.WebApp;
   if(!app){showFullscreenStatus('Browser preview');return;}
   try{
+    document.documentElement.classList.toggle('telegram-fullscreen',!!app.isFullscreen);
     app.onEvent?.('fullscreenChanged',()=>{
       document.documentElement.classList.toggle('telegram-fullscreen',!!app.isFullscreen);
       showFullscreenStatus(app.isFullscreen?'Fullscreen active':'Fullscreen off');
