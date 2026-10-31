@@ -3720,28 +3720,44 @@ async function henovaWatchSponsoredReward(){
  }catch(e){console.warn('Sponsored reward refresh',e);}
  finally{henovaSponsoredChecking=false;}
 }
+function henovaAdWatchMessage(kind){
+ const messages={
+  ar:{short:'شاهد الإعلان حتى النهاية ليتم احتسابه',pending:'انتهت مدة المشاهدة المطلوبة. جارٍ التحقق من المكافأة.',success:'تم احتساب الإعلان بنجاح!'},
+  en:{short:'Watch the advertisement to the end to earn the reward.',pending:'Required viewing time reached. Checking reward confirmation.',success:'Advertisement successfully credited!'},
+  tr:{short:'Ödül için reklamı sonuna kadar izleyin.',pending:'Gerekli izleme süresi doldu. Ödül doğrulanıyor.',success:'Reklam ödülü başarıyla eklendi!'}
+ };
+ return (messages[s.lang]||messages.en)[kind];
+}
+function henovaAdNotice(kind){
+ const color=kind==='success'?'#238449':kind==='short'?'#d64c40':'#b16a13';
+ const el=document.createElement('div');
+ el.textContent=henovaAdWatchMessage(kind);
+ el.style.cssText='position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:999999;max-width:min(92vw,420px);width:max-content;background:'+color+';color:white;border-radius:14px;padding:14px 20px;font-size:15px;font-weight:800;text-align:center;box-shadow:0 6px 22px #0003';
+ document.body.appendChild(el);setTimeout(()=>el.remove(),4200);
+}
 async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
  const l=henovaVideoRewardText();
  if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA in Telegram');
  if(!window.Adsgram?.init)return toast(l.unavailable);
  henovaRewardVideoBusy=true;
- const btn=document.getElementById('henova-reward-video-btn');
- if(btn)btn.disabled=true;
+ const btn=document.getElementById('henova-reward-video-btn');if(btn)btn.disabled=true;
  try{
+  const session=await henovaCall('ad_view_start');
+  if(!session?.session_id)throw Error('Session not available');
   const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
-  await ad.show();
-  // Do not credit locally: only the authenticated AdsGram video callback can award eggs and eligibility.
-  const msg=s.lang==='ar'?'تمت مشاهدة الإعلان للنهاية. جارٍ انتظار تأكيد المكافأة.':s.lang==='tr'?'Reklam sonuna kadar izlendi. Ödül doğrulaması bekleniyor.':'Advertisement watched to the end! Awaiting reward verification.';
-  toast(msg);
-  const before=await henovaCall('state').catch(()=>null);
-  const oldBalance=Number(before?.state?.eggs??s.eggs);
+  let completed=false;
+  try{await ad.show();completed=true}catch(err){console.warn('Advertisement not completed',err)}
+  const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
+  if(!completed||!checked?.min_seconds_met){henovaAdNotice('short');return}
+  henovaAdNotice('pending');
+  const oldBalance=Number(s.eggs);
   for(let i=0;i<8;i++){
    await new Promise(r=>setTimeout(r,1500));
    const fresh=await henovaCall('state').catch(()=>null);
    if(fresh?.state){
     henovaApplyState(fresh.state);render();
-    if(Number(fresh.state.eggs)>oldBalance){henovaShowRewardCard(5,'eggs');break}
+    if(Number(fresh.state.eggs)>oldBalance){henovaAdNotice('success');break}
    }
   }
  }catch(err){console.warn('HENOVA video ad',err);toast(l.unavailable)}
