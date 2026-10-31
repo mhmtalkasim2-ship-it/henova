@@ -3587,19 +3587,28 @@ function henovaShowRewardCard(amount,unit){
  const btn=document.createElement('button');btn.type='button';btn.textContent=close;btn.style.cssText='background:#f5c253;color:#283d24;border:0;border-radius:13px;padding:12px 34px;font-size:17px;font-weight:800';btn.onclick=()=>shade.remove();
  card.append(ico,h,p,btn);shade.appendChild(card);document.body.appendChild(shade);
 }
+async let henovaSponsoredChecking=false;
 async function henovaWatchSponsoredReward(){
+ if(henovaSponsoredChecking)return;
+ henovaSponsoredChecking=true;
  try{
-  const initial=await henovaCall('state');
-  if(!Number.isFinite(initial?.state?.eggs))return;
-  for(let i=0;i<6;i++){
-   await new Promise(r=>setTimeout(r,2000));
-   const current=await henovaCall('state').catch(()=>null);
-   if(current?.state){
-    henovaApplyState(current.state);render();
-    if(current.state.eggs>=initial.state.eggs+5){henovaShowRewardCard(5,'eggs');break}
+  for(let i=0;i<10;i++){
+   const response=await henovaCall('sponsored_reward_status').catch(()=>null);
+   const entry=response?.reward;
+   if(entry?.id && Date.now()-new Date(entry.rewarded_at).getTime()<120000){
+    const key='henova-sponsored-popup-'+String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'');
+    if(localStorage.getItem(key)!==String(entry.id)){
+     localStorage.setItem(key,String(entry.id));
+     const fresh=await henovaCall('state').catch(()=>null);
+     if(fresh?.state){henovaApplyState(fresh.state);render();}
+     henovaShowRewardCard(5,'eggs');
+     return;
+    }
    }
+   await new Promise(resolve=>setTimeout(resolve,2000));
   }
- }catch(e){console.warn('Sponsored reward refresh',e)}
+ }catch(e){console.warn('Sponsored reward refresh',e);}
+ finally{henovaSponsoredChecking=false;}
 }
 async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
