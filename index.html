@@ -3675,9 +3675,9 @@ async function henovaVideoCooldownRefresh(){
 setInterval(henovaVideoCooldownDraw,1000);
 
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Advertisement',desc:'5 eggs · Every 5 minutes',button:'Watch Ad',unavailable:'Ad currently unavailable'},
- ar:{title:'شاهد الإعلان',desc:'5 بيضات · كل 5 دقائق',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'5 yumurta · Her 5 dakikada bir',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
+ return ({en:{title:'Watch Advertisement',desc:'5 eggs · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
+ ar:{title:'شاهد الإعلان',desc:'5 بيضات · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
+ tr:{title:'Reklam İzle',desc:'5 yumurta · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -3726,24 +3726,26 @@ async function henovaWatchRewardVideo(){
  if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA in Telegram');
  if(!window.Adsgram?.init)return toast(l.unavailable);
  henovaRewardVideoBusy=true;
- const btn=document.getElementById('henova-reward-video-btn');if(btn)btn.disabled=true;
+ const btn=document.getElementById('henova-reward-video-btn');
+ if(btn)btn.disabled=true;
  try{
-  const permitted=await henovaVideoCooldownRefresh();
-  if(!permitted){toast(s.lang==='ar'?'انتظر انتهاء 5 دقائق قبل مشاهدة إعلان جديد':'Please wait for the 5-minute cooldown');return;}
   const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
   await ad.show();
-  // Independent five-egg button-use reward; not a verified AdsGram impression.
-  const result=await henovaCall('claim_interstitial_open');
-  if(result?.ok&&result.eggs===5){
-   henovaVideoCooldownUntil=performance.now()+300000;
-   const fresh=await henovaCall('state');
-   if(fresh?.state){henovaApplyState(fresh.state);render()}
-   henovaShowRewardCard(5,'eggs');
-  }else if(result?.error==='cooldown'){
-   toast(s.lang==='ar'?'المكافأة متاحة كل 5 دقائق':s.lang==='tr'?'Ödül her 5 dakikada bir':'Reward available every 5 minutes');
-  }else toast(l.unavailable);
- }catch(err){console.warn('HENOVA interstitial reward',err);toast(l.unavailable)}
- finally{henovaRewardVideoBusy=false;henovaVideoCooldownDraw()}
+  // Do not credit locally: only the authenticated AdsGram video callback can award eggs and eligibility.
+  const msg=s.lang==='ar'?'تمت مشاهدة الإعلان للنهاية. جارٍ انتظار تأكيد المكافأة.':s.lang==='tr'?'Reklam sonuna kadar izlendi. Ödül doğrulaması bekleniyor.':'Advertisement watched to the end! Awaiting reward verification.';
+  toast(msg);
+  const before=await henovaCall('state').catch(()=>null);
+  const oldBalance=Number(before?.state?.eggs??s.eggs);
+  for(let i=0;i<8;i++){
+   await new Promise(r=>setTimeout(r,1500));
+   const fresh=await henovaCall('state').catch(()=>null);
+   if(fresh?.state){
+    henovaApplyState(fresh.state);render();
+    if(Number(fresh.state.eggs)>oldBalance){henovaShowRewardCard(5,'eggs');break}
+   }
+  }
+ }catch(err){console.warn('HENOVA video ad',err);toast(l.unavailable)}
+ finally{henovaRewardVideoBusy=false;const b=document.getElementById('henova-reward-video-btn');if(b)b.disabled=false}
 }
 function render(){
 updateFarmIdentity();
@@ -3782,7 +3784,7 @@ if(tab===2){
 if(tab===2){
 const v=henovaVideoRewardText();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
-void henovaVideoCooldownRefresh().catch(()=>{const b=document.getElementById('henova-reward-video-btn');if(b)b.disabled=true});
+
 const a=henovaAdsgramLabels();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
  // Keep Daily Login first, then the two ad tasks together, followed by other tasks.
