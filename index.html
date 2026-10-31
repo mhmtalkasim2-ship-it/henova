@@ -3722,14 +3722,14 @@ async function henovaWatchSponsoredReward(){
 }
 function henovaAdWatchMessage(kind){
  const messages={
-  ar:{short:'شاهد الإعلان حتى النهاية ليتم احتسابه',pending:'انتهت مدة المشاهدة المطلوبة. جارٍ التحقق من المكافأة.',success:'تم احتساب الإعلان بنجاح!'},
-  en:{short:'Watch the advertisement to the end to earn the reward.',pending:'Required viewing time reached. Checking reward confirmation.',success:'Advertisement successfully credited!'},
-  tr:{short:'Ödül için reklamı sonuna kadar izleyin.',pending:'Gerekli izleme süresi doldu. Ödül doğrulanıyor.',success:'Reklam ödülü başarıyla eklendi!'}
+  ar:{short:'شاهد الإعلان حتى النهاية ليتم احتسابه',completed:'✅ اكتملت مشاهدة الإعلان',success:'✅ تم احتساب الإعلان بنجاح!'},
+  en:{short:'Watch the advertisement to the end to earn the reward.',completed:'✅ Advertisement completed',success:'✅ Advertisement successfully credited!'},
+  tr:{short:'Ödül için reklamı sonuna kadar izleyin.',completed:'✅ Reklam izleme tamamlandı',success:'✅ Reklam ödülü başarıyla eklendi!'}
  };
  return (messages[s.lang]||messages.en)[kind];
 }
 function henovaAdNotice(kind){
- const color=kind==='success'?'#238449':kind==='short'?'#d64c40':'#b16a13';
+ const color=kind==='success'||kind==='completed'?'#238449':kind==='short'?'#d64c40':'#b16a13';
  const el=document.createElement('div');
  el.textContent=henovaAdWatchMessage(kind);
  el.style.cssText='position:fixed;top:68px;left:50%;transform:translateX(-50%);z-index:999999;max-width:min(92vw,420px);width:max-content;background:'+color+';color:white;border-radius:14px;padding:14px 20px;font-size:15px;font-weight:800;text-align:center;box-shadow:0 6px 22px #0003';
@@ -3750,14 +3750,24 @@ async function henovaWatchRewardVideo(){
   try{await ad.show();completed=true}catch(err){console.warn('Advertisement not completed',err)}
   const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
   if(!completed||!checked?.min_seconds_met){henovaAdNotice('short');return}
-  // Do not show a pending-verification popup. Confirm the reward before saying it was credited.
+  // Immediate feedback for a completed ad; credit is announced only after it exists on the server.
   const oldBalance=Number(s.eggs);
-  for(let i=0;i<8;i++){
-   await new Promise(r=>setTimeout(r,1500));
-   const fresh=await henovaCall('state').catch(()=>null);
-   if(fresh?.state){
-    henovaApplyState(fresh.state);render();
-    if(Number(fresh.state.eggs)>oldBalance){henovaAdNotice('success');break}
+  const first=await henovaCall('state').catch(()=>null);
+  let credited=false;
+  if(first?.state){
+   credited=Number(first.state.eggs)>oldBalance;
+   henovaApplyState(first.state);render();
+  }
+  henovaAdNotice(credited?'success':'completed');
+  if(!credited){
+   // Silent follow-up: never show a long "verifying" banner.
+   for(let i=0;i<8;i++){
+    await new Promise(r=>setTimeout(r,1500));
+    const fresh=await henovaCall('state').catch(()=>null);
+    if(fresh?.state){
+     henovaApplyState(fresh.state);render();
+     if(Number(fresh.state.eggs)>oldBalance){credited=true;break}
+    }
    }
   }
  }catch(err){console.warn('HENOVA video ad',err);const code=String(err?.message||err||'unknown');toast((s.lang==='ar'?'تعذر بدء الإعلان: ':s.lang==='tr'?'Reklam başlatılamadı: ':'Could not start ad: ')+code.slice(0,90))}
