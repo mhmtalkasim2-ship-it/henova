@@ -2590,6 +2590,16 @@ async function henovaShowEligibility(){
  const w=henovaEligibilityWords();out.textContent='…';
  try{const d=await henovaCall('withdrawal_eligibility_progress');const pct=Math.max(0,Math.min(100,Number(d.percent)||0));hvAdEligible=pct>=100;henovaUpdateSimpleWithdrawal();out.innerHTML='<div style="font-weight:800;margin-bottom:8px">'+w.title+' · '+pct+'%</div><div role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" style="height:14px;background:#e3eddb;border-radius:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#f7c755;border-radius:12px"></div></div><p style="margin:10px 0 3px">'+w.watch+'</p><p style="font-size:12px;color:#6b806c">'+w.note+'</p>';}catch(e){const reason=String(e?.message||'network_error').slice(0,100);out.replaceChildren();const line=document.createElement('p');line.textContent=w.error+' — '+reason;line.style.cssText='color:#9a422e;overflow-wrap:anywhere';const retry=document.createElement('button');retry.type='button';retry.textContent=s.lang==='ar'?'إعادة المحاولة':s.lang==='tr'?'Tekrar dene':'Retry';retry.onclick=henovaShowEligibility;out.append(line,retry);console.warn('Eligibility progress:',reason);}
 }
+// Refresh eligibility while Wallet is visible, so 100% unlocks the submit button automatically.
+let henovaEligibilityPollBusy=false;
+setInterval(async()=>{
+ if(tab!==4||!henovaIsTelegram()||hvAdEligible||document.hidden||henovaEligibilityPollBusy)return;
+ henovaEligibilityPollBusy=true;
+ try{await henovaShowEligibility();}finally{henovaEligibilityPollBusy=false;}
+},15000);
+document.addEventListener('visibilitychange',()=>{
+ if(!document.hidden&&tab===4&&henovaIsTelegram()&&!hvAdEligible)void henovaShowEligibility();
+});
 async function henovaAdminPublishPromo(code){
  const out=document.getElementById('henova-admin-promo-result');
  if(!/^[A-Z0-9]{5,24}$/.test(code))return;
@@ -3205,7 +3215,7 @@ function henovaUpdateSimpleWithdrawal(){
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+hvMaxEggs+' 🥚';
- button.disabled=!valid||!hvPayoutReady||!Boolean(document.getElementById('henova-ton-wallet')?.value.trim())||(henovaIsTelegram()&&!hvAdEligible);
+ button.disabled=!valid||!hvPayoutReady||!Boolean(document.getElementById('henova-ton-wallet')?.value.trim())||!hvAdEligible;
 }
 // Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
 async function henovaMathGate(scope){
