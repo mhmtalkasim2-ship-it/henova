@@ -2213,6 +2213,45 @@ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{animation-duratio
  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;translate:0 0!important}
 }
 </style>
+<style id="henova-measured-scene-layout-v2">
+/* Fixed normalized scene coordinates. Original background illustration retains the scenery.
+   Overlay pieces are only enhanced when not already baked into the main scene. */
+main.farm-mode #farm-scene.farm-v3{
+ --hv-barn-left:8%; --hv-barn-top:25%;
+ --hv-pond-right:6%; --hv-pond-top:56%;
+ --hv-feeder-x:44%; --hv-feeder-y:47%;
+ --hv-hen-home-x:39%; --hv-hen-home-y:48%;
+}
+/* Hide legacy duplicate art pieces when their equivalents exist in scene SVG. */
+main.farm-mode #farm-scene.farm-v3 .v3-barn,
+main.farm-mode #farm-scene.farm-v3 .v3-pond,
+main.farm-mode #farm-scene.farm-v3 .v3-water,
+main.farm-mode #farm-scene.farm-v3 .v3-rock{display:none!important}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster{
+ width:24px!important;height:20px!important;opacity:.78!important;
+ background:none!important;box-shadow:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-a{left:5%!important;top:54%!important}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-b{right:6%!important;left:auto!important;top:52%!important}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ left:var(--hv-hen-home-x)!important;
+ top:var(--hv-hen-home-y)!important;
+ width:clamp(67px,16vw,94px)!important;
+ animation:henovaMeasuredFeeding 16s ease-in-out infinite!important;
+}
+@keyframes henovaMeasuredFeeding{
+ 0%,12%,88%,100%{translate:-2.5vw 2vh}
+ 32%,66%{translate:2vw 0}
+ 77%{translate:0 1vh}
+}
+/* Avoid heavy overlapping overlays over the barn roof and windmill. */
+html.telegram-fullscreen main.farm-mode .farm-toolbar{top:151px!important}
+html.telegram-fullscreen main.farm-mode .stats{top:222px!important}
+main.farm-mode .stats>div{background:rgba(248,251,227,.90)!important}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;translate:0!important}
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
