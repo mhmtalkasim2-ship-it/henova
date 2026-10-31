@@ -3760,7 +3760,7 @@ async function henovaWatchRewardVideo(){
     if(Number(fresh.state.eggs)>oldBalance){henovaAdNotice('success');break}
    }
   }
- }catch(err){console.warn('HENOVA video ad',err);toast(l.unavailable)}
+ }catch(err){console.warn('HENOVA video ad',err);const code=String(err?.message||err||'unknown');toast((s.lang==='ar'?'تعذر بدء الإعلان: ':s.lang==='tr'?'Reklam başlatılamadı: ':'Could not start ad: ')+code.slice(0,90))}
  finally{henovaRewardVideoBusy=false;const b=document.getElementById('henova-reward-video-btn');if(b)b.disabled=false}
 }
 function render(){
