@@ -2174,6 +2174,37 @@ main.farm-mode #farm-scene.farm-v3 .flower-right{right:4%;top:47%}
 main.farm-mode #farm-scene.farm-v3 .flower-low{left:7%;top:72%;transform:scale(.65);opacity:.68}
 @media(max-width:380px){main.farm-mode #farm-scene.farm-v3 .flower-right{right:1%;top:44%}}
 </style>
+<style id="henova-farm-depth-v3">
+/* Soft daylight, distinct material shadows and gentle water highlights. */
+main.farm-mode #farm-scene.farm-v3{
+ filter:saturate(1.09) contrast(1.035)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-barn{
+ filter:drop-shadow(3px 8px 4px rgba(43,61,29,.32))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-windmill{
+ filter:drop-shadow(3px 7px 4px rgba(42,66,30,.26))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-pond{
+ filter:drop-shadow(1px 4px 4px rgba(26,73,52,.18))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-water{
+ background:linear-gradient(150deg,#b7eafa 0%,#6cbdd5 35%,#308ea7 100%)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-water::after{
+ content:"";position:absolute;inset:14% 8% 60% 12%;border-radius:50%;
+ background:linear-gradient(90deg,transparent,rgba(255,255,236,.37),transparent);
+ animation:henovaWaterGlimmer 9s ease-in-out infinite;
+ pointer-events:none;
+}
+@keyframes henovaWaterGlimmer{
+ 0%,100%{opacity:.35;transform:translateX(-6%)}
+ 50%{opacity:.85;transform:translateX(8%)}
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .v3-water::after{animation:none!important}
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
