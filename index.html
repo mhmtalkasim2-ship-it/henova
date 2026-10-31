@@ -3291,7 +3291,7 @@ async function henovaPrepareWalletProof(){
   toast('Verification challenge prepared. Reconnect Tonkeeper. No payout was initiated.');
  }catch(e){const message=String(e?.message||'unknown_error');if(status)status.textContent='Wallet verification: '+message;toast(message.length>110?message.slice(0,110):message);}
 }
-let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=10000,hvGramPerEgg=0.0001,hvWalletVerified=false;
+let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=10000,hvGramPerEgg=0.00001,hvWalletVerified=false;
 let hvAdEligible=false;
 function henovaSetWithdrawalPercent(p){
  const input=document.getElementById('hv-withdraw-eggs');
@@ -3400,7 +3400,7 @@ async function henovaRefreshPayoutSetup(){
   hvWalletVerified=data.wallet?.verified_owner===true;
   hvMinEggs=Number(data.payout?.min_eggs)||500;
   hvMaxEggs=Number(data.payout?.max_eggs)||10000;
-  hvGramPerEgg=Number(data.payout?.gram_per_egg)||0.0001;
+  hvGramPerEgg=Number(data.payout?.gram_per_egg)||0.00001;
   const status=document.getElementById('hv-withdraw-state');
   if(status)status.textContent=hvPayoutReady
     ?(s.lang==='ar'?'السحب متاح للحسابات المؤهلة':s.lang==='tr'?'Uygun hesaplar için çekim açık':'Withdrawals open for eligible accounts')
@@ -3915,7 +3915,7 @@ const word=s.lang==='ar'?{title:'سحب GRAM',status:'السحب قيد التج
 el.innerHTML='<div class="henova-wallet-page hv-simple-withdraw">'+
 '<h1 class="henova-wallet-heading">💎 '+word.title+'</h1>'+
 '<p class="hv-withdraw-subtitle">'+(s.lang==='ar'?'اسحب أرباح البيض إلى محفظتك':s.lang==='tr'?'Yumurtalarını cüzdanına çek':'Withdraw eggs to your wallet')+'</p>'+
-'<section class="hv-withdraw-summary"><small>'+hvText('avail')+'</small><strong>🥚 '+num(s.eggs)+'</strong><p>≈ <span id="hv-withdraw-balance-gram">'+(s.eggs/10000).toFixed(6)+'</span> GRAM</p><div class="hv-withdraw-pill">💎 GRAM · TON</div></section>'+
+'<section class="hv-withdraw-summary"><small>'+hvText('avail')+'</small><strong>🥚 '+num(s.eggs)+'</strong><p>≈ <span id="hv-withdraw-balance-gram">'+(s.eggs*hvGramPerEgg).toFixed(6)+'</span> GRAM</p><div class="hv-withdraw-pill">💎 GRAM · TON</div></section>'+
 '<section class="henova-wallet-card"><label class="henova-wallet-label" for="henova-ton-wallet">'+word.wallet+'</label><input class="henova-wallet-input" id="henova-ton-wallet" type="text" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="EQ... / UQ..." maxlength="48"><button class="henova-wallet-save" onclick="henovaSaveTonWallet()">'+word.save+'</button><p id="henova-wallet-info" class="henova-wallet-note"></p></section>'+
 '<section class="henova-wallet-card hv-withdraw-form"><label class="henova-wallet-label" for="hv-withdraw-eggs">'+(s.lang==='ar'?'المبلغ بالبيض':s.lang==='tr'?'Yumurta miktarı':'Egg amount')+'</label><div class="hv-amount-line">🥚 <input id="hv-withdraw-eggs" type="number" inputmode="numeric" min="500" step="1" value="'+Math.min(s.eggs,10000)+'" oninput="henovaUpdateSimpleWithdrawal()"><strong id="hv-withdraw-gram">0 GRAM</strong></div><div class="hv-withdraw-percent">'+[25,50,75,100].map(x=>'<button type="button" onclick="henovaSetWithdrawalPercent('+x+')">'+(x===100?'Max':x+'%')+'</button>').join('')+'</div><div class="hv-withdraw-total"><span>'+(s.lang==='ar'?'ستستلم':s.lang==='tr'?'Alacağınız':'You receive')+'</span><strong id="hv-withdraw-net">0 GRAM</strong></div><small id="hv-withdraw-rule"></small><button id="hv-withdraw-submit" class="henova-wallet-save" onclick="henovaSubmitSimpleWithdrawal()" disabled>↑ '+(s.lang==='ar'?'سحب':s.lang==='tr'?'Çek':'Withdraw')+'</button><p id="hv-withdraw-state" class="henova-wallet-note">'+word.info+'</p></section>'+
 
