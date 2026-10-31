@@ -2076,6 +2076,22 @@ html.telegram-fullscreen #nav{padding-bottom:max(18px,env(safe-area-inset-bottom
  html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools button{min-width:35px!important;padding:5px!important}
 }
 </style>
+<style id="henova-compact-task-controls-v2">
+/* Compact task controls on small Telegram screens; preserve all click targets. */
+main.hv-tasks-mode #view>.title{font-size:22px!important;margin:8px 6px 12px!important}
+main.hv-tasks-mode #view>.item{padding:11px 12px!important;min-height:76px!important;gap:9px!important}
+main.hv-tasks-mode #view>.item h3{font-size:15px!important}
+main.hv-tasks-mode #view>.item p{font-size:12px!important}
+main.hv-tasks-mode #view>.item button{font-size:12px!important;padding:8px 11px!important;max-width:120px!important;min-height:38px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action button{width:100%!important;max-width:100%!important;min-height:42px!important;padding:9px 12px!important;font-size:15px!important}
+main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{padding:12px!important;gap:7px!important}
+main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:46px!important;height:46px!important;flex-basis:46px!important}
+main.hv-tasks-mode #view .primary{padding:9px 12px!important;font-size:14px!important;min-height:40px!important}
+@media(max-width:430px){
+ main.hv-tasks-mode #view{font-size:13px}
+ main.hv-tasks-mode #view>.item button{border-radius:11px!important}
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
