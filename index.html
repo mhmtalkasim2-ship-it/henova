@@ -2043,6 +2043,18 @@ let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar',
 let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0,henovaInviteThreeProgress=0,henovaInviteThreeRewarded=false;
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
+let henovaPresenceBusy=false;
+async function henovaPresencePing(){
+ if(henovaPresenceBusy||document.hidden||!henovaIsTelegram())return;
+ henovaPresenceBusy=true;
+ try{await henovaCall('presence_ping')}catch(e){console.warn('HENOVA presence',String(e?.message||e))}
+ finally{henovaPresenceBusy=false}
+}
+setInterval(()=>{void henovaPresencePing()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)void henovaPresencePing()});
+window.addEventListener('focus',()=>{void henovaPresencePing()});
+setTimeout(()=>{void henovaPresencePing()},2500);
+
 function henovaApplyState(st){
   if(!st || !Number.isFinite(st.eggs) || !Number.isFinite(st.coins))throw Error('invalid_server_state');
   s.eggs=st.eggs;s.coins=st.coins;s.hen=st.hen||{starter:1};s.fan=st.fan||0;
