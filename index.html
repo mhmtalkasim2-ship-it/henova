@@ -3739,7 +3739,7 @@ async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
  const l=henovaVideoRewardText();
  if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA in Telegram');
- if(!window.Adsgram?.init)return toast(l.unavailable);
+ if(!window.Adsgram?.init){toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');return;}
  henovaRewardVideoBusy=true;
  const btn=document.getElementById('henova-reward-video-btn');if(btn)btn.disabled=true;
  try{
