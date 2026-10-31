@@ -2053,11 +2053,24 @@ html.telegram-fullscreen main:not(.farm-mode)>header .farm-user{min-width:0;flex
 html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools{flex:0 0 auto;display:flex;gap:5px}
 html.telegram-fullscreen main.farm-mode .farm-toolbar,
 html.telegram-fullscreen main.farm-mode>header{
- top:max(155px,calc(env(safe-area-inset-top,0px) + 130px))!important;
+ top:155px!important;
 }
 html.telegram-fullscreen main.farm-mode .stats{
- top:max(230px,calc(env(safe-area-inset-top,0px) + 205px))!important;
+ top:265px!important;
 }
+/* Keep the main hen close to the feeding trough; walk and peck within a small area. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ left:43%!important;
+ top:52%!important;
+ animation:henovaHenShortFeedV17 15s ease-in-out infinite!important;
+}
+@keyframes henovaHenShortFeedV17{
+ 0%,10%,90%,100%{translate:0 0}
+ 30%,62%{translate:-3vw 2vh}
+ 77%{translate:-1.5vw 1vh}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{animation-duration:15s!important}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{animation-duration:15s!important}
 html.telegram-fullscreen #nav{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))!important}
 @media(max-width:380px){
  html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools button{min-width:35px!important;padding:5px!important}
