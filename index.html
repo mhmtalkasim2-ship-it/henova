@@ -3587,7 +3587,7 @@ function henovaShowRewardCard(amount,unit){
  const btn=document.createElement('button');btn.type='button';btn.textContent=close;btn.style.cssText='background:#f5c253;color:#283d24;border:0;border-radius:13px;padding:12px 34px;font-size:17px;font-weight:800';btn.onclick=()=>shade.remove();
  card.append(ico,h,p,btn);shade.appendChild(card);document.body.appendChild(shade);
 }
-async let henovaSponsoredChecking=false;
+let henovaSponsoredChecking=false;
 async function henovaWatchSponsoredReward(){
  if(henovaSponsoredChecking)return;
  henovaSponsoredChecking=true;
