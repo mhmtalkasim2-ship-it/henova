@@ -3750,7 +3750,7 @@ async function henovaWatchRewardVideo(){
   try{await ad.show();completed=true}catch(err){console.warn('Advertisement not completed',err)}
   const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
   if(!completed||!checked?.min_seconds_met){henovaAdNotice('short');return}
-  henovaAdNotice('pending');
+  // Do not show a pending-verification popup. Confirm the reward before saying it was credited.
   const oldBalance=Number(s.eggs);
   for(let i=0;i<8;i++){
    await new Promise(r=>setTimeout(r,1500));
