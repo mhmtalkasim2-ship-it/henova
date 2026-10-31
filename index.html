@@ -2154,79 +2154,9 @@ main.farm-mode~nav{
 main.farm-mode~nav button{font-weight:800!important}
 main.farm-mode~nav button.active{color:#2c742e!important}
 </style>
-<style id="henova-orchard-details-v2">
-/* Three subtle meadow flower beds add depth to HENOVA's own illustrated farm. */
-main.farm-mode #farm-scene.farm-v3 .henova-wildflowers{
- position:absolute!important;display:block!important;z-index:7!important;
- width:clamp(42px,13vw,85px);height:clamp(30px,7vw,52px);
- pointer-events:none!important;opacity:.9;
- background:
- radial-gradient(circle at 22% 24%,#ffe2a0 0 3px,#fff6d5 3.5px 6px,transparent 6.5px),
- radial-gradient(circle at 61% 43%,#ffd37f 0 2px,#f9f1ca 2.5px 5px,transparent 5.5px),
- radial-gradient(circle at 76% 15%,#fff8ca 0 3px,#f9f3da 3.5px 6px,transparent 6.5px),
- radial-gradient(ellipse at 47% 90%,#447d35 0 14%,transparent 65%),
- radial-gradient(ellipse at 22% 90%,#5c963d 0 14%,transparent 60%),
- radial-gradient(ellipse at 76% 94%,#447f35 0 14%,transparent 60%);
- filter:drop-shadow(1px 3px 1px #275a2b40);
-}
-main.farm-mode #farm-scene.farm-v3 .flower-left{left:3%;top:47%}
-main.farm-mode #farm-scene.farm-v3 .flower-right{right:4%;top:47%}
-main.farm-mode #farm-scene.farm-v3 .flower-low{left:7%;top:72%;transform:scale(.65);opacity:.68}
-@media(max-width:380px){main.farm-mode #farm-scene.farm-v3 .flower-right{right:1%;top:44%}}
-</style>
-<style id="henova-farm-depth-v3">
-/* Soft daylight, distinct material shadows and gentle water highlights. */
-main.farm-mode #farm-scene.farm-v3{
- filter:saturate(1.09) contrast(1.035)!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-barn{
- filter:drop-shadow(3px 8px 4px rgba(43,61,29,.32))!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-windmill{
- filter:drop-shadow(3px 7px 4px rgba(42,66,30,.26))!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-pond{
- filter:drop-shadow(1px 4px 4px rgba(26,73,52,.18))!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-water{
- background:linear-gradient(150deg,#b7eafa 0%,#6cbdd5 35%,#308ea7 100%)!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-water::after{
- content:"";position:absolute;inset:14% 8% 60% 12%;border-radius:50%;
- background:linear-gradient(90deg,transparent,rgba(255,255,236,.37),transparent);
- animation:henovaWaterGlimmer 9s ease-in-out infinite;
- pointer-events:none;
-}
-@keyframes henovaWaterGlimmer{
- 0%,100%{opacity:.35;transform:translateX(-6%)}
- 50%{opacity:.85;transform:translateX(8%)}
-}
-@media(prefers-reduced-motion:reduce){
- main.farm-mode #farm-scene.farm-v3 .v3-water::after{animation:none!important}
-}
-</style>
-<style id="henova-farm-art-balance-v4">
-/* Harmonize HENOVA's existing original barn, trees and chicken assets. */
-main.farm-mode #farm-scene.farm-v3 .v3-barn{
- filter:drop-shadow(2px 7px 3px rgba(39,58,27,.32)) saturate(1.10)!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-windmill{
- filter:drop-shadow(2px 6px 3px rgba(39,58,27,.28)) saturate(1.08)!important;
-}
-main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
- width:clamp(70px,17vw,98px)!important;
- filter:drop-shadow(2px 6px 3px rgba(35,68,31,.29))!important;
-}
-main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
- filter:drop-shadow(1px 4px 2px rgba(35,68,31,.29))!important;
-}
-main.farm-mode #farm-scene.farm-v3 .henova-wildflowers{
- opacity:.8!important;
-}
-@media(max-width:380px){
- main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{width:clamp(66px,16vw,88px)!important}
-}
-</style>
+
+
+
 <style id="henova-maintenance-style">
 #henova-maintenance-screen{position:fixed;inset:0;z-index:2147483640;display:flex;align-items:center;justify-content:center;padding:26px;background:linear-gradient(145deg,#cbe6ae,#78b65a);font-family:system-ui,sans-serif;text-align:center;color:#234d2a}
 #henova-maintenance-screen .hv-maintenance-card{width:min(100%,420px);padding:36px 24px;border-radius:28px;background:#f8ffedef;box-shadow:0 16px 45px #23451d33;border:2px solid #fff4cf}
@@ -3989,7 +3919,7 @@ const labels=document.querySelectorAll('.stats small');if(labels.length===2){lab
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
 // Task layout only: hide header balances without modifying player data.
 document.querySelector('main').classList.toggle('hv-tasks-mode',tab===2);
-if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="henova-wildflowers flower-left" aria-hidden="true"></div><div class="henova-wildflowers flower-right" aria-hidden="true"></div><div class="henova-wildflowers flower-low" aria-hidden="true"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking" draggable="false"></div></div></div>'+henovaOwnedHensMarkup()+'<div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+hvText('unit')+'</strong><small id="clock">'+(secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+hvText('collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
+if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-pond"><div class="v3-water"></div><i></i><i></i></div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen walking and pecking" draggable="false"></div></div></div>'+henovaOwnedHensMarkup()+'<div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=1" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+hvText('unit')+'</strong><small id="clock">'+(secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+hvText('collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
 if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">'+hvText('packInfo')+'</p><p class="muted">'+({ar:'🐔 أول دجاجة مجانية، وكل دجاجة أساسية إضافية 750 عملة. يمكنك شراء 5 دجاجات كحد أقصى من كل نوع، ولكل نوع لون خاص به.',tr:'🐔 İlk tavuk ücretsiz. Her ek başlangıç tavuğu 750 jeton. Her türden en fazla 5 tavuk alabilirsin; her türün rengi farklıdır.',en:'🐔 Your first starter hen is free; each extra starter hen costs 750 coins. You can own up to 5 hens of each type. Every breed has a different color.'}[s.lang]||'')+'</p>'+H.map(h=>'<article class="item"><div class="face hv-breed-face"><img src="'+henovaBreedImage(h[0])+'" alt="'+h[2]+'" loading="lazy"></div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+(h[3]*6)+' '+(s.lang==='ar'?'بيضة كل 6 ساعات':s.lang==='tr'?'yumurta / 6 saat':'eggs / 6 hours')+' <small>('+h[3]+' '+hvText('eggsHour')+')</small></p><small>'+hvText('owned')+': '+ (s.hen[h[0]]||0)+'/5</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')" '+((s.hen[h[0]]||0)>=5?'disabled':'')+'>'+((s.hen[h[0]]||0)>=5?(s.lang==='ar'?'اكتمل 5/5':s.lang==='tr'?'Dolu 5/5':'Full 5/5'):(num(h[4])+' 🪙<br>'+names[6]))+'</button>':'<b>'+hvText('free')+'</b>')+'</article>').join('')+'<p class="warning">'+hvText('packWarning')+'</p>';
 if(tab===2){
 queueMicrotask(henovaLoadPost80Status);
