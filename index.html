@@ -3480,7 +3480,7 @@ function henovaUpdateSimpleWithdrawal(){
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+(hvMaxEggs===1000000?'1M':hvMaxEggs.toLocaleString('en-US'))+' 🥚';
- button.disabled=!valid||!hvPayoutReady||!Boolean(document.getElementById('henova-ton-wallet')?.value.trim())||!hvAdEligible;
+ // Unlock once confirmed ads reach 100% and user has at least 500 eggs; validate wallet on submission.\n button.disabled=!(hvAdEligible&&Number(s.eggs)>=500&&valid);
 }
 // Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
 async function henovaMathGate(scope){
