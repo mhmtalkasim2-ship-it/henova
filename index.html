@@ -4305,4 +4305,36 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
  });
  observer.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
 })();
-</script></body></html>
+</script>
+<style id="henova-approved-3d-overlay-fix">
+/* Overlay the uploaded approved image above obsolete v3 decorations.
+   Leave real buttons and counters outside the scene untouched. */
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3{
+ position:absolute!important;isolation:isolate!important;
+ background:#87b95b url("./assets/henova-approved-3d-scene.PNG") center center / 100% 100% no-repeat!important;
+}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > :not(.farm-hen):not(.v3-windmill){
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+/* The picture contains the stone windmill, so keep only an animated rotor
+   atop that photographed mill instead of displaying a second tower. */
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .v3-windmill{
+ position:absolute!important;left:76%!important;top:20%!important;
+ width:1px!important;height:1px!important;background:none!important;
+ border:0!important;box-shadow:none!important;z-index:24!important;pointer-events:none!important;
+}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .v3-windmill::before,
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .v3-windmill::after{display:none!important}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 .v3-rotor{
+ position:absolute!important;left:0!important;top:0!important;opacity:.8!important;
+ animation:henovaApprovedRotor 8s linear infinite!important;transform-origin:center!important;
+}
+@keyframes henovaApprovedRotor{to{transform:rotate(360deg)}}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .farm-hen{
+ visibility:visible!important;opacity:1!important;z-index:25!important;
+}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .farm-hen.hen-a{
+ left:47%!important;bottom:36%!important;width:clamp(54px,14vw,78px)!important;
+}
+</style>
+</body></html>
