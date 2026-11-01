@@ -4284,11 +4284,11 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   try{
     const response=await fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'diagnostic',initData:app.initData}),cache:'no-store'
+      body:JSON.stringify({action:'admin_visual_preview',initData:app.initData}),cache:'no-store'
     });
     if(!response.ok)return;
     const result=await response.json();
-    if(result?.ok===true && result?.auth==='telegram_verified' && result?.database==='connected'){
+    if(result?.ok===true && result?.admin_preview===true){
       document.documentElement.classList.add('henova-admin-3d-preview');
     }
   }catch(error){console.info('HENOVA admin-only visual pilot not available');}
