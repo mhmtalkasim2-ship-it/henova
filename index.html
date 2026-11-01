@@ -2252,51 +2252,7 @@ main.farm-mode .stats>div{background:rgba(248,251,227,.90)!important}
  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;translate:0!important}
 }
 </style>
-<style id="henova-uploaded-art-layout-v1">
-/* Dedicated asset coordinates. The four files were uploaded to assets/ on main.
-   Background is now grass; other elements are transparent image layers. */
-main.farm-mode #farm-scene.farm-v3{
- background-image:url('./assets/8374a478-82be-4241-a58e-438fd644c66f.png')!important;
- background-position:center!important;
- background-size:cover!important;
- background-color:#78b641!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-barn{
- display:block!important;position:absolute!important;
- left:4%!important;top:24%!important;width:45%!important;height:24%!important;
- background:transparent url('./assets/4d86e42d-9ae1-42bf-a91b-94456c904fec.png') center/contain no-repeat!important;
- filter:drop-shadow(2px 8px 3px #2c442c55)!important;z-index:5!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-pond{
- display:block!important;position:absolute!important;
- left:auto!important;right:3%!important;top:54%!important;bottom:auto!important;
- width:38%!important;height:17%!important;
- background:transparent url('./assets/d74fff47-19db-440e-8c81-64319f4f6fc7.png') center/contain no-repeat!important;
- border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;z-index:5!important;
-}
-main.farm-mode #farm-scene.farm-v3 .v3-pond .v3-water,
-main.farm-mode #farm-scene.farm-v3 .v3-pond i{display:none!important}
-main.farm-mode #farm-scene.farm-v3 .v3-rock{
- display:block!important;position:absolute!important;
- right:5%!important;left:auto!important;top:49%!important;bottom:auto!important;
- width:13%!important;height:8%!important;border:0!important;border-radius:0!important;
- background:transparent url('./assets/10fd1bc6-1a89-407d-ae3b-4b3eec40468c.png') center/contain no-repeat!important;
- box-shadow:none!important;transform:none!important;z-index:6!important;
-}
-/* Keep existing themed art functional without duplicating the embedded old scene. */
-main.farm-mode #farm-scene.farm-v3 .v3-tree{display:block!important;z-index:3!important}
-main.farm-mode #farm-scene.farm-v3 .v3-nest{display:block!important;top:56%!important;left:5%!important;z-index:6!important}
-main.farm-mode #farm-scene.farm-v3 .v3-windmill{display:block!important;left:65%!important;top:27%!important;width:31%!important;height:22%!important;z-index:5!important}
-main.farm-mode #farm-scene.farm-v3 .v3-feeder{
- display:block!important;position:absolute!important;top:50%!important;left:43%!important;
- width:24%!important;height:9%!important;transform:none!important;
- background:transparent url('./assets/henova-feeder-cutout-v15.svg') center/contain no-repeat!important;
- border:0!important;border-radius:0!important;box-shadow:none!important;z-index:7!important;
-}
-main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{left:35%!important;top:49%!important;z-index:12!important}
-main.farm-mode #farm-scene.farm-v3 .v3-stones{display:none!important}
-main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster{display:none!important}
-</style>
+
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
