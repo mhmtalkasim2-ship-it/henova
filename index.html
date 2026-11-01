@@ -4192,9 +4192,9 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   var didRequest=false;
   function start(){
     if(didRequest)return;
-    if(!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initData){
-      console.info('Entry AdsGram: Telegram initData unavailable');return;
-    }
+    if(!window.Telegram?.WebApp){console.info('Entry AdsGram: outside Telegram');return;}
+    // Some Telegram launches populate initData asynchronously. Let AdsGram decide
+    // availability rather than silently suppressing the entry placement.
     var tries=0;
     function showWhenReady(){
       if(didRequest)return;
@@ -4206,6 +4206,11 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
       didRequest=true;
       try{
         var ad=window.Adsgram.init({blockId:'int-56161',debug:false});
+        if(ad.addEventListener){
+          ad.addEventListener('onStart',function(){console.info('HENOVA entry ad started')});
+          ad.addEventListener('onBannerNotFound',function(){console.info('HENOVA entry ad: no available inventory')});
+          ad.addEventListener('onError',function(e){console.warn('HENOVA entry ad render error',e)});
+        }
         Promise.resolve(ad.show()).catch(function(e){
           console.info('Entry AdsGram unavailable:',e && (e.description||e.message||e));
         });
