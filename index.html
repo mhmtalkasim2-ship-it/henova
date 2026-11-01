@@ -2331,32 +2331,79 @@ main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen {
 }
 /* HUD is untouched: nav, collect dock, balance, languages, payout/admin flows. */
 </style>
-<style id="henova-single-hen-feeder-v19">
-/* Keep the live, clickable starter hen right beside the feed tray.
-   Existing henovaTapHen/henovaPlayCluck and all business logic remain untouched. */
-main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a {
-  left:60.5%!important;
+<style id="henova-natural-walk-and-feed-v25">
+/* Main hen: walk on the grass beside the trough, stop to eat, then walk back.
+   CSS-only movement avoids extra JS loops and preserves the existing hen click/cluck. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  display:block!important;
+  left:55%!important;
+  top:44%!important;
   right:auto!important;
-  top:43%!important;
   bottom:auto!important;
   width:clamp(64px,17vw,94px)!important;
-  display:block!important;
   z-index:15!important;
   pointer-events:auto!important;
-  animation:henovaFeedOnlyV19 13s ease-in-out infinite!important;
+  cursor:pointer!important;
+  translate:none!important;
+  transform-origin:center bottom!important;
+  animation:henovaStarterNaturalWalkV25 17s linear infinite!important;
+  will-change:transform;
 }
-@keyframes henovaFeedOnlyV19 {
-  0%,8%,91%,100% {translate:19px 8px}
-  20% {translate:3px 3px}
-  32%,65% {translate:-13px 0px}
-  72% {translate:-4px 6px}
-  82% {translate:12px 5px}
+/* One step every few pixels, and a full pause beside the grain tray. */
+@keyframes henovaStarterNaturalWalkV25{
+  0%,10%{transform:translate3d(20px,8px,0)}
+  14%{transform:translate3d(15px,6px,0)}
+  18%{transform:translate3d(7px,6px,0)}
+  22%{transform:translate3d(-1px,4px,0)}
+  27%{transform:translate3d(-12px,5px,0)}
+  32%,65%{transform:translate3d(-21px,5px,0)}
+  69%{transform:translate3d(-19px,6px,0)}
+  73%{transform:translate3d(-11px,5px,0)}
+  78%{transform:translate3d(1px,5px,0)}
+  84%{transform:translate3d(14px,7px,0)}
+  88%,100%{transform:translate3d(20px,8px,0)}
 }
-/* Let the existing detailed hen action keep its pecking animation. */
-@media(prefers-reduced-motion:reduce) {
- main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a {
-  animation:none!important; translate:0 0!important;
- }
+/* Direction changes only while the hen is standing still, never mid-stride. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  display:block!important;
+  transform-origin:50% 70%!important;
+  animation:henovaStarterFacingV25 17s steps(1,end) infinite!important;
+}
+@keyframes henovaStarterFacingV25{
+  0%,65.9%{transform:scaleX(-1)}
+  66%,96.9%{transform:scaleX(1)}
+  97%,100%{transform:scaleX(-1)}
+}
+/* Gentle body bob when walking, then several small head dips when eating. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  display:block!important;
+  transform-origin:56% 83%!important;
+  animation:henovaStarterBodyAndPeckV25 17s ease-in-out infinite!important;
+}
+@keyframes henovaStarterBodyAndPeckV25{
+  0%,10%,12%,16%,20%,24%,28%,32%,36%,42%,47%,52%,57%,62%,65%,68%,72%,76%,80%,84%,88%,100%{transform:translateY(0) rotate(0deg)}
+  14%,18%,22%,26%,30%,71%,74%,78%,82%,86%{transform:translateY(-2px) rotate(-1deg)}
+  39%,44%,49%,54%,59%{transform:translateY(4px) rotate(8deg)}
+}
+/* Prevent a second legacy image animation from moving it during feeding. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a img{
+  animation:none!important;
+  width:100%!important;
+  height:auto!important;
+  display:block!important;
+  pointer-events:none!important;
+}
+/* Retain the familiar touch reaction and the original real cluck audio. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v11{
+  animation:henovaHenTapV11 .48s ease-out 1!important;
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a,
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing,
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+    animation:none!important;
+  }
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{transform:translate3d(0,0,0)!important}
 }
 </style>
 <style id="henova-hud-roof-clearance-v19">
