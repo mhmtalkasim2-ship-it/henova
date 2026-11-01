@@ -2843,7 +2843,7 @@ function henovaEligibilityWords(){return s.lang==='ar'?{button:'هل أنا مؤ
 async function henovaShowEligibility(){
  const out=document.getElementById('henova-eligibility-results');if(!out)return;
  const w=henovaEligibilityWords();out.textContent='…';
- try{const d=await henovaCall('withdrawal_eligibility_progress');const pct=Math.max(0,Math.min(100,Number(d.percent)||0));hvAdEligible=pct>=100;henovaUpdateSimpleWithdrawal();out.innerHTML='<div style="font-weight:800;margin-bottom:8px">'+w.title+' · '+pct+'%</div><div role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" style="height:14px;background:#e3eddb;border-radius:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#f7c755;border-radius:12px"></div></div><p style="margin:10px 0 3px">'+w.watch+'</p><p style="font-size:12px;color:#6b806c">'+w.note+'</p>';if(Number(window.Telegram?.WebApp?.initDataUnsafe?.user?.id)===1035565575 && pct<100){const preview=document.createElement('div');preview.textContent='🧪 Admin-only test preview: 99% — real withdrawal remains locked';preview.style.cssText='padding:8px;margin:8px 0;border:1px dashed #b48c48;border-radius:10px;font-size:12px';out.append(preview);}}catch(e){const reason=String(e?.message||'network_error').slice(0,100);out.replaceChildren();const line=document.createElement('p');line.textContent=w.error+' — '+reason;line.style.cssText='color:#9a422e;overflow-wrap:anywhere';const retry=document.createElement('button');retry.type='button';retry.textContent=s.lang==='ar'?'إعادة المحاولة':s.lang==='tr'?'Tekrar dene':'Retry';retry.onclick=henovaShowEligibility;out.append(line,retry);console.warn('Eligibility progress:',reason);}
+ try{const d=await henovaCall('withdrawal_eligibility_progress');const pct=Math.max(0,Math.min(100,Number(d.percent)||0));hvAdEligible=pct>=100;henovaUpdateSimpleWithdrawal();out.innerHTML='<div style="font-weight:800;margin-bottom:8px">'+w.title+' · '+pct+'%</div><div role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" style="height:14px;background:#e3eddb;border-radius:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#f7c755;border-radius:12px"></div></div><p style="margin:10px 0 3px">'+w.watch+'</p><p style="font-size:12px;color:#6b806c">'+w.note+'</p>';}catch(e){const reason=String(e?.message||'network_error').slice(0,100);out.replaceChildren();const line=document.createElement('p');line.textContent=w.error+' — '+reason;line.style.cssText='color:#9a422e;overflow-wrap:anywhere';const retry=document.createElement('button');retry.type='button';retry.textContent=s.lang==='ar'?'إعادة المحاولة':s.lang==='tr'?'Tekrar dene':'Retry';retry.onclick=henovaShowEligibility;out.append(line,retry);console.warn('Eligibility progress:',reason);}
 }
 // Refresh eligibility while Wallet is visible, so 100% unlocks the submit button automatically.
 let henovaEligibilityPollBusy=false;
@@ -4098,15 +4098,6 @@ if(henovaIsTelegram()){
  const btn=document.createElement('button');btn.type='button';btn.className='henova-wallet-save';btn.textContent='📊 '+henovaEligibilityWords().button;btn.onclick=henovaShowEligibility;
  const output=document.createElement('div');output.id='henova-eligibility-results';output.style.cssText='margin-top:12px;line-height:1.6';
  card.append(btn,output);el.querySelector('.henova-wallet-page')?.prepend(card);
-}
-// Clearly expose the payout management screen to the existing staff account.
-if(String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'')==='1035565575'){
- const adminLink=document.createElement('button');
- adminLink.type='button';
- adminLink.textContent='📣 Manage payouts / Repost #14–#16';
- adminLink.style.cssText='display:block!important;width:100%;margin:14px 0;padding:15px;border:2px solid #8cae73;border-radius:14px;background:#ecf7dc;color:#275b38;font-weight:800;position:relative;z-index:3';
- adminLink.onclick=henovaShowAdminPayouts;
- el.prepend(adminLink);
 }
 henovaRefreshPayoutSetup();
 }
