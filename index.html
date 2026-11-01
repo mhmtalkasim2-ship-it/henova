@@ -4026,7 +4026,7 @@ async function henovaWatchRewardVideo(){
   if(!session?.session_id)throw Error('Session not available');
   const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
   let completed=false;
-  try{await ad.show();completed=true}catch(err){console.warn('Advertisement not completed',err)}
+  try{await ad.show();completed=true}catch(err){console.warn('Advertisement not completed',err);const reason=String(err?.description||err?.message||err||'').toLowerCase();if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available/.test(reason)){toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');return;}}
   const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
   if(!completed||!checked?.min_seconds_met){henovaAdNotice('short');return}
   // Immediate feedback for a completed ad; credit is announced only after it exists on the server.
@@ -4228,15 +4228,5 @@ if(new URLSearchParams(location.search).get('admin')==='payouts'){
 if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.textContent='🔇';}
 // HENOVA AdsGram interstitial, Unit ID int-56161 (platform 53244).
 // AdsGram is currently in moderation; ad unavailability must never block the farm.
-function henovaLaunchInterstitial(){
-  if(!window.Telegram?.WebApp?.initData)return;
-  if(!window.Adsgram?.init){console.info('HENOVA AdsGram SDK unavailable');return;}
-  try{
-    const controller=window.Adsgram.init({blockId:'int-56161',debug:false});
-    Promise.resolve(controller.show()).catch(err=>{
-      console.info('HENOVA launch ad not available',err?.description||err?.message||'no fill');
-    });
-  }catch(error){console.warn('HENOVA launch ad failed',error?.message||error);}
-}
-setTimeout(henovaLaunchInterstitial,5000);
+
 </script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span></body></html>
