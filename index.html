@@ -4337,4 +4337,25 @@ html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .f
  left:47%!important;bottom:36%!important;width:clamp(54px,14vw,78px)!important;
 }
 </style>
+
+<style id="henova-admin-3d-cleanup-v2">
+/* Admin-only: eliminate duplicated flat vector art over approved photographic background. */
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3{
+ background-image:url("./assets/henova-approved-3d-scene.PNG")!important;
+ background-size:cover!important;
+ background-position:center center!important;
+ image-rendering:auto!important;
+}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > *{
+ display:none!important;
+}
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 > .farm-hen{
+ display:block!important;visibility:visible!important;opacity:1!important;z-index:26!important;
+}
+/* Keep the real, tappable moving hen, but avoid duplicating other cartoon props. */
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 .farm-hen.hen-b,
+html.henova-admin-3d-preview.henova-approved-art-loaded #farm-scene.farm-v3 .farm-hen.hen-c{
+ display:none!important;
+}
+</style>
 </body></html>
