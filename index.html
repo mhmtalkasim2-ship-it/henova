@@ -1908,6 +1908,22 @@ html.henova-admin-3d-preview main.farm-mode .scene .farm-hen img{
  filter:drop-shadow(3px 8px 5px #142e1899)!important;
 }
 
+
+/* Exact approved HENOVA 3D artwork; visible only after server-admin gate.
+   If artwork is absent, keep previous functional farm art, not an empty area. */
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3{
+ background:#82b251 url('./assets/henova-approved-3d-scene.jpg') center center/100% 100% no-repeat!important;
+ filter:none!important;
+}
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-orchard,
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-barn,
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-windmill,
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-pond,
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-basket,
+html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-path{
+ opacity:0!important;pointer-events:none!important;
+}
+
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
@@ -4276,5 +4292,17 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
       document.documentElement.classList.add('henova-admin-3d-preview');
     }
   }catch(error){console.info('HENOVA admin-only visual pilot not available');}
+})();
+</script><script>
+/* Never reveal the 3D image before verified admin status; fail closed. */
+(function(){
+ const observer=new MutationObserver(()=>{
+  if(!document.documentElement.classList.contains('henova-admin-3d-preview'))return;
+  observer.disconnect();
+  const image=new Image();
+  image.onload=()=>{if(image.naturalWidth>0)document.documentElement.classList.add('henova-approved-art-loaded')};
+  image.src='./assets/henova-approved-3d-scene.jpg';
+ });
+ observer.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
 })();
 </script></body></html>
