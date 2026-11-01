@@ -3548,9 +3548,8 @@ async function henovaSubmitSimpleWithdrawal(){
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
  try{
-  const math=await henovaMathGate('withdraw');
   const requestId=crypto.randomUUID();
-  const result=await henovaCall('request_gram_withdrawal',{requestId,eggs:amount,...math});
+  const result=await henovaCall('request_gram_withdrawal',{requestId,eggs:amount});
   if(!result?.ok)throw Error(result?.error||'withdrawal_unavailable');
   toast(s.lang==='ar'?'تم إرسال طلب السحب':'Withdrawal request submitted');
   await henovaRefreshPayoutSetup();
