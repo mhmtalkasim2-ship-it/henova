@@ -1880,6 +1880,34 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 .henova-admin-empty{padding:30px 14px;text-align:center;border-radius:20px;background:white;border:1px dashed #b9d9b7;font-weight:800;color:#507e58}
 .henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
 .henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
+
+/* HENOVA 3D admin-only design trial: no changes to game logic or public UI. */
+html.henova-admin-3d-preview main.farm-mode #farm-scene.farm-v3{
+  background-image:linear-gradient(180deg,#233d2110,#20381018),url('./assets/henova-farm-scene.jpg')!important;
+  background-position:center 48%!important;background-size:cover!important;
+  filter:saturate(1.13) contrast(1.055)!important;
+}
+html.henova-admin-3d-preview main.farm-mode .farm-toolbar .farm-user,
+html.henova-admin-3d-preview main.farm-mode .stats>div{
+ background:linear-gradient(155deg,#fffef3f5,#ecf1dbee)!important;
+ border:2px solid #fff8db!important;
+ box-shadow:0 7px 14px #1b351c55,inset 0 2px 1px #fff!important;
+}
+html.henova-admin-3d-preview main.farm-mode .collect-dock{
+ filter:drop-shadow(0 8px 7px #243c2666)!important;
+}
+html.henova-admin-3d-preview main.farm-mode .collect-dock button{
+ background:linear-gradient(180deg,#fff19b,#ffda55 55%,#efad24)!important;
+ box-shadow:inset 0 3px 2px #fff6c5,0 5px 0 #b47c26,0 9px 18px #422e2244!important;
+}
+html.henova-admin-3d-preview main.farm-mode nav{
+ background:linear-gradient(180deg,#fffff1,#e9efd7)!important;
+ box-shadow:0 -5px 18px #213c2855!important;
+}
+html.henova-admin-3d-preview main.farm-mode .scene .farm-hen img{
+ filter:drop-shadow(3px 8px 5px #142e1899)!important;
+}
+
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
@@ -4230,5 +4258,23 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
     showWhenReady();
   }
   setTimeout(start,5000);
+})();
+</script><script>
+/* Opt-in visual pilot: server-verified Telegram administrator only.
+   Never grant preview based on query params, username or client-side IDs. */
+(async function henovaAdmin3DPreviewGate(){
+  const app=window.Telegram?.WebApp;
+  if(!app?.initData)return;
+  try{
+    const response=await fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'diagnostic',initData:app.initData}),cache:'no-store'
+    });
+    if(!response.ok)return;
+    const result=await response.json();
+    if(result?.ok===true && result?.auth==='telegram_verified' && result?.database==='connected'){
+      document.documentElement.classList.add('henova-admin-3d-preview');
+    }
+  }catch(error){console.info('HENOVA admin-only visual pilot not available');}
 })();
 </script></body></html>
