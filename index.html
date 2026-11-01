@@ -2331,6 +2331,34 @@ main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen {
 }
 /* HUD is untouched: nav, collect dock, balance, languages, payout/admin flows. */
 </style>
+<style id="henova-single-hen-feeder-v19">
+/* Keep the live, clickable starter hen right beside the feed tray.
+   Existing henovaTapHen/henovaPlayCluck and all business logic remain untouched. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a {
+  left:60.5%!important;
+  right:auto!important;
+  top:43%!important;
+  bottom:auto!important;
+  width:clamp(64px,17vw,94px)!important;
+  display:block!important;
+  z-index:15!important;
+  pointer-events:auto!important;
+  animation:henovaFeedOnlyV19 13s ease-in-out infinite!important;
+}
+@keyframes henovaFeedOnlyV19 {
+  0%,8%,91%,100% {translate:19px 8px}
+  20% {translate:3px 3px}
+  32%,65% {translate:-13px 0px}
+  72% {translate:-4px 6px}
+  82% {translate:12px 5px}
+}
+/* Let the existing detailed hen action keep its pecking animation. */
+@media(prefers-reduced-motion:reduce) {
+ main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a {
+  animation:none!important; translate:0 0!important;
+ }
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
