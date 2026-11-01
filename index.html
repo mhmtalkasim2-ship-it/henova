@@ -1912,7 +1912,7 @@ html.henova-admin-3d-preview main.farm-mode .scene .farm-hen img{
 /* Exact approved HENOVA 3D artwork; visible only after server-admin gate.
    If artwork is absent, keep previous functional farm art, not an empty area. */
 html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3{
- background:#82b251 url('./assets/henova-approved-3d-scene.jpg') center center/100% 100% no-repeat!important;
+ background:#82b251 url('./assets/henova-approved-3d-scene.PNG') center center/100% 100% no-repeat!important;
  filter:none!important;
 }
 html.henova-admin-3d-preview.henova-approved-art-loaded main.farm-mode #farm-scene.farm-v3 .v3-orchard,
@@ -4301,7 +4301,7 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   observer.disconnect();
   const image=new Image();
   image.onload=()=>{if(image.naturalWidth>0)document.documentElement.classList.add('henova-approved-art-loaded')};
-  image.src='./assets/henova-approved-3d-scene.jpg';
+  image.src='./assets/henova-approved-3d-scene.PNG';
  });
  observer.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
 })();
