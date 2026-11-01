@@ -2442,6 +2442,30 @@ main.farm-mode #farm-scene.farm-v3 > .v3-feeder{
  pointer-events:none!important;
 }
 </style>
+<style id="henova-approved-hay-bales-v31">
+/* Replace the single legacy hay prop with the user-approved golden four-bale artwork.
+   Keep this scenery-only; no interaction or reward logic changes. */
+body main.farm-mode #farm-scene.farm-v3 > .henova-cartoon-hay {
+  display:block!important;
+  position:absolute!important;
+  top:66.2%!important;
+  left:1%!important;
+  width:29%!important;
+  height:12%!important;
+  padding:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent url('./assets/henova-hay-approved-v31.svg?v=20261102-approved') center center/contain no-repeat!important;
+  filter:drop-shadow(1px 4px 2px rgba(40,70,28,.23))!important;
+  pointer-events:none!important;
+  z-index:6!important;
+}
+/* Hide the old duplicate hay props; the approved illustration is the only hay. */
+body main.farm-mode #farm-scene.farm-v3 > .v3-hay,
+body main.farm-mode #farm-scene.farm-v3 > .v3-hay-bales {
+  display:none!important;
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
