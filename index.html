@@ -4194,23 +4194,34 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
 // AdsGram is currently in moderation; ad unavailability must never block the farm.
 
 // Entry interstitial: preserve the requested ad 5 seconds after opening HENOVA.
-let henovaEntryAdAttempted=false;
-async function henovaLaunchInterstitial(){
-  // Wait for async AdsGram SDK to finish loading; never attempt multiple ad shows.
-  if(henovaEntryAdAttempted)return;
-  if(!window.Telegram?.WebApp?.initData){console.info('HENOVA entry ad: Telegram session unavailable');return;}
-  for(let attempt=0;attempt<20 && !window.Adsgram?.init;attempt++){
-    await new Promise(resolve=>setTimeout(resolve,500));
+
+</script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span><script id="henova-entry-adsgram-isolated-v2">
+/* Run separately from the farm application; an app runtime error must not disable the entry ad. */
+(function(){
+  var didRequest=false;
+  function start(){
+    if(didRequest)return;
+    if(!window.Telegram || !window.Telegram.WebApp || !window.Telegram.WebApp.initData){
+      console.info('Entry AdsGram: Telegram initData unavailable');return;
+    }
+    var tries=0;
+    function showWhenReady(){
+      if(didRequest)return;
+      if(!window.Adsgram || typeof window.Adsgram.init!=='function'){
+        if(++tries<40)setTimeout(showWhenReady,500);
+        else console.warn('Entry AdsGram SDK not loaded');
+        return;
+      }
+      didRequest=true;
+      try{
+        var ad=window.Adsgram.init({blockId:'int-56161',debug:false});
+        Promise.resolve(ad.show()).catch(function(e){
+          console.info('Entry AdsGram unavailable:',e && (e.description||e.message||e));
+        });
+      }catch(e){console.warn('Entry AdsGram failed:',e && (e.message||e))}
+    }
+    showWhenReady();
   }
-  if(!window.Adsgram?.init){console.warn('HENOVA entry ad: AdsGram SDK did not load');return;}
-  henovaEntryAdAttempted=true;
-  try{
-    const controller=window.Adsgram.init({blockId:'int-56161',debug:false});
-    await controller.show();
-  }catch(err){
-    console.info('HENOVA entry ad unavailable',err?.description||err?.message||err);
-    // A no-fill is decided by AdsGram; do not force fake ad views or grant rewards.
-  }
-}
-setTimeout(henovaLaunchInterstitial,5000);
-</script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span></body></html>
+  setTimeout(start,5000);
+})();
+</script></body></html>
