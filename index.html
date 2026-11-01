@@ -2157,14 +2157,7 @@ main.farm-mode~nav button.active{color:#2c742e!important}
 
 
 
-<style id="henova-maintenance-style">
-#henova-maintenance-screen{position:fixed;inset:0;z-index:2147483640;display:flex;align-items:center;justify-content:center;padding:26px;background:linear-gradient(145deg,#cbe6ae,#78b65a);font-family:system-ui,sans-serif;text-align:center;color:#234d2a}
-#henova-maintenance-screen .hv-maintenance-card{width:min(100%,420px);padding:36px 24px;border-radius:28px;background:#f8ffedef;box-shadow:0 16px 45px #23451d33;border:2px solid #fff4cf}
-#henova-maintenance-screen .hv-maintenance-icon{font-size:54px}
-#henova-maintenance-screen h2{font-size:25px;margin:12px 0}
-#henova-maintenance-screen p{font-size:16px;font-weight:600;line-height:1.8;margin:0;color:#527349}
-#henova-maintenance-screen[hidden]{display:none!important}
-</style><style id="henova-farm-coordinate-layout-v1">
+<style id="henova-farm-coordinate-layout-v1">
 /* Stable, deliberate art positions; decorative elements never intercept taps. */
 main.farm-mode #farm-scene.farm-v3{
  --hv-feed-x:40%;
@@ -2253,6 +2246,16 @@ main.farm-mode .stats>div{background:rgba(248,251,227,.90)!important}
 }
 </style>
 
+<style id="henova-farm-order-fix-20261101">
+/* Correct the overlay positions without changing the baked landscape artwork. */
+html.telegram-fullscreen main.farm-mode .farm-toolbar{top:142px!important}
+html.telegram-fullscreen main.farm-mode .stats{top:207px!important;gap:9px!important}
+main.farm-mode .stats>div{min-height:43px!important;padding:5px 9px!important;border-radius:22px!important}
+main.farm-mode .stats b{font-size:19px!important}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{left:39%!important;top:48%!important;width:clamp(61px,14vw,82px)!important;animation:henovaNearFeederFix 15s ease-in-out infinite!important}
+@keyframes henovaNearFeederFix{0%,15%,90%,100%{translate:-3vw 1vh}35%,65%{translate:1vw 0}78%{translate:-1vw .5vh}}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster{display:none!important}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
@@ -4168,25 +4171,6 @@ function setupTelegram(){
   }
 }
 setupTelegram();
-// Temporary HENOVA maintenance view for users. Administrative operations remain available.
-(function henovaMaintenanceGate(){
- const root=document.createElement('div');
- root.id='henova-maintenance-screen';
- root.innerHTML='<section class="hv-maintenance-card"><div class="hv-maintenance-icon">🛠️</div><h2 id="henova-maintenance-title">Maintenance in progress</h2><p id="henova-maintenance-detail">We are improving HENOVA. Please check back soon.</p></section>';
- document.body.appendChild(root);
- function refresh(){
-  const app=window.Telegram?.WebApp;
-  const id=Number(app?.initDataUnsafe?.user?.id||0);
-  const admin=id===1035565575 && !!app?.initData;
-  root.hidden=admin;
-  const lang=String(app?.initDataUnsafe?.user?.language_code||'').toLowerCase();
-  const current=(typeof s!=='undefined'&&s?.lang)||lang;
-  const tr=String(current).startsWith('tr'),ar=String(current).startsWith('ar');
-  root.querySelector('#henova-maintenance-title').textContent=ar?'المزرعة قيد الصيانة':tr?'Çiftlik bakımda':'HENOVA Maintenance';
-  root.querySelector('#henova-maintenance-detail').textContent=ar?'نعمل على تحسين المزرعة. سنعود قريباً. شكراً لصبركم.':tr?'HENOVA geliştirmeleri yapılıyor. Yakında tekrar görüşmek üzere.':'We are improving the farm. We will be back soon. Thank you for your patience.';
- }
- refresh();setTimeout(refresh,700);setTimeout(refresh,2200);
-})();
 // Entry popup removed. Telegram server authentication and withdrawal checks remain enabled.
 if(new URLSearchParams(location.search).get('admin')==='payouts'){
   // Render after Telegram initialization; no server access without valid initData.
