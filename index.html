@@ -1880,6 +1880,13 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 .henova-admin-empty{padding:30px 14px;text-align:center;border-radius:20px;background:white;border:1px dashed #b9d9b7;font-weight:800;color:#507e58}
 .henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
 .henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
+
+/* HENOVA 2026-11-02: approved orchard, owner-only scene preview. */
+#henova-admin-scene-preview[hidden]{display:none!important}
+#henova-admin-scene-preview{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;z-index:2147483000;background:#4e8423;overflow:hidden}
+#henova-admin-scene-preview .henova-admin-approved-art{display:block;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}
+#henova-admin-scene-preview .henova-admin-preview-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #fff9;border-radius:50%;background:#122e20a1;color:white;font:600 24px/1 sans-serif;box-shadow:0 2px 10px #0004;cursor:pointer;z-index:2}
+#henova-admin-scene-preview .henova-admin-preview-close:focus-visible{outline:3px solid #fff;outline-offset:3px}
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
@@ -2487,6 +2494,12 @@ body main.farm-mode #farm-scene.farm-v3 > .v3-pond {
 }
 </style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+<!-- Admin-only approved farm scene preview; regular users retain existing HENOVA UI. -->
+<section id="henova-admin-scene-preview" hidden aria-label="HENOVA farm approved orchard preview">
+  <img class="henova-admin-approved-art" src="assets/henova-admin-orchard-approved-20261102.jpg?v=20261102" alt="Apple orchard, red chicken coop, windmill, grassy farm, chickens and fountain" decoding="async" />
+  <button class="henova-admin-preview-close" type="button" onclick="henovaHideApprovedFarmPreview()" aria-label="Return to HENOVA">×</button>
+</section>
+
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
 <script>
@@ -4436,4 +4449,41 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   }
   setTimeout(start,5000);
 })();
-</script></body></html>
+</script>
+<script id="henova-admin-scene-preview-v1">
+(function(){
+  'use strict';
+  // Telegram ID is only a prefilter; signed initData is checked by the server.
+  var HENOVA_PREVIEW_OWNER_ID='8848098170';
+  var overlay=document.getElementById('henova-admin-scene-preview');
+  if(!overlay)return;
+  window.henovaHideApprovedFarmPreview=function(){overlay.hidden=true;};
+  var tried=false;
+  function checkOwner(){
+    if(tried)return;
+    var tg=window.Telegram&&window.Telegram.WebApp;
+    var user=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
+    if(!user || !tg.initData)return;
+    if(String(user.id)!==HENOVA_PREVIEW_OWNER_ID)return;
+    tried=true;
+    fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'diagnostic',initData:tg.initData}),
+      cache:'no-store'
+    }).then(function(response){
+      if(!response.ok)return null;
+      return response.json();
+    }).then(function(data){
+      if(data && data.ok===true && data.auth==='telegram_verified' && data.database==='connected'){
+        overlay.hidden=false;
+      }
+    }).catch(function(err){
+      console.warn('HENOVA admin scene preview verification failed',err);
+    });
+  }
+  checkOwner();
+  setTimeout(checkOwner,600);
+})();
+</script>
+</body></html>
