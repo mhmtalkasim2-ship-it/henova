@@ -3737,7 +3737,8 @@ function henovaUpdateSimpleWithdrawal(){
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+(hvMaxEggs===1000000?'1M':hvMaxEggs.toLocaleString('en-US'))+' 🥚';
- // Request submissions open at the configured minimum egg balance; the server checks wallet, pending requests and cooldown.\n button.disabled=!(hvPayoutReady&&Number(s.eggs)>=hvMinEggs&&valid);
+ // Request submissions open at the configured minimum egg balance; the server checks wallet, pending requests and cooldown.
+ button.disabled=!(hvPayoutReady&&Number(s.eggs)>=hvMinEggs&&valid);
 }
 // Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
 async function henovaMathGate(scope){
