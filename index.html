@@ -3113,22 +3113,6 @@ async function henovaAdminSearchAds(){
   }
  }catch(e){out.textContent='Search unavailable: '+String(e.message||e).slice(0,100)}
 }
-function henovaEligibilityWords(){return s.lang==='ar'?{button:'هل أنا مؤهل للسحب؟',title:'تقدم مشاهدة الإعلانات',watch:'شاهد الإعلانات من قائمة المهام',note:'يُفتح طلب السحب عند 70% عند استيفاء بقية الشروط.',error:'تعذر تحديث النسبة'}:s.lang==='tr'?{button:'Çekim için uygun muyum?',title:'Reklam izleme ilerlemesi',watch:'Görevler bölümünden reklam izle',note:'%70 olduğunda diğer koşullar sağlanırsa çekim talebi açılır.',error:'İlerleme alınamadı'}:{button:'Am I eligible to withdraw?',title:'Ad watching progress',watch:'Watch ads in Tasks',note:'At 70%, withdrawals unlock when other conditions are met.',error:'Could not load progress'};}
-async function henovaShowEligibility(){
- const out=document.getElementById('henova-eligibility-results');if(!out)return;
- const w=henovaEligibilityWords();out.textContent='…';
- try{const d=await henovaCall('withdrawal_eligibility_progress');const pct=Math.max(0,Math.min(100,Number(d.percent)||0));hvAdEligible=pct>=Math.max(1,Math.min(100,Number(d.goal)||70));henovaUpdateSimpleWithdrawal();out.innerHTML='<div style="font-weight:800;margin-bottom:8px">'+w.title+' · '+pct+'%</div><div role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" style="height:14px;background:#e3eddb;border-radius:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#f7c755;border-radius:12px"></div></div><p style="margin:10px 0 3px">'+w.watch+'</p><p style="font-size:12px;color:#6b806c">'+w.note+'</p>';}catch(e){const reason=String(e?.message||'network_error').slice(0,100);out.replaceChildren();const line=document.createElement('p');line.textContent=w.error+' — '+reason;line.style.cssText='color:#9a422e;overflow-wrap:anywhere';const retry=document.createElement('button');retry.type='button';retry.textContent=s.lang==='ar'?'إعادة المحاولة':s.lang==='tr'?'Tekrar dene':'Retry';retry.onclick=henovaShowEligibility;out.append(line,retry);console.warn('Eligibility progress:',reason);}
-}
-// Refresh eligibility while Wallet is visible; eligibility unlocks at the server-defined goal (70%).
-let henovaEligibilityPollBusy=false;
-setInterval(async()=>{
- if(tab!==4||!henovaIsTelegram()||hvAdEligible||document.hidden||henovaEligibilityPollBusy)return;
- henovaEligibilityPollBusy=true;
- try{await henovaShowEligibility();}finally{henovaEligibilityPollBusy=false;}
-},15000);
-document.addEventListener('visibilitychange',()=>{
- if(!document.hidden&&tab===4&&henovaIsTelegram()&&!hvAdEligible)void henovaShowEligibility();
-});
 async function henovaAdminPublishPromo(code){
  const out=document.getElementById('henova-admin-promo-result');
  if(!/^[A-Z0-9]{5,24}$/.test(code))return;
@@ -3737,7 +3721,6 @@ async function henovaPrepareWalletProof(){
  }catch(e){const message=String(e?.message||'unknown_error');if(status)status.textContent='Wallet verification: '+message;toast(message.length>110?message.slice(0,110):message);}
 }
 let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=1000000,hvGramPerEgg=0.00001,hvWalletVerified=false;
-let hvAdEligible=false;
 function henovaSetWithdrawalPercent(p){
  const input=document.getElementById('hv-withdraw-eggs');
  if(!input)return;
@@ -3754,7 +3737,7 @@ function henovaUpdateSimpleWithdrawal(){
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+(hvMaxEggs===1000000?'1M':hvMaxEggs.toLocaleString('en-US'))+' 🥚';
- // Unlock once confirmed ads reach the 70% eligibility goal and user has at least 500 eggs; validate wallet on submission.\n button.disabled=!(hvAdEligible&&Number(s.eggs)>=500&&valid);
+ // Request submissions open at the configured minimum egg balance; the server checks wallet, pending requests and cooldown.\n button.disabled=!(hvPayoutReady&&Number(s.eggs)>=hvMinEggs&&valid);
 }
 // Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
 async function henovaMathGate(scope){
@@ -3817,7 +3800,6 @@ async function henovaMathGate(scope){
 async function henovaSubmitSimpleWithdrawal(){
  const amount=Number(document.getElementById('hv-withdraw-eggs')?.value);
  if(!hvPayoutReady)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
- if(henovaIsTelegram()&&!hvAdEligible)return toast(s.lang==='ar'?'أكمل نسبة الإعلانات 70% أولاً':s.lang==='tr'?'Önce reklam ilerlemesini %70 tamamla':'Complete 70% ad progress first');
  if(!Number.isSafeInteger(amount)||amount<hvMinEggs||amount>hvMaxEggs||amount>Number(s.eggs))return henovaUpdateSimpleWithdrawal();
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
@@ -3847,10 +3829,9 @@ async function henovaRefreshPayoutSetup(){
   hvGramPerEgg=Number(data.payout?.gram_per_egg)||0.00001;
   const status=document.getElementById('hv-withdraw-state');
   if(status)status.textContent=hvPayoutReady
-    ?(s.lang==='ar'?'السحب متاح للحسابات المؤهلة':s.lang==='tr'?'Uygun hesaplar için çekim açık':'Withdrawals open for eligible accounts')
+    ?(s.lang==='ar'?'طلبات السحب متاحة ابتداءً من 500 بيضة':s.lang==='tr'?'Çekim talepleri 500 yumurtadan itibaren açık':'Withdrawal requests open from 500 eggs')
     :(s.lang==='ar'?'السحب قيد التجهيز حالياً':s.lang==='tr'?'Çekimler hazırlanıyor':'Withdrawals are being prepared');
   henovaUpdateSimpleWithdrawal();
-  if(henovaIsTelegram())void henovaShowEligibility();
   if(history&&data.withdrawals?.length)history.textContent=data.withdrawals.map(x=>'#'+x.id+' · '+x.status+' · '+x.eggs_amount+' 🥚').join(' | ');
  }catch(e){console.warn('Payout setup unavailable',e)}
 }
@@ -4365,13 +4346,6 @@ el.innerHTML='<div class="henova-wallet-page hv-simple-withdraw">'+
 
 '<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div></section></div>';
 
-// Public eligibility progress from confirmed rewarded ads.
-if(henovaIsTelegram()){
- const card=document.createElement('section');card.className='henova-wallet-card';
- const btn=document.createElement('button');btn.type='button';btn.className='henova-wallet-save';btn.textContent='📊 '+henovaEligibilityWords().button;btn.onclick=henovaShowEligibility;
- const output=document.createElement('div');output.id='henova-eligibility-results';output.style.cssText='margin-top:12px;line-height:1.6';
- card.append(btn,output);el.querySelector('.henova-wallet-page')?.prepend(card);
-}
 henovaRefreshPayoutSetup();
 }
 if(tab===0)prepareFarmArtwork();
