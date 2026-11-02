@@ -2499,34 +2499,14 @@ body main.farm-mode #farm-scene.farm-v3 > .v3-pond {
 #henova-admin-scene-preview[hidden]{display:none!important}
 #henova-admin-scene-preview{background:#56913f!important;overflow:hidden}
 #henova-admin-scene-preview .henova-admin-approved-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
-#henova-admin-scene-preview .hv-admin-animated-layer{position:absolute;inset:0;z-index:2;pointer-events:none}
-#henova-admin-scene-preview .hv-windmill-rotor{position:absolute;left:87%;top:29.5%;width:12px;height:12px;transform-origin:center;animation:hvWindSpin 3s linear infinite;filter:drop-shadow(0 2px 3px #0005)}
-#henova-admin-scene-preview .hv-windmill-rotor i{position:absolute;left:2px;top:-43px;width:9px;height:49px;background:linear-gradient(90deg,#f7e9cd,#dcb580);border:1px solid #a97640;border-radius:75% 20% 60% 15%;transform-origin:50% calc(100% - 6px)}
-#henova-admin-scene-preview .hv-windmill-rotor i:nth-child(2){transform:rotate(90deg)}
-#henova-admin-scene-preview .hv-windmill-rotor i:nth-child(3){transform:rotate(180deg)}
-#henova-admin-scene-preview .hv-windmill-rotor i:nth-child(4){transform:rotate(270deg)}
-@keyframes hvWindSpin{to{transform:rotate(360deg)}}
-#henova-admin-scene-preview .hv-hen{position:absolute;font-size:clamp(27px,7vw,43px);line-height:1;filter:drop-shadow(0 4px 3px #0004);animation:hvHenStep 4s ease-in-out infinite alternate}
-#henova-admin-scene-preview .hv-hen-1{left:9%;top:77%;animation-duration:5.2s}
-#henova-admin-scene-preview .hv-hen-2{left:45%;top:75%;font-size:28px;animation-delay:-1.5s}
-#henova-admin-scene-preview .hv-hen-3{left:68%;top:78%;animation-duration:6s;animation-delay:-2.7s}
-#henova-admin-scene-preview .hv-hen-4{left:17%;top:65%;font-size:29px;animation-duration:5s;animation-delay:-1s}
-@keyframes hvHenStep{0%{transform:translate(-16px,2px) scaleX(1) rotate(-4deg)}47%{transform:translate(13px,-5px) scaleX(1) rotate(2deg)}53%{transform:translate(13px,-5px) scaleX(-1) rotate(2deg)}100%{transform:translate(-14px,2px) scaleX(-1) rotate(-3deg)}}
 #henova-admin-scene-preview .hv-admin-farm-controls{position:absolute;bottom:max(14px,env(safe-area-inset-bottom));left:3%;width:94%;display:flex;gap:4px;z-index:4;justify-content:center}
 #henova-admin-scene-preview .hv-admin-farm-controls button{min-width:0;flex:1;padding:10px 2px;background:linear-gradient(#ffde83,#e9ab46);border:1px solid #b78229;border-radius:12px;color:#4e3817;font-size:clamp(9px,2.6vw,12px);font-weight:800;box-shadow:0 3px 6px #0003}
 #henova-admin-scene-preview .henova-admin-preview-close{z-index:5}
-@media(prefers-reduced-motion:reduce){#henova-admin-scene-preview .hv-hen,#henova-admin-scene-preview .hv-windmill-rotor{animation:none}}
+}
 </style></head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <!-- Admin-only approved farm scene preview; regular users retain existing HENOVA UI. -->
 <section id="henova-admin-scene-preview" hidden aria-label="HENOVA farm approved orchard preview">
   <img class="henova-admin-approved-art" data-fallback-src="assets/henova-admin-orchard-approved-20261102.jpg?v=20261102" alt="HENOVA approved farm" decoding="async" />
-  <div class="hv-admin-animated-layer" aria-hidden="true">
-    <div class="hv-windmill-rotor"><i></i><i></i><i></i><i></i></div>
-    <span class="hv-hen hv-hen-1">🐔</span>
-    <span class="hv-hen hv-hen-2">🐥</span>
-    <span class="hv-hen hv-hen-3">🐔</span>
-    <span class="hv-hen hv-hen-4">🐥</span>
-  </div>
   <div class="hv-admin-farm-controls">
     <button type="button" data-hv-tab="0">🥚 Collect</button>
     <button type="button" data-hv-tab="1">🐓 Farm</button>
