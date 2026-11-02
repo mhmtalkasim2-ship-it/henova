@@ -4452,28 +4452,28 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   setTimeout(start,5000);
 })();
 </script>
-<script id="henova-admin-scene-preview-v2">
+<script id="henova-admin-scene-preview-v3">
 (function(){
   'use strict';
-  // Telegram user ID is only a prefilter; server checks signed Telegram initData.
-  var OWNER_ID='8848098170';
   var overlay=document.getElementById('henova-admin-scene-preview');
   if(!overlay)return;
   var art=overlay.querySelector('.henova-admin-approved-art');
   if(!art)return;
-  var checked=false,closed=false;
+  var closed=false,authorized=false,checking=false,attempts=0;
   var fallback=art.getAttribute('data-fallback-src');
   var parts=[1,2,3,4,5,6,7].map(function(i){
     return 'assets/henova-adopted-20261102-part-'+String(i).padStart(2,'0')+'.txt';
   });
   window.henovaHideApprovedFarmPreview=function(){closed=true;overlay.hidden=true;};
   function showImage(src,canFallback){
-    art.onload=function(){if(!closed)overlay.hidden=false;};
+    art.onload=function(){if(!closed&&authorized)overlay.hidden=false;};
     art.onerror=function(){if(canFallback&&fallback)showImage(fallback,false);};
     art.src=src;
-    if(art.complete&&art.naturalWidth&&!closed)overlay.hidden=false;
+    if(art.complete&&art.naturalWidth&&!closed&&authorized)overlay.hidden=false;
   }
   function loadAdopted(){
+    // Show the approved backup first; full-resolution artwork replaces it when ready.
+    if(fallback)showImage(fallback,false);
     Promise.all(parts.map(function(path){
       return fetch(path+'?v=20261102-original',{cache:'force-cache'}).then(function(r){
         if(!r.ok)throw Error('Missing approved asset '+r.status);
@@ -4487,34 +4487,37 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
       var exact=chunks.join('');
       if(exact.length!==4371152||exact.slice(0,16)!=='iVBORw0KGgoAAAAN')throw Error('Incomplete approved PNG');
       if(!closed)showImage('data:image/png;base64,'+exact,true);
-    }).catch(function(err){
-      console.warn('HENOVA approved image unavailable; using backup',err);
-      if(!closed&&fallback)showImage(fallback,false);
-    });
+    }).catch(function(err){console.warn('HENOVA approved PNG unavailable; backup retained',err);});
   }
   function checkOwner(){
-    if(checked||closed)return;
+    if(closed||authorized||checking)return;
     var tg=window.Telegram&&window.Telegram.WebApp;
     var user=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
-    if(!user||!tg.initData||String(user.id)!==OWNER_ID)return;
-    checked=true;
+    if(!user||!user.id||!tg.initData)return;
+    checking=true;attempts++;
+    // Supabase validates Telegram's signed initData and checks the configured administrator ID.
+    // Never authorize preview based on editable browser-side user identity.
     fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({action:'diagnostic',initData:tg.initData}),cache:'no-store'
     }).then(function(r){
-      if(!r.ok)throw Error('Owner verification HTTP '+r.status);
+      if(r.status===401||r.status===403){return null;}
+      if(!r.ok)throw Error('Verification HTTP '+r.status);
       return r.json();
     }).then(function(data){
       if(data&&data.ok===true&&data.auth==='telegram_verified'&&data.database==='connected'){
+        authorized=true;
         loadAdopted();
-      }else{console.warn('HENOVA owner preview not authorized');}
-    }).catch(function(err){console.warn('HENOVA owner preview verification unavailable',err);});
+      }
+    }).catch(function(err){
+      console.warn('HENOVA administrator preview verification pending',err);
+      if(attempts<3)setTimeout(checkOwner,2500*attempts);
+    }).finally(function(){checking=false;});
   }
   checkOwner();
   document.addEventListener('DOMContentLoaded',checkOwner,{once:true});
-  setTimeout(checkOwner,600);
-  setTimeout(checkOwner,1800);
-  setTimeout(checkOwner,4000);
+  setTimeout(checkOwner,1000);
+  setTimeout(checkOwner,3500);
 })();
 </script>
 </body></html>
