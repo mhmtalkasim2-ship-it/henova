@@ -3113,13 +3113,13 @@ async function henovaAdminSearchAds(){
   }
  }catch(e){out.textContent='Search unavailable: '+String(e.message||e).slice(0,100)}
 }
-function henovaEligibilityWords(){return s.lang==='ar'?{button:'هل أنا مؤهل للسحب؟',title:'تقدم مشاهدة الإعلانات',watch:'شاهد الإعلانات من قائمة المهام',note:'يُفتح طلب السحب عند 100% عند استيفاء بقية الشروط.',error:'تعذر تحديث النسبة'}:s.lang==='tr'?{button:'Çekim için uygun muyum?',title:'Reklam izleme ilerlemesi',watch:'Görevler bölümünden reklam izle',note:'%100 olduğunda diğer koşullar sağlanırsa çekim talebi açılır.',error:'İlerleme alınamadı'}:{button:'Am I eligible to withdraw?',title:'Ad watching progress',watch:'Watch ads in Tasks',note:'At 100%, withdrawals unlock when other conditions are met.',error:'Could not load progress'};}
+function henovaEligibilityWords(){return s.lang==='ar'?{button:'هل أنا مؤهل للسحب؟',title:'تقدم مشاهدة الإعلانات',watch:'شاهد الإعلانات من قائمة المهام',note:'يُفتح طلب السحب عند 70% عند استيفاء بقية الشروط.',error:'تعذر تحديث النسبة'}:s.lang==='tr'?{button:'Çekim için uygun muyum?',title:'Reklam izleme ilerlemesi',watch:'Görevler bölümünden reklam izle',note:'%70 olduğunda diğer koşullar sağlanırsa çekim talebi açılır.',error:'İlerleme alınamadı'}:{button:'Am I eligible to withdraw?',title:'Ad watching progress',watch:'Watch ads in Tasks',note:'At 70%, withdrawals unlock when other conditions are met.',error:'Could not load progress'};}
 async function henovaShowEligibility(){
  const out=document.getElementById('henova-eligibility-results');if(!out)return;
  const w=henovaEligibilityWords();out.textContent='…';
- try{const d=await henovaCall('withdrawal_eligibility_progress');const pct=Math.max(0,Math.min(100,Number(d.percent)||0));hvAdEligible=pct>=100;henovaUpdateSimpleWithdrawal();out.innerHTML='<div style="font-weight:800;margin-bottom:8px">'+w.title+' · '+pct+'%</div><div role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" style="height:14px;background:#e3eddb;border-radius:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#f7c755;border-radius:12px"></div></div><p style="margin:10px 0 3px">'+w.watch+'</p><p style="font-size:12px;color:#6b806c">'+w.note+'</p>';}catch(e){const reason=String(e?.message||'network_error').slice(0,100);out.replaceChildren();const line=document.createElement('p');line.textContent=w.error+' — '+reason;line.style.cssText='color:#9a422e;overflow-wrap:anywhere';const retry=document.createElement('button');retry.type='button';retry.textContent=s.lang==='ar'?'إعادة المحاولة':s.lang==='tr'?'Tekrar dene':'Retry';retry.onclick=henovaShowEligibility;out.append(line,retry);console.warn('Eligibility progress:',reason);}
+ try{const d=await henovaCall('withdrawal_eligibility_progress');const pct=Math.max(0,Math.min(100,Number(d.percent)||0));hvAdEligible=pct>=Math.max(1,Math.min(100,Number(d.goal)||70));henovaUpdateSimpleWithdrawal();out.innerHTML='<div style="font-weight:800;margin-bottom:8px">'+w.title+' · '+pct+'%</div><div role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100" style="height:14px;background:#e3eddb;border-radius:12px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:#f7c755;border-radius:12px"></div></div><p style="margin:10px 0 3px">'+w.watch+'</p><p style="font-size:12px;color:#6b806c">'+w.note+'</p>';}catch(e){const reason=String(e?.message||'network_error').slice(0,100);out.replaceChildren();const line=document.createElement('p');line.textContent=w.error+' — '+reason;line.style.cssText='color:#9a422e;overflow-wrap:anywhere';const retry=document.createElement('button');retry.type='button';retry.textContent=s.lang==='ar'?'إعادة المحاولة':s.lang==='tr'?'Tekrar dene':'Retry';retry.onclick=henovaShowEligibility;out.append(line,retry);console.warn('Eligibility progress:',reason);}
 }
-// Refresh eligibility while Wallet is visible, so 100% unlocks the submit button automatically.
+// Refresh eligibility while Wallet is visible; eligibility unlocks at the server-defined goal (70%).
 let henovaEligibilityPollBusy=false;
 setInterval(async()=>{
  if(tab!==4||!henovaIsTelegram()||hvAdEligible||document.hidden||henovaEligibilityPollBusy)return;
@@ -3754,7 +3754,7 @@ function henovaUpdateSimpleWithdrawal(){
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+(hvMaxEggs===1000000?'1M':hvMaxEggs.toLocaleString('en-US'))+' 🥚';
- // Unlock once confirmed ads reach 100% and user has at least 500 eggs; validate wallet on submission.\n button.disabled=!(hvAdEligible&&Number(s.eggs)>=500&&valid);
+ // Unlock once confirmed ads reach the 70% eligibility goal and user has at least 500 eggs; validate wallet on submission.\n button.disabled=!(hvAdEligible&&Number(s.eggs)>=500&&valid);
 }
 // Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
 async function henovaMathGate(scope){
@@ -3817,7 +3817,7 @@ async function henovaMathGate(scope){
 async function henovaSubmitSimpleWithdrawal(){
  const amount=Number(document.getElementById('hv-withdraw-eggs')?.value);
  if(!hvPayoutReady)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
- if(henovaIsTelegram()&&!hvAdEligible)return toast(s.lang==='ar'?'أكمل نسبة الإعلانات 100% أولاً':s.lang==='tr'?'Önce reklam ilerlemesini %100 tamamla':'Complete 100% ad progress first');
+ if(henovaIsTelegram()&&!hvAdEligible)return toast(s.lang==='ar'?'أكمل نسبة الإعلانات 70% أولاً':s.lang==='tr'?'Önce reklam ilerlemesini %70 tamamla':'Complete 70% ad progress first');
  if(!Number.isSafeInteger(amount)||amount<hvMinEggs||amount>hvMaxEggs||amount>Number(s.eggs))return henovaUpdateSimpleWithdrawal();
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
