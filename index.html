@@ -2487,6 +2487,60 @@ body main.farm-mode #farm-scene.farm-v3 > .v3-pond {
   display:none!important;
 }
 </style>
+<style id="henova-white-hen-wander-v27">
+/* White starter hen: match owned hens' size and roam across the clear grass.
+   Existing older transform:none!important rules prevented transform keyframes
+   from moving this hen. Animate margins instead; preserve clicks and pecking. */
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  left:51%!important;
+  top:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:clamp(38px,8.2vw,54px)!important;
+  height:auto!important;
+  z-index:15!important;
+  display:block!important;
+  pointer-events:auto!important;
+  animation:henovaWhiteHenWalkV27 14s linear infinite!important;
+}
+@keyframes henovaWhiteHenWalkV27{
+  0%,8%{margin-left:-13px;margin-top:0}
+  16%{margin-left:0;margin-top:2px}
+  26%{margin-left:21px;margin-top:9px}
+  36%,59%{margin-left:51px;margin-top:11px}
+  69%{margin-left:29px;margin-top:8px}
+  80%{margin-left:3px;margin-top:3px}
+  91%,100%{margin-left:-13px;margin-top:0}
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  animation:henovaWhiteHenFacingV27 14s steps(1,end) infinite!important;
+}
+@keyframes henovaWhiteHenFacingV27{
+  0%,59.9%{transform:scaleX(-1)}
+  60%,100%{transform:scaleX(1)}
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  animation:henovaWhiteHenPeckV27 14s ease-in-out infinite!important;
+}
+@keyframes henovaWhiteHenPeckV27{
+  0%,8%,16%,26%,36%,39%,44%,49%,54%,59%,69%,80%,91%,100%{transform:translateY(0) rotate(0)}
+  21%,31%,74%,86%{transform:translateY(-2px) rotate(-2deg)}
+  41%,46%,51%,56%{transform:translateY(3px) rotate(9deg)}
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v11{
+  animation:henovaHenTapV11 .48s ease-out 1!important;
+}
+@media(prefers-reduced-motion:reduce){
+  body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a,
+  body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing,
+  body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+    animation:none!important;
+  }
+  body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+    margin:0!important;
+  }
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 
 
