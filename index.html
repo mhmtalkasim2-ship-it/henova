@@ -4495,17 +4495,17 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
     var user=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
     if(!user||!user.id||!tg.initData)return;
     checking=true;attempts++;
-    // Supabase validates Telegram's signed initData and checks the configured administrator ID.
+    // Supabase validates Telegram signed initData, channel admin membership, and the HENOVA owner ID.
     // Never authorize preview based on editable browser-side user identity.
     fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'diagnostic',initData:tg.initData}),cache:'no-store'
+      body:JSON.stringify({action:'admin_eligibility_progress',initData:tg.initData}),cache:'no-store'
     }).then(function(r){
       if(r.status===401||r.status===403){return null;}
       if(!r.ok)throw Error('Verification HTTP '+r.status);
       return r.json();
     }).then(function(data){
-      if(data&&data.ok===true&&data.auth==='telegram_verified'&&data.database==='connected'){
+      if(data&&data.ok===true&&data.trial===true){
         authorized=true;
         loadAdopted();
       }
