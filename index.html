@@ -2894,6 +2894,74 @@ function henovaRenderSigningQueue(items){
  pay.disabled=henovaSigningQueue.length!==5;
  pay.onclick=()=>henovaSignAdminBatch(henovaSigningQueue.slice(0,5));
  root.append(pay);
+ // Show the real blocking local batch beside the Pay button, rather than letting
+ // the owner repeatedly discover it through an ambiguous signing error.
+ const savedBatchLocks=[];
+ for(const key of ['henova-last-batch-pending','henova-last-batch-signing']){
+  const raw=localStorage.getItem(key);
+  if(!raw)continue;
+  let record=null;
+  try{record=JSON.parse(raw)}catch{}
+  savedBatchLocks.push({key,record});
+ }
+ if(savedBatchLocks.length){
+  const notice=document.createElement('section');
+  notice.className='henova-wallet-card';
+  notice.style.cssText='border:2px solid #d9a14b;background:#fff7e6;padding:15px;margin:10px 0;border-radius:16px;color:#74451b';
+  const heading=document.createElement('strong');
+  heading.textContent='🔒 Prior grouped payout needs TON verification';
+  notice.append(heading);
+  const detail=document.createElement('p');
+  detail.style.cssText='line-height:1.5;margin:9px 0';
+  detail.textContent=savedBatchLocks.map(x=>{
+   const ids=Array.isArray(x.record?.ids)?x.record.ids.join(', '):'unknown';
+   return 'Previous request IDs: '+ids+' · '+(x.record?.batchId||'unreadable receipt');
+  }).join(' | ')+' — Do not sign those requests again until chain settlement is verified.';
+  notice.append(detail);
+  const review=document.createElement('button');review.type='button';review.className='henova-wallet-save';
+  review.textContent='🔎 Verify previous batch on TON (no payment)';
+  review.onclick=async()=>{
+   review.disabled=true;
+   const findings=[];
+   try{
+    for(const lock of savedBatchLocks){
+     if(!lock.record?.batchId){
+      findings.push(lock.key+': Invalid saved record. No data removed.');
+      continue;
+     }
+     let status;
+     try{status=await henovaCall('admin_batch_reconcile_local',{batchId:lock.record.batchId});}
+     catch(e){findings.push(lock.record.batchId+': '+String(e?.message||e).slice(0,120));continue}
+     if(status?.can_clear_local_receipt===true&&status?.all_confirmed===true){
+      localStorage.removeItem(lock.key);
+      findings.push(lock.record.batchId+': Five payments verified; local lock cleared.');
+      continue;
+     }
+     // Auditing checks the actual sender and recipient-chain transactions.
+     // It can record verified proof, but NEVER requests a new TON signature.
+     try{
+      await henovaCall('admin_batch_audit',{batchId:lock.record.batchId});
+     }catch(e){
+      findings.push(lock.record.batchId+': TON verification pending: '+String(e?.message||e).slice(0,130));
+     }
+     try{
+      status=await henovaCall('admin_batch_reconcile_local',{batchId:lock.record.batchId});
+      if(status?.can_clear_local_receipt===true&&status?.all_confirmed===true){
+       localStorage.removeItem(lock.key);
+       findings.push(lock.record.batchId+': All five payments verified; lock cleared.');
+      }else{
+       findings.push(lock.record.batchId+': Not all five payments verified. Lock retained.');
+      }
+     }catch(e){findings.push(lock.record.batchId+': Could not recheck; lock retained.')}
+    }
+    alert('HENOVA TON payment safety review\n\n'+findings.join('\n\n')+
+      '\n\nNo new GRAM payment was initiated.');
+    await henovaShowAdminPayouts();
+   }finally{review.disabled=false}
+  };
+  notice.append(review);
+  root.append(notice);
+ }
  const recover=document.createElement('button');recover.type='button';recover.className='henova-wallet-save';
  recover.textContent='🔎 Recover grouped signing receipt';
  recover.onclick=()=>henovaRecoverAdminBatch();
