@@ -2650,18 +2650,72 @@ return henovaAction('purchase',id)}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv])return toast('Not enough Coins');return henovaAction('boost')}
 function daily(){return henovaAction('daily')}
 function henovaOpenPromoCodes(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_PROMO_CODES');}
+let henovaPromoRedeemBusy=false;
 async function henovaRedeemPromo(){
+ if(henovaPromoRedeemBusy)return;
  const input=document.getElementById('henova-promo-input');
  const code=String(input?.value||'').trim().toUpperCase();
  if(!/^[A-Z0-9]{5,24}$/.test(code))return toast(s.lang==='ar'?'أدخل كوداً صالحاً':s.lang==='tr'?'Geçerli bir kod girin':'Enter a valid code');
- const btn=document.getElementById('henova-promo-redeem');if(btn)btn.disabled=true;
+ if(!window.Telegram?.WebApp?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
+ if(!window.Adsgram?.init)return toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');
+ const btn=document.getElementById('henova-promo-redeem');
+ const originalLabel=btn?.textContent||'';
+ henovaPromoRedeemBusy=true;
+ if(btn)btn.disabled=true;
  try{
-  const r=await henovaCall('redeem_promo_code',{code});
-  if(!r?.ok)throw Error(r?.error||'invalid_code');
-  const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render();}
+  const session=await henovaCall('promo_ad_start',{code});
+  if(!session?.session_id)throw Error('promo_session_unavailable');
+
+  const ad=window.Adsgram.init({blockId:'int-57642',debug:false});
+  try{
+   await ad.show();
+  }catch(err){
+   console.warn('Promo advertisement closed or unavailable',err);
+   const reason=String(err?.description||err?.message||err||'').toLowerCase();
+   if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available/.test(reason)){
+    toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');
+    return;
+   }
+  }
+
+  const checked=await henovaCall('promo_ad_check',{session_id:session.session_id});
+  if(!checked?.min_seconds_met){
+   henovaAdNotice('short');
+   return;
+  }
+
+  if(btn){
+   btn.textContent=s.lang==='ar'?'✅ تم مشاهدة الإعلان':s.lang==='tr'?'✅ Reklam izlendi':'✅ Ad watched';
+   btn.style.background='linear-gradient(#55bd70,#2b8c49)';
+  }
+  henovaAdNotice('completed');
+
+  const r=await henovaCall('redeem_promo_code',{code,session_id:session.session_id});
+  const fresh=await henovaCall('state');
+  if(fresh?.state){henovaApplyState(fresh.state);render();}
+  henovaAdNotice('success');
   henovaShowRewardCard(Number(r.eggs??r.coins),r.rewardType==='eggs'?'eggs':'coins');
- }catch(e){toast(s.lang==='ar'?'الكود غير متاح أو مستخدم أو منتهي':s.lang==='tr'?'Kod geçersiz, kullanılmış veya süresi dolmuş':'Code invalid, used or expired');}
- finally{const b=document.getElementById('henova-promo-redeem');if(b)b.disabled=false;}
+ }catch(e){
+  const reason=String(e?.message||e||'');
+  if(reason==='ad_verification_required'){
+   henovaAdNotice('short');
+  }else if(['invalid_code','invalid_or_expired_code','already_claimed'].includes(reason)){
+   toast(s.lang==='ar'?'الكود غير متاح أو مستخدم أو منتهي':s.lang==='tr'?'Kod geçersiz, kullanılmış veya süresi dolmuş':'Code invalid, used or expired');
+  }else{
+   console.warn('Promo redeem',e);
+   toast(s.lang==='ar'?'تعذر بدء الإعلان أو استلام الكود، حاول مرة أخرى.':s.lang==='tr'?'Reklam veya kod işlemi başlatılamadı. Tekrar deneyin.':'Could not start the ad or claim the code. Please try again.');
+  }
+ }finally{
+  henovaPromoRedeemBusy=false;
+  const current=document.getElementById('henova-promo-redeem');
+  if(current){
+   current.disabled=false;
+   if(current===btn){
+    current.textContent=originalLabel;
+    current.style.background='linear-gradient(#93db59,#52a82d)';
+   }
+  }
+ }
 }
 
 function henovaTaskClock(n){return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':')}
