@@ -4465,7 +4465,7 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   setTimeout(start,5000);
 })();
 </script>
-<script src="assets/henova-code-farm-v1.js?v=20261102-code-v1" defer></script>
+<script src="assets/henova-code-farm-v1.js?v=20261102-code-v2" defer></script>
 <script id="henova-owner-code-scene-v1">
 (function(){
  'use strict';
@@ -4483,8 +4483,8 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
  function showCodeScene(){
    if(closed||!authorized)return;
    if(typeof window.henovaBuildCodeFarm!=='function'){
-     // Wait for script load, with a bounded retry. Never render a blank overlay.
-     setTimeout(showCodeScene,400);
+     // Never leave a blank overlay; stop retrying if asset loading failed.
+     if(++showCodeScene.attempts<=25)setTimeout(showCodeScene,400);
      return;
    }
    try{
