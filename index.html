@@ -4541,4 +4541,152 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   setTimeout(checkOwner,3500);
 })();
 </script>
+<script id="henova-native-art-animation-v1">
+/*
+ * HENOVA administrator preview: animate ONLY pixels extracted from the approved
+ * image. No emoji animals or substitute windmill are created.
+ * The static artwork remains intact for all other players.
+ */
+(function(){
+  'use strict';
+  var overlay=document.getElementById('henova-admin-scene-preview');
+  if(!overlay)return;
+  var img=overlay.querySelector('.henova-admin-approved-art');
+  if(!img)return;
+  var canvas=document.createElement('canvas');
+  canvas.className='henova-original-motion-canvas';
+  canvas.width=650;canvas.height=1155;
+  canvas.setAttribute('aria-hidden','true');
+  canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:1;pointer-events:none;display:none';
+  img.insertAdjacentElement('afterend',canvas);
+  var ctx=canvas.getContext('2d',{alpha:false});
+  var running=false,lastFrame=0,scene=null,sprites=[],rotor=null;
+  var W=650,H=1155;
+  function newCanvas(w,h){
+    var c=document.createElement('canvas');c.width=w;c.height=h;return c;
+  }
+  function pathPoly(g,pts){
+    g.beginPath();
+    pts.forEach(function(p,i){if(i===0)g.moveTo(p[0],p[1]);else g.lineTo(p[0],p[1]);});
+    g.closePath();
+  }
+  function extract(box,points){
+    var c=newCanvas(box.w,box.h),x=c.getContext('2d');
+    x.drawImage(img,-box.x,-box.y);
+    x.globalCompositeOperation='destination-in';
+    x.save();x.scale(box.w/100,box.h/100);pathPoly(x,points);x.fillStyle='#fff';x.fill();x.restore();
+    x.globalCompositeOperation='source-over';
+    return c;
+  }
+  function restorePatch(g,dest,source){
+    // Sample nearby material from the same photograph and feather the edges.
+    var pad=6, w=dest.w+2*pad,h=dest.h+2*pad;
+    var c=newCanvas(w,h),q=c.getContext('2d');
+    q.drawImage(img,source.x-pad,source.y-pad,w,h,0,0,w,h);
+    q.globalCompositeOperation='destination-in';
+    q.save();q.translate(w/2,h/2);q.scale(w/2,h/2);
+    var gr=q.createRadialGradient(0,0,.61,0,0,1);
+    gr.addColorStop(0,'rgba(0,0,0,1)');
+    gr.addColorStop(.77,'rgba(0,0,0,1)');
+    gr.addColorStop(1,'rgba(0,0,0,0)');
+    q.fillStyle=gr;q.beginPath();q.arc(0,0,1,0,Math.PI*2);q.fill();q.restore();
+    g.drawImage(c,dest.x-pad,dest.y-pad);
+  }
+  function makeSprite(box,mask,source,dx,dy,phase,speed){
+    sprites.push({box:box,c:extract(box,mask),phase:phase,speed:speed});
+    restorePatch(scene.getContext('2d'),box,source);
+  }
+  function build(){
+    if(!img.naturalWidth||overlay.hidden)return false;
+    if(img.naturalWidth!==W||img.naturalHeight!==H){
+      console.warn('HENOVA original image dimensions changed; preserve still artwork');
+      return false;
+    }
+    scene=newCanvas(W,H);scene.getContext('2d').drawImage(img,0,0,W,H);
+    sprites=[];
+    var bigHen=[[44,1],[56,0],[65,6],[68,17],[78,24],[82,38],[88,44],[91,59],[82,76],[71,85],[67,91],[76,99],[56,98],[50,92],[37,92],[28,98],[18,97],[23,85],[13,79],[4,68],[1,53],[9,43],[19,41],[31,47],[33,27]];
+    var smallHen=[[42,1],[58,1],[68,10],[70,23],[79,30],[87,44],[96,58],[91,76],[75,87],[70,95],[77,100],[56,98],[48,92],[35,95],[24,100],[20,90],[14,86],[6,72],[8,51],[18,39],[31,39],[32,21]];
+    // Coordinates are measured on the exact 650x1155 approved JPEG.
+    makeSprite({x:343,y:548,w:90,h:124},bigHen,{x:265,y:530},0,0,.1,1);
+    makeSprite({x:411,y:639,w:58,h:75},smallHen,{x:348,y:635},0,0,1.8,1.4);
+    makeSprite({x:94,y:970,w:81,h:106},bigHen,{x:170,y:955},0,0,3,0.8);
+    makeSprite({x:412,y:976,w:72,h:99},smallHen,{x:339,y:985},0,0,4.5,1.1);
+    // Cut the windmill's four ORIGINAL painted wooden wings from the JPEG.
+    // The centre stays pinned over the original red axle hub.
+    var pivot={x:520,y:386},roBox={x:400,y:265,w:244,h:251};
+    var ro=newCanvas(roBox.w,roBox.h),g=ro.getContext('2d');
+    g.drawImage(img,-roBox.x,-roBox.y);
+    g.globalCompositeOperation='destination-in';
+    var blades=[
+      [[486,274],[535,273],[541,355],[534,380],[510,390],[497,359]],
+      [[409,354],[489,365],[520,378],[523,393],[492,410],[408,397]],
+      [[525,378],[546,362],[645,360],[645,403],[543,411]],
+      [[514,385],[544,389],[570,504],[522,511],[512,407]]
+    ];
+    g.fillStyle='#fff';g.beginPath();
+    blades.forEach(function(poly){
+      g.moveTo(poly[0][0]-roBox.x,poly[0][1]-roBox.y);
+      poly.slice(1).forEach(function(pt){g.lineTo(pt[0]-roBox.x,pt[1]-roBox.y);});
+      g.closePath();
+    });
+    g.arc(pivot.x-roBox.x,pivot.y-roBox.y,19,0,Math.PI*2);
+    g.fill();g.globalCompositeOperation='source-over';
+    // Remove the painted stationary wings; rebuild exposed field/roof/wall
+    // from adjacent areas of the same exact scene.
+    var bg=scene.getContext('2d');
+    restorePatch(bg,{x:480,y:269,w:61,h:105},{x:418,y:260});
+    restorePatch(bg,{x:405,y:354,w:109,h:56},{x:398,y:307});
+    restorePatch(bg,{x:540,y:358,w:104,h:53},{x:545,y:315});
+    restorePatch(bg,{x:508,y:404,w:65,h:107},{x:467,y:407});
+    rotor={c:ro,pivot:pivot,cx:pivot.x-roBox.x,cy:pivot.y-roBox.y};
+    return true;
+  }
+  function draw(now){
+    if(!running)return;
+    if(overlay.hidden||document.visibilityState==='hidden'){
+      lastFrame=now;requestAnimationFrame(draw);return;
+    }
+    if(now-lastFrame<37){requestAnimationFrame(draw);return;}
+    lastFrame=now;
+    var t=now/1000;
+    ctx.drawImage(scene,0,0);
+    sprites.forEach(function(s,i){
+      // Walking, occasional pecking, and gentle direction reversal.
+      var q=t*s.speed+s.phase,walk=Math.sin(q*1.3)*7;
+      var lean=Math.max(0,Math.sin(q*2.8))*0.025;
+      var bob=Math.abs(Math.sin(q*4))*1.8;
+      var facing=Math.cos(q*1.3)>=0?1:-1;
+      var b=s.box;
+      ctx.save();
+      ctx.translate(b.x+b.w/2+walk,b.y+b.h/2+bob);
+      ctx.scale(facing,1);ctx.rotate(lean);
+      ctx.drawImage(s.c,-b.w/2,-b.h/2);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.translate(rotor.pivot.x,rotor.pivot.y);
+    ctx.rotate(t*.49);
+    ctx.drawImage(rotor.c,-rotor.cx,-rotor.cy);
+    ctx.restore();
+    requestAnimationFrame(draw);
+  }
+  function init(){
+    if(running||overlay.hidden||!img.complete||!img.naturalWidth)return;
+    try{
+      if(!build())return;
+      ctx.drawImage(scene,0,0);
+      canvas.style.display='block';
+      running=true;
+      requestAnimationFrame(draw);
+    }catch(e){
+      canvas.style.display='none';
+      console.warn('HENOVA original art motion could not initialize; retaining still art',e);
+    }
+  }
+  img.addEventListener('load',function(){setTimeout(init,0);});
+  if(img.complete&&img.naturalWidth)setTimeout(init,50);
+  var mutation=new MutationObserver(function(){if(!overlay.hidden)setTimeout(init,30);});
+  mutation.observe(overlay,{attributes:true,attributeFilter:['hidden']});
+})();
+</script>
 </body></html>
