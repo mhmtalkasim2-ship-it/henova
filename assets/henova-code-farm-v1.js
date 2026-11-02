@@ -253,7 +253,7 @@ function scene(){
 function style(){
  return '#henova-admin-scene-preview #henova-code-farm{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:linear-gradient(#86ba42,#478723)}'
  +'#henova-code-farm svg{display:block;width:100%;height:100%}'
- +'#henova-admin-scene-preview .hv-rotor{animation:hvRotor 5.3s linear infinite;transform-origin:0px 0px;transform-box:view-box}'
+ +'#henova-admin-scene-preview .hv-rotor{animation:hvRotor 5.3s linear infinite;transform-origin:center center;transform-box:fill-box}'
  +'#henova-admin-scene-preview .hv-chicken-walk{animation:hvFarmWalk 6s ease-in-out infinite alternate;transform-origin:0 10px}'
  +'#henova-admin-scene-preview .hv-chicken-head{animation:hvHenPeck 3.1s ease-in-out infinite;transform-origin:13px -20px}'
  +'#henova-admin-scene-preview .hv-chicken-tail{animation:hvHenTail 2.2s ease-in-out infinite;transform-origin:-19px -15px}'
