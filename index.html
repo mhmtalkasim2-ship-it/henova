@@ -1883,7 +1883,9 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 
 /* HENOVA 2026-11-02: approved orchard, owner-only scene preview. */
 #henova-admin-scene-preview[hidden]{display:none!important}
-#henova-admin-scene-preview{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;z-index:2147483000;background:#4e8423;overflow:hidden}
+#henova-admin-scene-preview{position:fixed;inset:0;width:100%;height:100vh;height:100dvh;z-index:2147483000;background:#5a8e1b;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#henova-admin-scene-preview::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(255,255,255,.03),rgba(0,0,0,.02))}
+#henova-admin-scene-preview .henova-admin-approved-art{max-width:760px}
 #henova-admin-scene-preview .henova-admin-approved-art{display:block;width:100%;height:100%;object-fit:cover;object-position:center;user-select:none;-webkit-user-drag:none}
 #henova-admin-scene-preview .henova-admin-preview-close{position:absolute;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #fff9;border-radius:50%;background:#122e20a1;color:white;font:600 24px/1 sans-serif;box-shadow:0 2px 10px #0004;cursor:pointer;z-index:2}
 #henova-admin-scene-preview .henova-admin-preview-close:focus-visible{outline:3px solid #fff;outline-offset:3px}
@@ -2496,7 +2498,7 @@ body main.farm-mode #farm-scene.farm-v3 > .v3-pond {
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 <!-- Admin-only approved farm scene preview; regular users retain existing HENOVA UI. -->
 <section id="henova-admin-scene-preview" hidden aria-label="HENOVA farm approved orchard preview">
-  <img class="henova-admin-approved-art" src="assets/henova-admin-orchard-approved-20261102.jpg?v=20261102" alt="Apple orchard, red chicken coop, windmill, grassy farm, chickens and fountain" decoding="async" />
+  <img class="henova-admin-approved-art" data-fallback-src="assets/henova-admin-orchard-approved-20261102.jpg?v=20261102" alt="Apple orchard, red chicken coop, windmill, grassy farm, chickens and fountain" decoding="async" />
   <button class="henova-admin-preview-close" type="button" onclick="henovaHideApprovedFarmPreview()" aria-label="Return to HENOVA">×</button>
 </section>
 
@@ -4450,40 +4452,69 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   setTimeout(start,5000);
 })();
 </script>
-<script id="henova-admin-scene-preview-v1">
+<script id="henova-admin-scene-preview-v2">
 (function(){
   'use strict';
-  // Telegram ID is only a prefilter; signed initData is checked by the server.
-  var HENOVA_PREVIEW_OWNER_ID='8848098170';
+  // Telegram user ID is only a prefilter; server checks signed Telegram initData.
+  var OWNER_ID='8848098170';
   var overlay=document.getElementById('henova-admin-scene-preview');
   if(!overlay)return;
-  window.henovaHideApprovedFarmPreview=function(){overlay.hidden=true;};
-  var tried=false;
-  function checkOwner(){
-    if(tried)return;
-    var tg=window.Telegram&&window.Telegram.WebApp;
-    var user=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
-    if(!user || !tg.initData)return;
-    if(String(user.id)!==HENOVA_PREVIEW_OWNER_ID)return;
-    tried=true;
-    fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'diagnostic',initData:tg.initData}),
-      cache:'no-store'
-    }).then(function(response){
-      if(!response.ok)return null;
-      return response.json();
-    }).then(function(data){
-      if(data && data.ok===true && data.auth==='telegram_verified' && data.database==='connected'){
-        overlay.hidden=false;
-      }
+  var art=overlay.querySelector('.henova-admin-approved-art');
+  if(!art)return;
+  var checked=false,closed=false;
+  var fallback=art.getAttribute('data-fallback-src');
+  var parts=[1,2,3,4,5,6,7].map(function(i){
+    return 'assets/henova-adopted-20261102-part-'+String(i).padStart(2,'0')+'.txt';
+  });
+  window.henovaHideApprovedFarmPreview=function(){closed=true;overlay.hidden=true;};
+  function showImage(src,canFallback){
+    art.onload=function(){if(!closed)overlay.hidden=false;};
+    art.onerror=function(){if(canFallback&&fallback)showImage(fallback,false);};
+    art.src=src;
+    if(art.complete&&art.naturalWidth&&!closed)overlay.hidden=false;
+  }
+  function loadAdopted(){
+    Promise.all(parts.map(function(path){
+      return fetch(path+'?v=20261102-original',{cache:'force-cache'}).then(function(r){
+        if(!r.ok)throw Error('Missing approved asset '+r.status);
+        return r.text();
+      }).then(function(part){
+        part=part.trim();
+        if(!/^[A-Za-z0-9+/=]+$/.test(part))throw Error('Invalid approved asset');
+        return part;
+      });
+    })).then(function(chunks){
+      var exact=chunks.join('');
+      if(exact.length!==4371152||exact.slice(0,16)!=='iVBORw0KGgoAAAAN')throw Error('Incomplete approved PNG');
+      if(!closed)showImage('data:image/png;base64,'+exact,true);
     }).catch(function(err){
-      console.warn('HENOVA admin scene preview verification failed',err);
+      console.warn('HENOVA approved image unavailable; using backup',err);
+      if(!closed&&fallback)showImage(fallback,false);
     });
   }
+  function checkOwner(){
+    if(checked||closed)return;
+    var tg=window.Telegram&&window.Telegram.WebApp;
+    var user=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
+    if(!user||!tg.initData||String(user.id)!==OWNER_ID)return;
+    checked=true;
+    fetch('https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'diagnostic',initData:tg.initData}),cache:'no-store'
+    }).then(function(r){
+      if(!r.ok)throw Error('Owner verification HTTP '+r.status);
+      return r.json();
+    }).then(function(data){
+      if(data&&data.ok===true&&data.auth==='telegram_verified'&&data.database==='connected'){
+        loadAdopted();
+      }else{console.warn('HENOVA owner preview not authorized');}
+    }).catch(function(err){console.warn('HENOVA owner preview verification unavailable',err);});
+  }
   checkOwner();
+  document.addEventListener('DOMContentLoaded',checkOwner,{once:true});
   setTimeout(checkOwner,600);
+  setTimeout(checkOwner,1800);
+  setTimeout(checkOwner,4000);
 })();
 </script>
 </body></html>
