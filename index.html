@@ -4509,22 +4509,20 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
   }
   // Never show the full-screen cover until the artwork has loaded successfully.
   function loadAdopted(){
-    // Show the approved backup first; full-resolution artwork replaces it when ready.
-    if(fallback)showImage(fallback,false);
-    Promise.all(parts.map(function(path){
-      return fetch(path+'?v=20261102-original',{cache:'force-cache'}).then(function(r){
-        if(!r.ok)throw Error('Missing approved asset '+r.status);
-        return r.text();
-      }).then(function(part){
-        part=part.trim();
-        if(!/^[A-Za-z0-9+/=]+$/.test(part))throw Error('Invalid approved asset');
-        return part;
-      });
-    })).then(function(chunks){
-      var exact=chunks.join('');
-      if(exact.length!==4371152||exact.slice(0,16)!=='iVBORw0KGgoAAAAN')throw Error('Incomplete approved PNG');
-      if(!closed)showImage('data:image/png;base64,'+exact,true);
-    }).catch(function(err){console.warn('HENOVA approved PNG unavailable; backup retained',err);});
+    // Use a small, browser-native image URL instead of a 4.3MB data URI that
+    // can fail in Telegram Android WebView. A failed load never covers the app.
+    if(!fallback)return;
+    var previewUrl=fallback+(fallback.indexOf('?')<0?'?':'&')+'release=20261102v4';
+    var probe=new Image();
+    probe.onload=function(){
+      if(!authorized||closed)return;
+      art.onload=function(){if(authorized&&!closed)overlay.hidden=false;};
+      art.onerror=function(){overlay.hidden=true;console.warn('HENOVA preview failed to render');};
+      art.src=previewUrl;
+      if(art.complete&&art.naturalWidth&&!closed)overlay.hidden=false;
+    };
+    probe.onerror=function(){overlay.hidden=true;console.warn('HENOVA preview asset not found');};
+    probe.src=previewUrl;
   }
   function checkOwner(){
     if(closed||authorized||checking)return;
