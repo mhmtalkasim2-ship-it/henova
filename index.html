@@ -3842,7 +3842,7 @@ async function henovaPrepareWalletProof(){
   toast('Verification challenge prepared. Reconnect Tonkeeper. No payout was initiated.');
  }catch(e){const message=String(e?.message||'unknown_error');if(status)status.textContent='Wallet verification: '+message;toast(message.length>110?message.slice(0,110):message);}
 }
-let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=1000000,hvGramPerEgg=0.00001,hvWalletVerified=false;
+let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=1000000,hvGramPerEgg=0.00001,hvWalletVerified=false,hvEligibilityPercent=0,hvEligibilityGoal=25,hvEligibilityReady=false;
 function henovaSetWithdrawalPercent(p){
  const input=document.getElementById('hv-withdraw-eggs');
  if(!input)return;
@@ -3858,9 +3858,16 @@ function henovaUpdateSimpleWithdrawal(){
  const v=document.getElementById('hv-withdraw-gram'),net=document.getElementById('hv-withdraw-net'),rule=document.getElementById('hv-withdraw-rule');
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
- if(rule)rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+(hvMaxEggs===1000000?'1M':hvMaxEggs.toLocaleString('en-US'))+' 🥚';
- // Request submissions open at the configured minimum egg balance; the server checks wallet, pending requests and cooldown.
- button.disabled=!(hvPayoutReady&&Number(s.eggs)>=hvMinEggs&&valid);
+ if(rule){
+  const eligibilityText=s.lang==='ar'
+    ?'الأهلية '+hvEligibilityPercent+'% / '+hvEligibilityGoal+'%'
+    :s.lang==='tr'
+      ?'Uygunluk '+hvEligibilityPercent+'% / '+hvEligibilityGoal+'%'
+      :'Eligibility '+hvEligibilityPercent+'% / '+hvEligibilityGoal+'%';
+  rule.textContent=(s.lang==='ar'?'الحد الأدنى ':s.lang==='tr'?'Minimum ':'Minimum ')+hvMinEggs+' 🥚 · '+(s.lang==='ar'?'الحد الأقصى ':s.lang==='tr'?'Maksimum ':'Maximum ')+(hvMaxEggs===1000000?'1M':hvMaxEggs.toLocaleString('en-US'))+' 🥚 · '+eligibilityText;
+ }
+ // Withdrawal requires both the egg minimum and the server-confirmed 25% activity eligibility.
+ button.disabled=!(hvPayoutReady&&hvEligibilityReady&&Number(s.eggs)>=hvMinEggs&&valid);
 }
 // Short arithmetic human check. Both the question and the answer are validated by HENOVA API.
 async function henovaMathGate(scope){
@@ -3923,6 +3930,11 @@ async function henovaMathGate(scope){
 async function henovaSubmitSimpleWithdrawal(){
  const amount=Number(document.getElementById('hv-withdraw-eggs')?.value);
  if(!hvPayoutReady)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
+ if(!hvEligibilityReady)return toast(
+  s.lang==='ar'?'يجب الوصول إلى '+hvEligibilityGoal+'% لفتح السحب. نسبتك الحالية '+hvEligibilityPercent+'%'
+  :s.lang==='tr'?'Çekim için '+hvEligibilityGoal+'% uygunluğa ulaşmalısın. Mevcut: '+hvEligibilityPercent+'%'
+  :'Reach '+hvEligibilityGoal+'% eligibility to withdraw. Current: '+hvEligibilityPercent+'%'
+ );
  if(!Number.isSafeInteger(amount)||amount<hvMinEggs||amount>hvMaxEggs||amount>Number(s.eggs))return henovaUpdateSimpleWithdrawal();
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
@@ -3950,10 +3962,23 @@ async function henovaRefreshPayoutSetup(){
   hvMinEggs=Number(data.payout?.min_eggs)||500;
   hvMaxEggs=Number(data.payout?.max_eggs)||1000000;
   hvGramPerEgg=Number(data.payout?.gram_per_egg)||0.00001;
+  hvEligibilityPercent=Math.max(0,Math.min(100,Number(data.eligibility?.percent)||0));
+  hvEligibilityGoal=Number(data.eligibility?.goal)||25;
+  hvEligibilityReady=data.eligibility?.eligible===true;
   const status=document.getElementById('hv-withdraw-state');
-  if(status)status.textContent=hvPayoutReady
-    ?(s.lang==='ar'?'طلبات السحب متاحة ابتداءً من 500 بيضة':s.lang==='tr'?'Çekim talepleri 500 yumurtadan itibaren açık':'Withdrawal requests open from 500 eggs')
-    :(s.lang==='ar'?'السحب قيد التجهيز حالياً':s.lang==='tr'?'Çekimler hazırlanıyor':'Withdrawals are being prepared');
+  if(status){
+    if(!hvPayoutReady)status.textContent=s.lang==='ar'?'السحب قيد التجهيز حالياً':s.lang==='tr'?'Çekimler hazırlanıyor':'Withdrawals are being prepared';
+    else if(!hvEligibilityReady)status.textContent=s.lang==='ar'
+      ?'أهلية السحب: '+hvEligibilityPercent+'% / '+hvEligibilityGoal+'% — أكمل الإعلانات للوصول إلى '+hvEligibilityGoal+'%'
+      :s.lang==='tr'
+        ?'Çekim uygunluğu: '+hvEligibilityPercent+'% / '+hvEligibilityGoal+'% — '+hvEligibilityGoal+'% için reklamları tamamla'
+        :'Withdrawal eligibility: '+hvEligibilityPercent+'% / '+hvEligibilityGoal+'% — complete ads to reach '+hvEligibilityGoal+'%';
+    else status.textContent=s.lang==='ar'
+      ?'✅ أهلية السحب '+hvEligibilityPercent+'% — السحب متاح ابتداءً من '+hvMinEggs+' بيضة'
+      :s.lang==='tr'
+        ?'✅ Çekim uygunluğu '+hvEligibilityPercent+'% — minimum '+hvMinEggs+' yumurta'
+        :'✅ Withdrawal eligibility '+hvEligibilityPercent+'% — open from '+hvMinEggs+' eggs';
+  }
   henovaUpdateSimpleWithdrawal();
   if(history&&data.withdrawals?.length)history.textContent=data.withdrawals.map(x=>'#'+x.id+' · '+x.status+' · '+x.eggs_amount+' 🥚').join(' | ');
  }catch(e){console.warn('Payout setup unavailable',e)}
@@ -4143,7 +4168,8 @@ function hvError(code){
  hen_limit_reached:{en:'Maximum 5 hens of this type',ar:'وصلت للحد الأقصى: 5 دجاجات من هذا النوع',tr:'Bu türden en fazla 5 tavuk alabilirsin'},
  not_joined:{en:'Join the channel first',ar:'اشترك في القناة أولاً',tr:'Önce kanala katıl'},
  cooldown:{en:'Wait for the reward countdown',ar:'انتظر انتهاء عداد المكافأة',tr:'Ödül sayacının bitmesini bekle'},
- verification_unavailable:{en:'Channel verification unavailable, try later',ar:'تعذر التحقق من الاشتراك، حاول لاحقاً',tr:'Kanal doğrulanamadı, daha sonra tekrar dene'}
+ verification_unavailable:{en:'Channel verification unavailable, try later',ar:'تعذر التحقق من الاشتراك، حاول لاحقاً',tr:'Kanal doğrulanamadı, daha sonra tekrar dene'},
+ withdrawal_eligibility_required:{en:'Reach 25% eligibility before withdrawing',ar:'يجب الوصول إلى أهلية 25% قبل السحب',tr:'Çekimden önce %25 uygunluğa ulaşmalısın'}
  };
  return errors[code]?.[s.lang]||errors[code]?.en||({ar:'تعذرت العملية، حاول لاحقاً',tr:'İşlem başarısız, tekrar dene',en:'Action failed, please try again'}[s.lang]||'Action failed');
 }
