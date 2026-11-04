@@ -2795,7 +2795,7 @@ async function henovaClaimNGM(){
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaNGMClaimBusy=false;const current=document.getElementById('henova-ngm-claim');if(current)current.disabled=henovaNGMClaimed}
 }
-function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS')}
+function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS/889')}
 async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
  try{
