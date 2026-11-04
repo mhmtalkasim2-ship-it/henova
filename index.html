@@ -1881,6 +1881,14 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 .henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
 .henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
 
+
+
+/* HENOVA sponsored task: show only the task name above the ad unit. */
+.hv-sponsored-task-vertical > div:first-child > img{display:none!important}
+.hv-sponsored-task-vertical > div:first-child .hv-sponsored-copy p,
+.hv-sponsored-task-vertical > div:first-child .hv-sponsored-copy small{display:none!important}
+.hv-sponsored-task-vertical > div:first-child{gap:0!important}
+.hv-sponsored-task-vertical > div:first-child .hv-sponsored-copy{width:100%;}
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
