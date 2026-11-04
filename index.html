@@ -2795,6 +2795,17 @@ async function henovaClaimNGM(){
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaNGMClaimBusy=false;const current=document.getElementById('henova-ngm-claim');if(current)current.disabled=henovaNGMClaimed}
 }
+let henovaCatsMinerOpened=false,henovaCatsMinerClaimBusy=false,henovaCatsMinerClaimed=false;
+function henovaOpenCatsMiner(){henovaCatsMinerOpened=true;window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/CatsMinerBot/app?startapp=r1035565575');}
+async function henovaClaimCatsMiner(){
+ if(henovaCatsMinerClaimBusy||henovaCatsMinerClaimed)return;
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ if(!henovaCatsMinerOpened){toast(ar?'افتح البوت أولاً':tr?'Önce botu aç':'Open the bot first');return}
+ henovaCatsMinerClaimBusy=true;const btn=document.getElementById('henova-catsminer-claim');if(btn)btn.disabled=true;
+ try{const result=await henovaCall('claim_catsminer_once');if(!result?.ok)throw Error(result?.error||'reward_unavailable');henovaCatsMinerClaimed=true;const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}if(result.claimed)henovaShowRewardCard(20,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Bu ödülü zaten aldın':'Reward already claimed');}
+ catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
+ finally{henovaCatsMinerClaimBusy=false;const b=document.getElementById('henova-catsminer-claim');if(b)b.disabled=henovaCatsMinerClaimed}
+}
 function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS/889')}
 async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
@@ -4505,6 +4516,10 @@ if(tab===2){
  el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/riftycoinbot.jpg" alt="Riftycoin" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGM()">'+nOpen+'</button><button id="henova-ngm-claim" onclick="henovaClaimNGM()" '+(henovaNGMClaimed?'disabled':'')+'>'+nClaim+'</button></div></article>');
 }
 
+ const cTitle=s.lang==='ar'?'انضم إلى CatsMiner':s.lang==='tr'?"CatsMiner'a Katıl":'Join CatsMiner';
+ const cDesc=s.lang==='ar'?'20 عملة · مرة واحدة':s.lang==='tr'?'20 jeton · Tek seferlik':'20 coins · One time only';
+ const cPending=s.lang==='ar'?'افتح CatsMiner ثم تحقق لاستلام المكافأة':s.lang==='tr'?"CatsMiner'ı aç, ardından ödülü doğrula":'Open CatsMiner, then verify to claim your reward';
+ el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/CatsMinerBot.jpg" alt="CatsMiner" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+cTitle+'</h3><p>🪙 '+cDesc+'</p><small>'+cPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenCatsMiner()">'+(s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot')+'</button><button id="henova-catsminer-claim" onclick="henovaClaimCatsMiner()" '+(henovaCatsMinerClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>');
 if(tab===2){
 const v=henovaVideoRewardText();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
