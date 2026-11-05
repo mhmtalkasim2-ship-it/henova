@@ -2953,8 +2953,14 @@ function henovaRenderSigningQueue(items){
  const root=document.getElementById('henova-signing-queue');
  if(!root)return;
  root.replaceChildren();
- if(!henovaSigningQueue.length){root.textContent='No signing queue selected.';return}
- const title=document.createElement('strong');title.textContent='🔐 Sequential Tonkeeper signing · '+henovaSigningQueue.length+' left';root.append(title); 
+ if(!henovaSigningQueue.length){
+  const empty=document.createElement('p');
+  empty.textContent='No approved withdrawals in the payment queue yet. Select up to 5 pending requests below, then approve them to load the grouped payment panel.';
+  empty.style.cssText='margin:0 0 10px;color:#526b54;line-height:1.5';
+  root.append(empty);
+ }else{
+  const title=document.createElement('strong');title.textContent='🔐 Sequential Tonkeeper signing · '+henovaSigningQueue.length+' left';root.append(title);
+ } 
  const batch=document.createElement('button');batch.type='button';batch.className='henova-wallet-save';
  batch.textContent='🧾 Preview one-signature batch ('+Math.min(henovaSigningQueue.length,5)+' requests)';
  batch.onclick=async()=>{
