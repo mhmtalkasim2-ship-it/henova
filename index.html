@@ -2588,13 +2588,17 @@ const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/heno
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
 function henovaAdminLaunchRequested(){const app=window.Telegram?.WebApp;const p=new URLSearchParams(location.search);return p.get('admin')==='payouts'||p.get('startapp')==='admin_payouts'||p.get('tgWebAppStartParam')==='admin_payouts'||app?.initDataUnsafe?.start_param==='admin_payouts'}
 let henovaPresenceBusy=false;
+let henovaPresenceLastAt=0;
 async function henovaPresencePing(){
- if(henovaPresenceBusy||document.hidden||!henovaIsTelegram())return;
+ const now=Date.now();
+ if(henovaPresenceBusy||document.hidden||!henovaIsTelegram()||now-henovaPresenceLastAt<45000)return;
  henovaPresenceBusy=true;
+ henovaPresenceLastAt=now;
  try{await henovaCall('presence_ping')}catch(e){console.warn('HENOVA presence',String(e?.message||e))}
  finally{henovaPresenceBusy=false}
 }
-setInterval(()=>{void henovaPresencePing()},30000);
+// Presence refresh every 60s; server online window remains 90s.
+setInterval(()=>{void henovaPresencePing()},60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)void henovaPresencePing()});
 window.addEventListener('focus',()=>{void henovaPresencePing()});
 setTimeout(()=>{void henovaPresencePing()},2500);
