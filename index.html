@@ -2586,6 +2586,7 @@ let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar',
 let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0,henovaInviteThreeProgress=0,henovaInviteThreeRewarded=false;
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
+function henovaAdminLaunchRequested(){const app=window.Telegram?.WebApp;const p=new URLSearchParams(location.search);return p.get('admin')==='payouts'||p.get('startapp')==='admin_payouts'||p.get('tgWebAppStartParam')==='admin_payouts'||app?.initDataUnsafe?.start_param==='admin_payouts'}
 let henovaPresenceBusy=false;
 async function henovaPresencePing(){
  if(henovaPresenceBusy||document.hidden||!henovaIsTelegram())return;
@@ -2621,7 +2622,7 @@ async function henovaLoad(){
     henovaApplyState(data.state);
     henovaReady=true;
     render();
-    if(new URLSearchParams(location.search).get('admin')==='payouts')henovaShowAdminPayouts();
+    if(henovaAdminLaunchRequested())henovaShowAdminPayouts();
   }catch(error){
     henovaReady=false;
     console.warn('HENOVA initial sync failed',error);
@@ -4639,10 +4640,7 @@ function setupTelegram(){
 }
 setupTelegram();
 // Entry popup removed. Telegram server authentication and withdrawal checks remain enabled.
-if(new URLSearchParams(location.search).get('admin')==='payouts'){
-  // Render after Telegram initialization; no server access without valid initData.
-  setTimeout(henovaShowAdminPayouts,100);
-}
+// Admin payouts view is opened once after authenticated state sync in henovaLoad().
 if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.textContent='🔇';}
 // HENOVA AdsGram interstitial, Unit ID int-56161 (platform 53244).
 // AdsGram is currently in moderation; ad unavailability must never block the farm.
