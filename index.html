@@ -2711,25 +2711,25 @@ async function henovaRedeemPromo(){
    return;
   }
 
-  if(btn){
-   btn.textContent=s.lang==='ar'?'✅ تم مشاهدة الإعلان':s.lang==='tr'?'✅ Reklam izlendi':'✅ Ad watched';
-   btn.style.background='linear-gradient(#55bd70,#2b8c49)';
-  }
-  henovaAdNotice('completed');
-
   const r=await henovaCall('redeem_promo_code',{code,session_id:session.session_id});
+  if(!r?.ok)throw Error(String(r?.error||'promo_claim_not_confirmed'));
   const fresh=await henovaCall('state');
   if(fresh?.state){henovaApplyState(fresh.state);render();}
-  henovaAdNotice('success');
-  henovaShowRewardCard(Number(r.eggs??r.coins),r.rewardType==='eggs'?'eggs':'coins');
+  const amount=Number(r.eggs??r.coins??0);
+  const unit=r.rewardType==='eggs'?'eggs':'coins';
+  const successMessage=s.lang==='ar'?'✅ تم استلام الكود بنجاح! أضيفت '+amount+' '+(unit==='eggs'?'بيضة إلى رصيدك.':'عملة إلى رصيدك.') :s.lang==='tr'?'✅ Kod başarıyla alındı! Bakiyene '+amount+' '+(unit==='eggs'?'yumurta eklendi.':'coin eklendi.'):'✅ Promo code claimed! '+amount+' '+unit+' added to your balance.';
+  toast(successMessage);
+  henovaShowRewardCard(amount,unit);
  }catch(e){
   const reason=String(e?.message||e||'');
   if(reason==='ad_verification_required'){
    henovaAdNotice('short');
   }else if(reason==='code_fully_claimed'){
-   toast(s.lang==='ar'?'انتهى هذا الكود؛ تم استخدام جميع مرات الاسترداد المتاحة. لم تحصل على مكافأة.':s.lang==='tr'?'Bu kodun kullanım hakkı doldu. Ödül verilmedi.':'This promo code has reached its claim limit. No reward was granted.');
-  }else if(['invalid_code','invalid_or_expired_code','already_claimed'].includes(reason)){
-   toast(s.lang==='ar'?'الكود غير متاح أو مستخدم أو منتهي':s.lang==='tr'?'Kod geçersiz, kullanılmış veya süresi dolmuş':'Code invalid, used or expired');
+   toast(s.lang==='ar'?'❌ لم تستلم المكافأة: انتهت حصة هذا الكود واستخدمه جميع الأشخاص المسموح لهم.':s.lang==='tr'?'❌ Ödül alınmadı: Bu kodun tüm kullanım hakları doldu.':'❌ Reward not received: this promo code has reached its claim limit.');
+  }else if(reason==='already_claimed'){
+   toast(s.lang==='ar'?'⚠️ لم تستلم مكافأة جديدة: سبق لك استخدام هذا الكود.':s.lang==='tr'?'⚠️ Yeni ödül verilmedi: Bu kodu daha önce kullandın.':'⚠️ No new reward: you have already claimed this code.');
+  }else if(['invalid_code','invalid_or_expired_code'].includes(reason)){
+   toast(s.lang==='ar'?'❌ لم تستلم المكافأة: الكود غير صالح أو منتهي الصلاحية.':s.lang==='tr'?'❌ Ödül alınmadı: Kod geçersiz veya süresi dolmuş.':'❌ Reward not received: the code is invalid or expired.');
   }else{
    console.warn('Promo redeem',e);
    toast(s.lang==='ar'?'تعذر بدء الإعلان أو استلام الكود، حاول مرة أخرى.':s.lang==='tr'?'Reklam veya kod işlemi başlatılamadı. Tekrar deneyin.':'Could not start the ad or claim the code. Please try again.');
