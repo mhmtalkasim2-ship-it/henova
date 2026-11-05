@@ -3631,7 +3631,7 @@ async function henovaSignTestThree(){
   const result=await henovaTonUI.sendTransaction({
    validUntil:Math.floor(Date.now()/1000)+300,
    network:'-239',from:intent.sender,
-   messages:[{address:intent.destination,amount:intent.amountNanograms,payload:HENOVA_PAYOUT_COMMENT_BOC}]
+   messages:[{address:intent.destination,amount:intent.amountNanograms}]
   });
   if(!result?.boc)throw Error('No wallet receipt. Check TON before retrying.');
   toast('TEST signed. Check TON history before retrying. This is not yet recorded as paid.');
@@ -3648,7 +3648,7 @@ async function henovaRecoverAdminBatch(){
   if(response.ok){toast('Grouped receipt recorded. Verify TON before any further transfer.');await henovaShowAdminPayouts();}
  }catch(e){toast('Recovery pending: '+String(e.message||e).slice(0,90))}
 }
-const HENOVA_PAYOUT_COMMENT_BOC='te6ccgEBAQEAIgBAAAAAAABXaXRoZHJhd2FsIGZyb20gQEhFTk9WQV9GQVJN'; // TON text comment: Withdrawal from @HENOVA_FARM
+ // Temporarily omit custom comment payload: previous hand-built BoC caused Tonkeeper cell parsing failure.
 async function henovaSignAdminBatch(ids){
  if(henovaSignAdminBatch.inProgress)return toast('Batch signing already in progress');
  henovaSignAdminBatch.inProgress=true;
@@ -3737,7 +3737,7 @@ async function henovaSignAdminBatch(ids){
   }
   const result=await henovaTonUI.sendTransaction({
    validUntil:Math.floor(Date.now()/1000)+300,network:'-239',from:intent.sender,
-   messages:intent.messages.map(x=>({address:x.address,amount:x.amount,payload:HENOVA_PAYOUT_COMMENT_BOC}))
+   messages:intent.messages.map(x=>({address:x.address,amount:x.amount}))
   });
   const signedBoc=String(result?.boc||'');
   if(!signedBoc)throw Error('No wallet receipt; inspect TON, never sign twice');
