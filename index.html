@@ -3657,7 +3657,7 @@ async function henovaRecoverAdminBatch(){
   if(response.ok){toast('Grouped receipt recorded. Verify TON before any further transfer.');await henovaShowAdminPayouts();}
  }catch(e){toast('Recovery pending: '+String(e.message||e).slice(0,90))}
 }
-const HENOVA_PAYOUT_COMMENT_BOC='te6cckEBASIAAEAAAAAAV2l0aGRyYXdhbCBmcm9tIEBIRU5PVkFfRkFSTQ=='; // TON text comment: Withdrawal from @HENOVA_FARM
+const HENOVA_PAYOUT_COMMENT_BOC='te6cckEBAQEAKgAAAXQAAAAgV2l0aGRyYXdhbCBmcm9tIEBIRU5PVkFfRkFSTQ=='; // TON text comment: Withdrawal from @HENOVA_FARM
 async function henovaSignAdminBatch(ids){
  if(henovaSignAdminBatch.inProgress)return toast('Batch signing already in progress');
  henovaSignAdminBatch.inProgress=true;
