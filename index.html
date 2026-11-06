@@ -2822,6 +2822,26 @@ async function henovaClaimNGMCloud(){
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaNGMCloudBusy=false;const current=document.getElementById('henova-ngm-cloud-claim');if(current)current.disabled=henovaNGMCloudClaimed}
 }
+let henovaDoggminerOpened=false,henovaDoggminerBusy=false,henovaDoggminerClaimed=false;
+function henovaOpenDoggminer(){
+ henovaDoggminerOpened=true;
+ window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/Doggminerbot/miner?startapp=ref_1035565575');
+}
+async function henovaClaimDoggminer(){
+ if(henovaDoggminerBusy||henovaDoggminerClaimed)return;
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ if(!henovaDoggminerOpened){toast(ar?'افتح البوت أولاً':tr?'Önce botu aç':'Open the bot first');return}
+ henovaDoggminerBusy=true;
+ const btn=document.getElementById('henova-doggminer-claim');if(btn)btn.disabled=true;
+ try{
+  const result=await henovaCall('claim_doggminer_once');
+  if(!result?.ok)throw Error(result?.error||'reward_unavailable');
+  henovaDoggminerClaimed=true;
+  const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
+  if(result.claimed)henovaShowRewardCard(20,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
+ }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
+ finally{henovaDoggminerBusy=false;const current=document.getElementById('henova-doggminer-claim');if(current)current.disabled=henovaDoggminerClaimed}
+}
 function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS/889')}
 async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
@@ -4528,6 +4548,7 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 '<article class="item" style="background:linear-gradient(120deg,#f5f7e8,#e4f0d4);border:1px solid #d4deb9;border-radius:18px"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:15px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'تفاعل مع أحدث منشوراتنا':s.lang==='tr'?'En Son Gönderimizle Etkileşime Geç':'Interact With Our Latest Post')+'</h3><p>🪙 +50 · '+(s.lang==='ar'?'مرة واحدة فقط':s.lang==='tr'?'Tek seferlik':'One-time reward')+'</p></div><div style="display:grid;gap:6px"><button onclick="henovaOpenPost80()">'+(s.lang==='ar'?'فتح المنشور':s.lang==='tr'?'Gönderiyi aç':'Open Post')+'</button><button id="henova-post80-claim" onclick="henovaClaimPost80()" '+(henovaPost80Claimed?'disabled':'')+'>'+(henovaPost80Claimed?'✓':(s.lang==='ar'?'استلام':s.lang==='tr'?'Al':'Claim'))+'</button></div></article>'+'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 '+hvText('taskDesc')+'</p><small id="join-timer">'+(Date.now()<henovaChannelNext?henovaTaskClock(Math.ceil((henovaChannelNext-Date.now())/1000)):hvText('ready'))+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">'+hvText('open')+'</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>'+hvText('verify')+'</button></div></article>'+
 '<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_WITHDRAWALS.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:14px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'قناة السحب':s.lang==='tr'?'Çekim Kanalı':'Withdrawals Channel')+'</h3><p>HENOVA Withdrawals</p><small id="withdraw-channel-status">'+(s.lang==='ar'?'تحقق من اشتراكك':s.lang==='tr'?'Üyeliğini doğrula':'Verify membership')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenWithdrawals()">'+hvText('open')+'</button><button onclick="henovaCheckWithdrawals()">'+hvText('verify')+'</button></div></article>'+
 '<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/NGMCloudeminingbot.jpg" alt="NGM Cloud Mining" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src='+'\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\''+'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · NGM Cloud Mining':s.lang==='tr'?'Bize Katıl · NGM Cloud Mining':'Join Us · NGM Cloud Mining')+'</h3><p>🪙 +20 · '+(s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only')+'</p><small>'+(s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGMCloud()">'+(s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot')+'</button><button id="henova-ngm-cloud-claim" onclick="henovaClaimNGMCloud()">'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
+ el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Doggminerbot.jpg" alt="Dogg Miner" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Dogg Miner':s.lang==='tr'?'Bize Katıl · Dogg Miner':'Join Us · Dogg Miner')+'</h3><p>🪙 +20 · '+(s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only')+'</p><small>'+(s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenDoggminer()">'+(s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot')+'</button><button id="henova-doggminer-claim" onclick="henovaClaimDoggminer()">'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>');
 }
 
 if(tab===2){
