@@ -2311,8 +2311,8 @@ html.telegram-fullscreen body main.farm-mode .stats{
 <style id="henova-visual-v11-migration">
 /* Scenery-only migration: leave existing live collection, ads, wallet, tabs, sounds and owned hens intact. */
 main.farm-mode #farm-scene.farm-v3 {
-  background:#6caa4a!important;
-  background-image:none!important;
+  /* Keep the approved farm artwork as a fallback if the foreground SVG fails in Telegram WebView. */
+  background:#6caa4a url('./assets/henova-game-scene-no-old-pond-20261101.svg?v=1') center center/100% 100% no-repeat!important;
   isolation:isolate;
 }
 main.farm-mode #farm-scene.farm-v3 > .henova-farm-v11-background {
