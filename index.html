@@ -2822,6 +2822,26 @@ async function henovaClaimNGMCloud(){
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaNGMCloudBusy=false;const current=document.getElementById('henova-ngm-cloud-claim');if(current)current.disabled=henovaNGMCloudClaimed}
 }
+let henovaUTYAOpened=false,henovaUTYABusy=false,henovaUTYAClaimed=false;
+function henovaOpenUTYA(){
+ henovaUTYAOpened=true;
+ window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/UTYA_miner_bot?start=ref_1035565575');
+}
+async function henovaClaimUTYA(){
+ if(henovaUTYABusy||henovaUTYAClaimed)return;
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ if(!henovaUTYAOpened){toast(ar?'افتح البوت أولاً':tr?'Önce botu aç':'Open the bot first');return}
+ henovaUTYABusy=true;
+ const btn=document.getElementById('henova-utya-claim');if(btn)btn.disabled=true;
+ try{
+  const result=await henovaCall('claim_utya_miner_once');
+  if(!result?.ok)throw Error(result?.error||'reward_unavailable');
+  henovaUTYAClaimed=true;
+  const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
+  if(result.claimed)henovaShowRewardCard(20,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
+ }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
+ finally{henovaUTYABusy=false;const current=document.getElementById('henova-utya-claim');if(current)current.disabled=henovaUTYAClaimed}
+}
 function henovaOpenWithdrawals(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_WITHDRAWALS/889')}
 async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
@@ -4536,7 +4556,7 @@ if(tab===2){
  const nOpen=s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot';
  const nClaim=s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim';
  const nPending=s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward';
- el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/riftycoinbot.jpg" alt="Riftycoin" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGM()">'+nOpen+'</button><button id="henova-ngm-claim" onclick="henovaClaimNGM()" '+(henovaNGMClaimed?'disabled':'')+'>'+nClaim+'</button></div></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/riftycoinbot.jpg" alt="Riftycoin" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+nTitle+'</h3><p>🪙 '+nDesc+'</p><small>'+nPending+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGM()">'+nOpen+'</button><button id="henova-ngm-claim" onclick="henovaClaimNGM()" '+(henovaNGMClaimed?'disabled':'')+'>'+nClaim+'</button></div></article>'+<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/UTYA_miner_bot.jpg" alt="UTYA Miner" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src='https://t.me/i/userpic/320/HENOVA_FARM.jpg'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · UTYA Miner':s.lang==='tr'?'Bize Katıl · UTYA Miner':'Join Us · UTYA Miner')+'</h3><p>🪙 +20 · '+(s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only')+'</p><small>'+(s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenUTYA()">'+(s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot')+'</button><button id="henova-utya-claim" onclick="henovaClaimUTYA()" '+(henovaUTYAClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>);
 }
 if(tab===2){
 const v=henovaVideoRewardText();
