@@ -2578,8 +2578,16 @@ main.farm-mode #farm-scene .henova-gift-chest{
  animation:henovaChestIdle 3.8s ease-in-out infinite;
 }
 @keyframes henovaChestIdle{
- 0%,100%{transform:perspective(220px) rotateY(-13deg) translateY(0) rotateZ(0deg)}
- 50%{transform:perspective(220px) rotateY(-9deg) translateY(-4px) rotateZ(1.2deg)}
+ 0%,100%{transform:perspective(220px) rotateY(-13deg) translateY(0) rotateZ(0deg) scale(1)}
+ 50%{transform:perspective(220px) rotateY(-7deg) translateY(-8px) rotateZ(2.8deg) scale(1.045)}
+}
+.henova-gift-chest .chest-lid{
+ transform-origin:50% 100%;
+ animation:henovaChestLidIdle 3.8s ease-in-out infinite;
+}
+@keyframes henovaChestLidIdle{
+ 0%,18%,100%{transform:rotateX(0deg) translateY(0)}
+ 48%,66%{transform:rotateX(-24deg) translateY(-3px)}
 }
 @media(prefers-reduced-motion:reduce){
  .henova-gift-chest{animation:none!important}
