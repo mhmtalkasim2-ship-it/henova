@@ -1907,6 +1907,79 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 /* HENOVA AdsGram slot button: style the supplied slot, not shadow-DOM parts. */
 #henova-adsgram-task{--adsgram-task-button-width:112px!important;--adsgram-task-font-size:15px!important}
 #henova-adsgram-task .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 16px!important;background:#fac756!important;background-color:#fac756!important;color:#211b0d!important;border:0!important;border-radius:14px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-shadow:0 2px 0 rgba(137,94,19,.22)!important}
+
+/* HENOVA premium farm-game treasure chest — visual upgrade only */
+main.farm-mode #farm-scene .henova-gift-chest{
+  width:clamp(54px,15vw,70px)!important;height:68px!important;
+  filter:drop-shadow(0 8px 4px #172b167a) drop-shadow(0 0 5px #ffd66b55);
+}
+.henova-gift-chest .chest-base{
+  left:5%;right:5%;bottom:5%;height:53%;
+  border:2px solid #58300f;border-radius:5px 5px 10px 10px;
+  background:
+    linear-gradient(90deg,transparent 0 23%,#4d260e55 24% 26%,transparent 27% 48%,#4d260e55 49% 51%,transparent 52% 74%,#4d260e55 75% 77%,transparent 78%),
+    linear-gradient(90deg,#57260e 0%,#a9571e 13%,#e7a84d 29%,#b86b27 48%,#e6a34b 69%,#7a3914 100%);
+  box-shadow:inset 0 3px 5px #ffe6a988,inset 0 -8px 9px #321306a8,0 3px 2px #351708;
+}
+.henova-gift-chest .chest-base:before{
+  content:"";position:absolute;inset:5px 3px 4px;border-top:1px solid #ffd982aa;border-bottom:1px solid #4d210b99;
+  background:linear-gradient(180deg,#ffdb8b22,transparent 45%,#4b1e0c33);
+  border-radius:2px 2px 6px 6px;pointer-events:none;
+}
+.henova-gift-chest .chest-base:after{
+  content:"";position:absolute;left:7%;right:7%;top:8%;height:5px;
+  border-radius:50%;background:linear-gradient(90deg,#63300d,#ffd978 18%,#fff0b2 50%,#ffd978 82%,#63300d);
+  box-shadow:0 1px 2px #3d1c0b;
+}
+.henova-gift-chest .chest-lid{
+  left:3%;right:3%;top:13%;height:34%;
+  border:2px solid #60310f;border-radius:48% 48% 5px 5px / 72% 72% 5px 5px;
+  background:
+    linear-gradient(90deg,transparent 0 22%,#57290e66 23% 25%,transparent 26% 48%,#57290e66 49% 51%,transparent 52% 74%,#57290e66 75% 77%,transparent 78%),
+    linear-gradient(180deg,#ffe2a0 0%,#e9ad50 22%,#bd702b 62%,#713512 100%);
+  box-shadow:inset 0 4px 5px #fff4cfaa,inset 0 -5px 6px #55250f99,0 4px 4px #32160999;
+}
+.henova-gift-chest .chest-lid:before{
+  content:"";position:absolute;left:7%;right:7%;top:9%;height:3px;border-radius:50%;
+  background:linear-gradient(90deg,#8d4d18,#fff1b4 45%,#a65c1c);
+  box-shadow:0 2px 2px #5a2b0d88;
+}
+.henova-gift-chest .chest-lid:after{
+  content:"";position:absolute;left:10%;right:10%;bottom:4px;height:4px;
+  border-radius:2px;background:linear-gradient(90deg,#9c5b1b,#ffe69a 45%,#9c5b1b);
+  box-shadow:0 1px 2px #4b230d;
+}
+.henova-gift-chest .chest-band{
+  left:42%;top:14%;bottom:5%;width:16%;z-index:2;
+  border-left:1px solid #754713;border-right:1px solid #754713;
+  background:linear-gradient(90deg,#8c5318 0%,#f9d777 24%,#fff0ad 48%,#d79a37 72%,#815018 100%);
+  box-shadow:0 0 3px #3e210c99;
+}
+.henova-gift-chest .chest-lock{
+  left:37%;top:43%;width:26%;height:21%;z-index:4;
+  border:2px solid #855718;border-radius:5px 5px 7px 7px;
+  background:linear-gradient(90deg,#9b641e,#ffe99b 35%,#fff4c5 52%,#c38a2c);
+  box-shadow:inset 0 1px 2px #fff8d6,0 2px 3px #3d200d99;
+}
+.henova-gift-chest .chest-lock:before{
+  content:"";position:absolute;width:48%;height:42%;left:26%;top:-48%;
+  border:2px solid #e7bd60;border-bottom:0;border-radius:8px 8px 0 0;
+  box-shadow:inset 1px 0 #fff0b0,1px 0 #754a16;
+}
+.henova-gift-chest .chest-lock:after{
+  left:40%;top:37%;width:20%;height:30%;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#d8a64b,#57300f 70%);
+}
+.henova-gift-chest .chest-spark{
+  right:-2px;top:-1px;color:#fff0a5;font-size:18px;
+  text-shadow:0 0 4px #ffcf4b,0 0 9px #fff1a6;
+  animation:henovaChestSparkle 2.4s ease-in-out infinite;
+}
+@keyframes henovaChestSparkle{0%,100%{opacity:.55;transform:scale(.8) rotate(0)}50%{opacity:1;transform:scale(1.2) rotate(18deg)}}
+.henova-gift-chest{isolation:isolate}
+@media(max-width:380px){
+ main.farm-mode #farm-scene .henova-gift-chest{width:54px!important;height:62px!important}
+}
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
