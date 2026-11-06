@@ -2574,6 +2574,15 @@ main.farm-mode #farm-scene .henova-gift-chest{
  padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;
  pointer-events:auto!important;cursor:pointer;transform:perspective(220px) rotateY(-13deg);
  filter:drop-shadow(0 7px 4px #243d1c66);touch-action:manipulation;
+ transform-origin:50% 85%;
+ animation:henovaChestIdle 3.8s ease-in-out infinite;
+}
+@keyframes henovaChestIdle{
+ 0%,100%{transform:perspective(220px) rotateY(-13deg) translateY(0) rotateZ(0deg)}
+ 50%{transform:perspective(220px) rotateY(-9deg) translateY(-4px) rotateZ(1.2deg)}
+}
+@media(prefers-reduced-motion:reduce){
+ .henova-gift-chest{animation:none!important}
 }
 .henova-gift-chest:disabled{opacity:.7;cursor:wait}
 .henova-gift-chest .chest-base{
