@@ -2619,49 +2619,7 @@ const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Wit
 let preference={};try{preference=JSON.parse(localStorage.getItem('henova-display-preferences-v1'))||{}}catch{}
 function henovaTelegramLanguage(){
   const code=window.Telegram?.WebApp?.initDataUnsafe?.user?.language_code||navigator.language||'en';
-  const lang=String(c
-let henovaChestBusy=false;
-async function henovaOpenGiftChest(){
- if(henovaChestBusy)return;
- if(!henovaReady)return toast('Connecting to HENOVA server');
- if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA inside Telegram');
- if(!window.Adsgram?.init)return toast('AdsGram is not ready. Please reopen HENOVA.');
- henovaChestBusy=true;
- const chest=document.getElementById('henova-gift-chest');
- if(chest)chest.disabled=true;
- let completed=false,adFailed=false;
- const ad=window.Adsgram.init({blockId:'int-58349',debug:false});
- const onComplete=()=>{completed=true;};
- const onSkip=()=>{completed=true;};
- const onError=()=>{adFailed=true;};
- const onNotFound=()=>{adFailed=true;};
- try{
-  ad.addEventListener('onComplete',onComplete);
-  ad.addEventListener('onSkip',onSkip);
-  ad.addEventListener('onError',onError);
-  ad.addEventListener('onBannerNotFound',onNotFound);
-  try{await ad.show();}catch(showError){
-   if(!completed)throw showError;
-  }
-  if(!completed||adFailed)throw Error('ad_not_completed');
-  const result=await henovaCall('claim_interstitial_chest');
-  if(result?.ok!==true)throw Error(String(result?.error||'reward_unavailable'));
-  const fresh=await henovaCall('state');
-  if(fresh?.state){henovaApplyState(fresh.state);render();}
-  toast('Gift received: +20 eggs');
- }catch(error){
-  const reason=String(error?.message||error||'');
-  if(reason.includes('cooldown'))toast('You can open the gift chest again in 5 minutes.');
-  else if(reason.includes('ad_not_completed'))toast('Close the ad to receive your 20 eggs.');
-  else if(reason.includes('No ads')||reason.includes('no ads')||reason.includes('BannerNotFound'))toast('No ad available right now. Try again later.');
-  else{console.warn('HENOVA gift chest failed',error);toast('Gift chest is temporarily unavailable. Please try again.');}
- }finally{
-  try{ad.removeEventListener('onComplete',onComplete);ad.removeEventListener('onSkip',onSkip);ad.removeEventListener('onError',onError);ad.removeEventListener('onBannerNotFound',onNotFound);}catch(_){}
-  henovaChestBusy=false;
-  const button=document.getElementById('henova-gift-chest');if(button)button.disabled=false;
- }
-}
-ode).toLowerCase().split(/[-_]/)[0];
+  const lang=String(code).toLowerCase().split(/[-_]/)[0];
   return ['ar','tr','en'].includes(lang)?lang:'en';
 }
 let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:henovaTelegramLanguage(),fan:0};
@@ -2689,6 +2647,46 @@ function henovaApplyState(st){
   if(!st || !Number.isFinite(st.eggs) || !Number.isFinite(st.coins))throw Error('invalid_server_state');
   s.eggs=st.eggs;s.coins=st.coins;s.hen=st.hen||{starter:1};s.fan=st.fan||0;
   s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';s.dailyStreak=Math.min(7,Math.max(0,Number(st.daily_streak)||0));henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);henovaReferralCoins=Math.max(0,Number(st.referral_coins_earned)||0);henovaInviteThreeProgress=Math.min(3,Math.max(0,Number(st.invite_three_progress)||0));henovaInviteThreeRewarded=st.invite_three_rewarded===true;henovaChannelNext=st.channel_next_at?Date.parse(st.channel_next_at):0;
+}
+
+let henovaChestBusy=false;
+async function henovaOpenGiftChest(){
+ if(henovaChestBusy)return;
+ if(!henovaReady)return toast('Connecting to HENOVA server');
+ if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA inside Telegram');
+ if(!window.Adsgram?.init)return toast('AdsGram is not ready. Please reopen HENOVA.');
+ henovaChestBusy=true;
+ const chest=document.getElementById('henova-gift-chest');
+ if(chest)chest.disabled=true;
+ let completed=false,adFailed=false,ad;
+ const onComplete=()=>{completed=true;};
+ const onSkip=()=>{completed=true;};
+ const onError=()=>{adFailed=true;};
+ const onNotFound=()=>{adFailed=true;};
+ try{
+  ad=window.Adsgram.init({blockId:'int-58349',debug:false});
+  ad.addEventListener('onComplete',onComplete);
+  ad.addEventListener('onSkip',onSkip);
+  ad.addEventListener('onError',onError);
+  ad.addEventListener('onBannerNotFound',onNotFound);
+  try{await ad.show();}catch(showError){if(!completed)throw showError;}
+  if(!completed||adFailed)throw Error('ad_not_completed');
+  const result=await henovaCall('claim_interstitial_chest');
+  if(result?.ok!==true)throw Error(String(result?.error||'reward_unavailable'));
+  const fresh=await henovaCall('state');
+  if(fresh?.state){henovaApplyState(fresh.state);render();}
+  toast('Gift received: +20 eggs');
+ }catch(error){
+  const reason=String(error?.message||error||'');
+  if(reason.includes('cooldown'))toast('You can open the gift chest again in 5 minutes.');
+  else if(reason.includes('ad_not_completed'))toast('Close the ad to receive your 20 eggs.');
+  else if(reason.includes('No ads')||reason.includes('no ads')||reason.includes('BannerNotFound'))toast('No ad available right now. Try again later.');
+  else{console.warn('HENOVA gift chest failed',error);toast('Gift chest is temporarily unavailable. Please try again.');}
+ }finally{
+  try{if(ad){ad.removeEventListener('onComplete',onComplete);ad.removeEventListener('onSkip',onSkip);ad.removeEventListener('onError',onError);ad.removeEventListener('onBannerNotFound',onNotFound);}}catch(_){}
+  henovaChestBusy=false;
+  const button=document.getElementById('henova-gift-chest');if(button)button.disabled=false;
+ }
 }
 async function henovaCall(action,details={}){
   const initData=window.Telegram?.WebApp?.initData;
@@ -4614,7 +4612,7 @@ const labels=document.querySelectorAll('.stats small');if(labels.length===2){lab
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
 // Task layout only: hide header balances without modifying player data.
 document.querySelector('main').classList.toggle('hv-tasks-mode',tab===2);
-if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><img class="henova-farm-v11-background" src="./assets/henova-farm-pregrass-v38-restored.svg?v=20261102-independent-rollback-v42" alt="" aria-hidden="true" decoding="async" draggable="false"><div class="v3-sun"></div><button type="button" class="henova-gift-chest" id="henova-gift-chest" aria-label="Open gift chest for 20 eggs" onclick="henovaOpenGiftChest()"><span class="chest-lid"></span><span class="chest-base"></span><span class="chest-band"></span><span class="chest-lock"></span><span class="chest-spark">✦</span><span class="chest-caption">🎁 +20 EGGS</span></button><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="henova-flower-cluster henova-flower-a" aria-hidden="true"></div><div class="henova-flower-cluster henova-flower-b" aria-hidden="true"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen walking and pecking" draggable="false"></div></div></div>'+henovaOwnedHensMarkup()+'<div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+hvText('unit')+'</strong><small id="clock">'+(secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+hvText('collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
+if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><img class="henova-farm-v11-background" src="./assets/henova-farm-pregrass-v38-restored.svg?v=20261102-independent-rollback-v42" alt="" aria-hidden="true" decoding="async" draggable="false"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="henova-flower-cluster henova-flower-a" aria-hidden="true"></div><div class="henova-flower-cluster henova-flower-b" aria-hidden="true"></div><button type="button" class="henova-gift-chest" id="henova-gift-chest" aria-label="Open gift chest for 20 eggs" onclick="henovaOpenGiftChest()"><span class="chest-lid"></span><span class="chest-base"></span><span class="chest-band"></span><span class="chest-lock"></span><span class="chest-spark">✦</span><span class="chest-caption">🎁 +20 EGGS</span></button><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen walking and pecking" draggable="false"></div></div></div>'+henovaOwnedHensMarkup()+'<div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+hvText('unit')+'</strong><small id="clock">'+(secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+hvText('collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
 if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">'+hvText('packInfo')+'</p><p class="muted">'+({ar:'🐔 أول دجاجة مجانية، وكل دجاجة أساسية إضافية 750 عملة. يمكنك شراء 5 دجاجات كحد أقصى من كل نوع، ولكل نوع لون خاص به.',tr:'🐔 İlk tavuk ücretsiz. Her ek başlangıç tavuğu 750 jeton. Her türden en fazla 5 tavuk alabilirsin; her türün rengi farklıdır.',en:'🐔 Your first starter hen is free; each extra starter hen costs 750 coins. You can own up to 5 hens of each type. Every breed has a different color.'}[s.lang]||'')+'</p>'+H.map(h=>'<article class="item"><div class="face hv-breed-face"><img src="'+henovaBreedImage(h[0])+'" alt="'+h[2]+'" loading="lazy"></div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+(h[3]*6)+' '+(s.lang==='ar'?'بيضة كل 6 ساعات':s.lang==='tr'?'yumurta / 6 saat':'eggs / 6 hours')+' <small>('+h[3]+' '+hvText('eggsHour')+')</small></p><small>'+hvText('owned')+': '+ (s.hen[h[0]]||0)+'/5</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')" '+((s.hen[h[0]]||0)>=5?'disabled':'')+'>'+((s.hen[h[0]]||0)>=5?(s.lang==='ar'?'اكتمل 5/5':s.lang==='tr'?'Dolu 5/5':'Full 5/5'):(num(h[4])+' 🪙<br>'+names[6]))+'</button>':'<b>'+hvText('free')+'</b>')+'</article>').join('')+'<p class="warning">'+hvText('packWarning')+'</p>';
 if(tab===2){
 queueMicrotask(henovaLoadPost80Status);
