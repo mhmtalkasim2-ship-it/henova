@@ -2701,15 +2701,23 @@ async function henovaRedeemPromo(){
   if(!session?.session_id)throw Error('promo_session_unavailable');
 
   const ad=window.Adsgram.init({blockId:'int-57642',debug:false});
+  let adResult;
   try{
-   await ad.show();
-  }catch(err){
-   console.warn('Promo advertisement closed or unavailable',err);
-   const reason=String(err?.description||err?.message||err||'').toLowerCase();
-   if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available/.test(reason)){
-    toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');
+   adResult=await ad.show();
+   if(!adResult||adResult.done!==true||adResult.error===true){
+    console.warn('Promo advertisement did not complete',adResult);
+    toast(s.lang==='ar'?'يجب مشاهدة الإعلان حتى النهاية لاستلام مكافأة الكود.':s.lang==='tr'?'Kod ödülünü almak için reklamı sonuna kadar izleyin.':'Please watch the ad to the end to claim the promo reward.');
     return;
    }
+  }catch(err){
+   console.warn('Promo advertisement unavailable, skipped or failed',err);
+   const reason=String(err?.description||err?.message||err||'').toLowerCase();
+   if(/no.?ads|no.?fill|not available|not found|no inventory|unavailable|no ads available|banner/.test(reason)){
+    toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');
+   }else{
+    toast(s.lang==='ar'?'لم يكتمل الإعلان. حاول مرة أخرى.':s.lang==='tr'?'Reklam tamamlanmadı. Tekrar deneyin.':'The ad did not complete. Please try again.');
+   }
+   return;
   }
 
   const checked=await henovaCall('promo_ad_check',{session_id:session.session_id});
