@@ -1907,7 +1907,6 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 /* HENOVA AdsGram slot button: style the supplied slot, not shadow-DOM parts. */
 #henova-adsgram-task{--adsgram-task-button-width:112px!important;--adsgram-task-font-size:15px!important}
 #henova-adsgram-task .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 16px!important;background:#fac756!important;background-color:#fac756!important;color:#211b0d!important;border:0!important;border-radius:14px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-shadow:0 2px 0 rgba(137,94,19,.22)!important}
-
 /* HENOVA rustic farm gift chest — natural wood and aged iron */
 main.farm-mode #farm-scene .henova-gift-chest{
   width:clamp(48px,12vw,58px)!important;height:58px!important;
@@ -1980,6 +1979,7 @@ main.farm-mode #farm-scene .henova-gift-chest{
 @media(max-width:380px){
  main.farm-mode #farm-scene .henova-gift-chest{width:54px!important;height:62px!important}
 }
+
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
@@ -2384,8 +2384,8 @@ html.telegram-fullscreen body main.farm-mode .stats{
 <style id="henova-visual-v11-migration">
 /* Scenery-only migration: leave existing live collection, ads, wallet, tabs, sounds and owned hens intact. */
 main.farm-mode #farm-scene.farm-v3 {
-  /* Keep the approved farm artwork as a fallback if the foreground SVG fails in Telegram WebView. */
-  background:#6caa4a url('./assets/henova-game-scene-no-old-pond-20261101.svg?v=1') center center/100% 100% no-repeat!important;
+  background:#6caa4a!important;
+  background-image:none!important;
   isolation:isolate;
 }
 main.farm-mode #farm-scene.farm-v3 > .henova-farm-v11-background {
@@ -2639,7 +2639,6 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v1
     margin:0!important;
   }
 }
-
 /* HENOVA 3D gift chest — independent, clickable farm prop */
 main.farm-mode #farm-scene .henova-gift-chest{
  position:absolute!important;left:81%!important;top:65%!important;z-index:18!important;
@@ -2692,6 +2691,7 @@ main.farm-mode #farm-scene .henova-gift-chest{
 .henova-gift-chest .chest-spark{position:absolute;right:0;top:0;font-size:19px;filter:drop-shadow(0 1px 2px #6a4218)}
 .henova-gift-chest:active{transform:perspective(220px) rotateY(-13deg) translateY(2px) scale(.97)}
 @media(max-width:380px){main.farm-mode #farm-scene .henova-gift-chest{left:81%!important;top:65%!important;width:46px!important;height:52px!important}}
+
 </style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 
@@ -2975,7 +2975,7 @@ async function henovaLoadPost80Status(){
 let henovaNGMOpened=false,henovaNGMClaimBusy=false,henovaNGMClaimed=false;
 function henovaOpenNGM(){
  henovaNGMOpened=true;
- window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/OpFlexBot/app?startapp=r1035565575');
+ window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/riftycoinbot?startapp=ref_1035565575');
 }
 async function henovaClaimNGM(){
  if(henovaNGMClaimBusy||henovaNGMClaimed)return;
@@ -2984,7 +2984,7 @@ async function henovaClaimNGM(){
  henovaNGMClaimBusy=true;
  const btn=document.getElementById('henova-ngm-claim');if(btn)btn.disabled=true;
  try{
-  const result=await henovaCall('claim_opflex_once');
+  const result=await henovaCall('claim_ngm_once');
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaNGMClaimed=true;
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
@@ -4742,12 +4742,12 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 }
 
 if(tab===2){
- const nTitle=s.lang==='ar'?'انضم إلى OpFlex':s.lang==='tr'?'OpFlex\'e Katıl':'Join OpFlex';
+ const nTitle=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join Us';
  const nDesc=s.lang==='ar'?'20 عملة · مرة واحدة':s.lang==='tr'?'20 jeton · Tek seferlik':'20 coins · One time only';
  const nOpen=s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot';
  const nClaim=s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim';
  const nPending=s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward';
-  el.insertAdjacentHTML('beforeend', `<article class='item' style='display:flex;align-items:center;gap:12px'><img src='https://t.me/i/userpic/320/OpFlexBot.jpg' alt='OpFlex' style='width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px'><div class='grow' style='min-width:0'><h3>${nTitle}</h3><p>🪙 ${nDesc}</p><small>${nPending}</small></div><div style='display:grid;gap:5px;flex:0 0 auto'><button onclick='henovaOpenNGM()'>${nOpen}</button><button id='henova-ngm-claim' onclick='henovaClaimNGM()' ${henovaNGMClaimed?'disabled':''}>${nClaim}</button></div></article><article class='item' style='display:flex;align-items:center;gap:12px'><img src='https://t.me/i/userpic/320/UTYA_miner_bot.jpg' alt='UTYA Miner' style='width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px'><div class='grow' style='min-width:0'><h3>${s.lang==='ar'?'انضم إلينا · UTYA Miner':s.lang==='tr'?'Bize Katıl · UTYA Miner':'Join Us · UTYA Miner'}</h3><p>🪙 +20 · ${s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only'}</p><small>${nPending}</small></div><div style='display:grid;gap:5px;flex:0 0 auto'><button onclick='henovaOpenUTYA()'>${nOpen}</button><button id='henova-utya-claim' onclick='henovaClaimUTYA()' ${henovaUTYAClaimed?'disabled':''}>${nClaim}</button></div></article>`);
+  el.insertAdjacentHTML('beforeend', `<article class='item' style='display:flex;align-items:center;gap:12px'><img src='https://t.me/i/userpic/320/riftycoinbot.jpg' alt='Riftycoin' style='width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px'><div class='grow' style='min-width:0'><h3>${nTitle}</h3><p>🪙 ${nDesc}</p><small>${nPending}</small></div><div style='display:grid;gap:5px;flex:0 0 auto'><button onclick='henovaOpenNGM()'>${nOpen}</button><button id='henova-ngm-claim' onclick='henovaClaimNGM()' ${henovaNGMClaimed?'disabled':''}>${nClaim}</button></div></article><article class='item' style='display:flex;align-items:center;gap:12px'><img src='https://t.me/i/userpic/320/UTYA_miner_bot.jpg' alt='UTYA Miner' style='width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px'><div class='grow' style='min-width:0'><h3>${s.lang==='ar'?'انضم إلينا · UTYA Miner':s.lang==='tr'?'Bize Katıl · UTYA Miner':'Join Us · UTYA Miner'}</h3><p>🪙 +20 · ${s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only'}</p><small>${nPending}</small></div><div style='display:grid;gap:5px;flex:0 0 auto'><button onclick='henovaOpenUTYA()'>${nOpen}</button><button id='henova-utya-claim' onclick='henovaClaimUTYA()' ${henovaUTYAClaimed?'disabled':''}>${nClaim}</button></div></article>`);
 }
 if(tab===2){
 const v=henovaVideoRewardText();
