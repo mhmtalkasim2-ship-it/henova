@@ -1906,6 +1906,8 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 
 /* HENOVA AdsGram slot button: style the supplied slot, not shadow-DOM parts. */
 #henova-adsgram-task{--adsgram-task-button-width:112px!important;--adsgram-task-font-size:15px!important}
+#henova-adsgram-task-58583{--adsgram-task-button-width:112px!important;--adsgram-task-font-size:15px!important}
+#henova-adsgram-task-58583 .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 16px!important;background:#fac756!important;color:#211b0d!important;border:0!important;border-radius:14px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important}
 #henova-adsgram-task .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 16px!important;background:#fac756!important;background-color:#fac756!important;color:#211b0d!important;border:0!important;border-radius:14px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-shadow:0 2px 0 rgba(137,94,19,.22)!important}
 
 </style><style id="henova-tasks-layout-fix">
@@ -4389,14 +4391,16 @@ name:'Complete Sponsored Task',reward:'50 coins',interval:'Every 5 minutes',butt
 let henovaSponsoredExpires=Infinity;
 let henovaSponsoredCheckingStatus=false;
 function henovaSponsoredDrawCooldown(){
- const task=document.getElementById('henova-adsgram-task');
- if(!task)return;
- const status=document.getElementById('henova-adsgram-status');
+ const tasks=[document.getElementById('henova-adsgram-task'),document.getElementById('henova-adsgram-task-58583')].filter(Boolean);
+ if(!tasks.length)return;
  const seconds=Math.max(0,Math.ceil((henovaSponsoredExpires-performance.now())/1000));
  const locked=!Number.isFinite(henovaSponsoredExpires)||seconds>0;
- task.style.pointerEvents=locked?'none':'auto';
- task.style.opacity=locked?'.55':'1';
- if(status)status.textContent=locked?(Number.isFinite(seconds)?' ⏳ '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):' ⏳ Checking server…'):' ✅ Available now';
+ tasks.forEach(task=>{
+  task.style.pointerEvents=locked?'none':'auto';
+  task.style.opacity=locked?'.55':'1';
+  const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');
+  if(status)status.textContent=locked?(Number.isFinite(seconds)?' ⏳ '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):' ⏳ Checking server…'):' ✅ Available now';
+ });
 }
 async function henovaSponsoredRefreshCooldown(){
  if(henovaSponsoredCheckingStatus)return;
@@ -4414,12 +4418,16 @@ setInterval(()=>{
  if(document.getElementById('henova-adsgram-task')&&!document.hidden)void henovaSponsoredRefreshCooldown();
 },20000);
 function henovaAttachAdsgramTask(){
- const task=document.getElementById('henova-adsgram-task');
- if(!task||task.dataset.henovaBound==='1')return;
- task.dataset.henovaBound='1';
- task.style.pointerEvents='none';void henovaSponsoredRefreshCooldown();
- task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000)});
- task.addEventListener('onBannerNotFound',()=>{const status=document.getElementById('henova-adsgram-status');if(status)status.textContent=henovaAdsgramLabels().unavailable});
+ const tasks=[document.getElementById('henova-adsgram-task'),document.getElementById('henova-adsgram-task-58583')].filter(Boolean);
+ if(!tasks.length)return;
+ void henovaSponsoredRefreshCooldown();
+ tasks.forEach(task=>{
+  if(task.dataset.henovaBound==='1')return;
+  task.dataset.henovaBound='1';
+  task.style.pointerEvents='none';
+  task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000)});
+  task.addEventListener('onBannerNotFound',()=>{const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');if(status)status.textContent=henovaAdsgramLabels().unavailable});
+ });
 }
 /* Interstitial int-56730 has a separate server-side button-use reward. */
 let henovaRewardVideoBusy=false;
@@ -4578,7 +4586,8 @@ const v=henovaVideoRewardText();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
 
 const a=henovaAdsgramLabels();
- el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status" data-sponsored-status></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
+ el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small data-sponsored-status></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task-58583" data-block-id="task-58583" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
  // Keep Daily Login first, then the two ad tasks together, followed by other tasks.
  const dailyCard=el.querySelector('button[onclick="daily()"]')?.closest('article');
  const videoCard=el.querySelector('.hv-video-task-card');
