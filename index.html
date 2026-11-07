@@ -2763,27 +2763,37 @@ async function henovaOpenGiftChest(){
  const onSkip=()=>{adFailed=true;};
  const onError=()=>{adFailed=true;};
  const onNotFound=()=>{adFailed=true;};
+ const onNonStop=()=>{adFailed=true;};
+ const onLongSession=()=>{adFailed=true;};
  try{
   ad=window.Adsgram.init({blockId:'int-58349',debug:false});
   ad.addEventListener('onComplete',onComplete);
   ad.addEventListener('onSkip',onSkip);
   ad.addEventListener('onError',onError);
   ad.addEventListener('onBannerNotFound',onNotFound);
-  try{await ad.show();}catch(showError){if(!completed)throw showError;}
-  if(!completed||adFailed)throw Error('ad_not_completed');
+  ad.addEventListener('onNonStopShow',onNonStop);
+  ad.addEventListener('onTooLongSession',onLongSession);
+  const showResult=await ad.show();
+  if(showResult?.error || (showResult?.done===false&&!completed))throw showResult||Error('ad_not_completed');
+  if(adFailed||(!completed&&showResult?.done!==true))throw Error('ad_not_completed');
   const result=await henovaCall('claim_interstitial_chest');
   if(result?.ok!==true)throw Error(String(result?.error||'reward_unavailable'));
   const fresh=await henovaCall('state');
   if(fresh?.state){henovaApplyState(fresh.state);render();}
   toast('Gift received: +20 eggs');
  }catch(error){
-  const reason=String(error?.message||error||'');
+  const detail=[error?.description,error?.message,error?.code,error?.reason,typeof error==='string'?error:''].filter(Boolean).join(' ');
+  const reason=(detail||String(error||'')).toLowerCase();
+  console.warn('HENOVA gift chest ad/reward failure',{error,detail});
   if(reason.includes('cooldown'))toast('You can open the gift chest again in 5 minutes.');
-  else if(reason.includes('ad_not_completed'))toast('Complete the ad to receive your 20 eggs.');
-  else if(reason.includes('No ads')||reason.includes('no ads')||reason.includes('BannerNotFound'))toast('No ad available right now. Try again later.');
-  else{console.warn('HENOVA gift chest failed',error);toast('Gift chest is temporarily unavailable. Please try again.');}
+  else if(reason.includes('no ads')||reason.includes('banner not found')||reason.includes('bannernotfound')||reason.includes('no_fill'))toast('No ad available right now. Try again later.');
+  else if(reason.includes('nonstop')||reason.includes('non-stop'))toast('Please wait a moment before opening another ad.');
+  else if(reason.includes('toolong')||reason.includes('too long session'))toast('Please close and reopen HENOVA, then try again.');
+  else if(reason.includes('skip')||reason.includes('ad_not_completed'))toast('Watch the ad to the end to receive your 20 eggs.');
+  else if(reason.includes('reward_unavailable')||reason.includes('database_unavailable'))toast('Your ad finished, but the reward server is temporarily unavailable. Please try again.');
+  else toast('The gift ad could not be loaded. Please try again.');
  }finally{
-  try{if(ad){ad.removeEventListener('onComplete',onComplete);ad.removeEventListener('onSkip',onSkip);ad.removeEventListener('onError',onError);ad.removeEventListener('onBannerNotFound',onNotFound);}}catch(_){}
+  try{if(ad){ad.removeEventListener('onComplete',onComplete);ad.removeEventListener('onSkip',onSkip);ad.removeEventListener('onError',onError);ad.removeEventListener('onBannerNotFound',onNotFound);ad.removeEventListener('onNonStopShow',onNonStop);ad.removeEventListener('onTooLongSession',onLongSession);}}catch(_){}
   henovaChestBusy=false;
   const button=document.getElementById('henova-gift-chest');if(button)button.disabled=false;
  }
