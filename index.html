@@ -4606,9 +4606,9 @@ async function henovaVideoCooldownRefresh(){
 setInterval(henovaVideoCooldownDraw,1000);
 
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Advertisement',desc:'20 eggs · Every 5 minutes',button:'Watch Ad',unavailable:'Ad currently unavailable'},
- ar:{title:'شاهد الإعلان',desc:'20 بيضة · كل 5 دقائق',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'20 yumurta · Her 5 dakikada bir',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'20 eggs · Every 5 minutes',button:'Watch Ad',unavailable:'Ad unavailable'};
+ return ({en:{title:'Watch Advertisement',desc:'50 coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
+ ar:{title:'شاهد الإعلان',desc:'50 عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
+ tr:{title:'Reklam İzle',desc:'50 jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -4668,48 +4668,41 @@ function henovaAdNotice(kind){
 }
 async function henovaWatchRewardVideo(){
  if(henovaRewardVideoBusy)return;
+ const l=henovaVideoRewardText();
  if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA in Telegram');
  if(!window.Adsgram?.init){toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');return;}
  henovaRewardVideoBusy=true;
  const btn=document.getElementById('henova-reward-video-btn');if(btn)btn.disabled=true;
- let ad=null,completed=false,adFailed=false;
- const onComplete=()=>{completed=true;};
- const onSkip=()=>{adFailed=true;};
- const onError=()=>{adFailed=true;};
- const onNotFound=()=>{adFailed=true;};
  try{
-  const canWatch=await henovaVideoCooldownRefresh();
-  if(!canWatch){toast(s.lang==='ar'?'انتظر انتهاء مهلة الإعلان.':s.lang==='tr'?'Reklam süresinin dolmasını bekleyin.':'Please wait for the ad cooldown.');return;}
-  ad=window.Adsgram.init({blockId:'int-56730',debug:false});
-  ad.addEventListener('onComplete',onComplete);
-  ad.addEventListener('onSkip',onSkip);
-  ad.addEventListener('onError',onError);
-  ad.addEventListener('onBannerNotFound',onNotFound);
-  try{await ad.show();}catch(showError){if(!completed)throw showError;}
-  if(!completed||adFailed){toast(s.lang==='ar'?'لم تكتمل مشاهدة الإعلان. حاول مرة أخرى لاحقاً.':s.lang==='tr'?'Reklam tamamlanmadı. Daha sonra tekrar deneyin.':'The ad was not completed. Please try again later.');return;}
-  const reward=await henovaCall('claim_interstitial_open');
-  if(reward?.ok!==true)throw Error(String(reward?.error||'reward_unavailable'));
-  const fresh=await henovaCall('state');
-  if(fresh?.state){henovaApplyState(fresh.state);render();}
-  henovaShowRewardCard(Number(reward.eggs_added)||20,'eggs');
-  await henovaVideoCooldownRefresh().catch(()=>{});
- }catch(err){
-  console.warn('HENOVA int-56730 interstitial',err);
-  const reason=String(err?.description||err?.message||err||'').toLowerCase();
-  if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available|bannernotfound/.test(reason)){
-   toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً من AdsGram. جرّب لاحقاً.':s.lang==='tr'?'AdsGram şu anda reklam sunmuyor. Daha sonra tekrar deneyin.':'AdsGram has no ad inventory available right now. Please try again later.');
-  }else if(reason.includes('cooldown')){
-   await henovaVideoCooldownRefresh().catch(()=>{});
-   toast(s.lang==='ar'?'انتظر 5 دقائق قبل المحاولة التالية.':s.lang==='tr'?'Sonraki deneme için 5 dakika bekleyin.':'Please wait 5 minutes before trying again.');
-  }else{
-   toast((s.lang==='ar'?'تعذر تشغيل الإعلان: ':s.lang==='tr'?'Reklam başlatılamadı: ':'Could not start ad: ')+String(err?.message||err||'unknown').slice(0,75));
+  const session=await henovaCall('ad_view_start');
+  if(!session?.session_id)throw Error('Session not available');
+  const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
+  let completed=false;
+  try{await ad.show();completed=true}catch(err){console.warn('Advertisement not completed',err);const reason=String(err?.description||err?.message||err||'').toLowerCase();if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available/.test(reason)){toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');return;}}
+  const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
+  if(!completed||!checked?.min_seconds_met){henovaAdNotice('short');return}
+  // Immediate feedback for a completed ad; credit is announced only after it exists on the server.
+  const oldBalance=Number(s.coins);
+  const first=await henovaCall('state').catch(()=>null);
+  let credited=false;
+  if(first?.state){
+   credited=Number(first.state.coins)>oldBalance;
+   henovaApplyState(first.state);render();
   }
- }finally{
-  try{if(ad){ad.removeEventListener('onComplete',onComplete);ad.removeEventListener('onSkip',onSkip);ad.removeEventListener('onError',onError);ad.removeEventListener('onBannerNotFound',onNotFound);}}catch(_){}
-  henovaRewardVideoBusy=false;
-  const b=document.getElementById('henova-reward-video-btn');if(b)b.disabled=false;
-  henovaVideoCooldownDraw();
- }
+  henovaAdNotice(credited?'success':'completed');
+  if(!credited){
+   // Silent follow-up: never show a long "verifying" banner.
+   for(let i=0;i<8;i++){
+    await new Promise(r=>setTimeout(r,1500));
+    const fresh=await henovaCall('state').catch(()=>null);
+    if(fresh?.state){
+     henovaApplyState(fresh.state);render();
+     if(Number(fresh.state.coins)>oldBalance){credited=true;break}
+    }
+   }
+  }
+ }catch(err){console.warn('HENOVA video ad',err);const code=String(err?.message||err||'unknown');toast((s.lang==='ar'?'تعذر بدء الإعلان: ':s.lang==='tr'?'Reklam başlatılamadı: ':'Could not start ad: ')+code.slice(0,90))}
+ finally{henovaRewardVideoBusy=false;const b=document.getElementById('henova-reward-video-btn');if(b)b.disabled=false}
 }
 function render(){
 updateFarmIdentity();
@@ -4749,7 +4742,6 @@ if(tab===2){
 if(tab===2){
 const v=henovaVideoRewardText();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
- void henovaVideoCooldownRefresh().catch(error=>console.warn('Interstitial cooldown status',error));
 
 const a=henovaAdsgramLabels();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex:0 0 58px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status"></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
