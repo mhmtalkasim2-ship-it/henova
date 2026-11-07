@@ -2700,7 +2700,7 @@ async function henovaRedeemPromo(){
   const session=await henovaCall('promo_ad_start',{code});
   if(!session?.session_id)throw Error('promo_session_unavailable');
 
-  const ad=window.Adsgram.init({blockId:'11916820',debug:false});
+  const ad=window.Adsgram.init({blockId:'int-57642',debug:false});
   let adResult;
   try{
    adResult=await ad.show();
