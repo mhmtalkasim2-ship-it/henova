@@ -2621,7 +2621,7 @@ async function henovaCall(action,details={}){
     body:JSON.stringify({initData,action,...details}),cache:'no-store'
   });
   const data=await response.json();
-  if(!response.ok || data?.ok===false){const err=new Error(String(data?.error||'server_unavailable'));err.diagnostics=data?.diagnostics||data?.recipient_checks||data?.checked;throw err;}
+  if(!response.ok || data?.ok===false){const err=new Error(String(data?.error||'server_unavailable'));err.diagnostics=data?.diagnostics||data?.recipient_checks||data?.checked;err.henova=data?.henova===true;err.withdrawals=data?.withdrawals===true;throw err;}
   return data;
 }
 async function henovaLoad(){
