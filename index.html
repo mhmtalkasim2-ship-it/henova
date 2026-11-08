@@ -1910,6 +1910,25 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 #henova-adsgram-task-58583 .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 16px!important;background:#fac756!important;color:#211b0d!important;border:0!important;border-radius:14px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important}
 #henova-adsgram-task .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 16px!important;background:#fac756!important;background-color:#fac756!important;color:#211b0d!important;border:0!important;border-radius:14px!important;font-size:14px!important;font-weight:700!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-shadow:0 2px 0 rgba(137,94,19,.22)!important}
 
+
+/* HENOVA global maintenance screen — enabled for every visitor */
+html.henova-maintenance,html.henova-maintenance body{min-height:100%;background:#102d20!important}
+html.henova-maintenance body{margin:0!important;overflow:hidden!important}
+html.henova-maintenance body>:not(#henova-maintenance-screen){display:none!important}
+#henova-maintenance-screen{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;overflow:auto;padding:24px;background:radial-gradient(ellipse at 50% 12%,#386b45 0%,#1d4932 48%,#102d20 100%);color:#fff;font-family:system-ui,-apple-system,sans-serif;text-align:center}
+#henova-maintenance-screen .hm-card{width:min(440px,100%);padding:34px 25px 30px;border:1px solid #d6e9bd55;border-radius:30px;background:linear-gradient(155deg,#ffffff19,#ffffff08);box-shadow:0 24px 70px #061b1299,inset 0 1px #ffffff30;backdrop-filter:blur(12px)}
+#henova-maintenance-screen .hm-mark{width:104px;height:104px;margin:0 auto 20px;display:grid;place-items:center;border-radius:30px;background:linear-gradient(145deg,#ffe8a3,#dcae52);box-shadow:0 9px 0 #8b642e,0 18px 32px #061b1266;font-size:58px;transform:rotate(-4deg)}
+#henova-maintenance-screen .hm-brand{font-size:13px;font-weight:900;letter-spacing:5px;color:#d7e9bd}
+#henova-maintenance-screen h1{margin:13px 0 10px;font-size:clamp(27px,7vw,36px);line-height:1.15;color:#fff8df}
+#henova-maintenance-screen .hm-copy{margin:0 auto;max-width:330px;color:#e1eedf;font-size:15px;line-height:1.7;font-weight:500}
+#henova-maintenance-screen .hm-status{display:inline-flex;align-items:center;gap:9px;margin:23px 0 18px;padding:9px 15px;border:1px solid #f4d98b66;border-radius:999px;background:#f4d98b18;color:#ffe3a0;font-size:12px;font-weight:800;letter-spacing:1.4px}
+#henova-maintenance-screen .hm-dot{width:8px;height:8px;border-radius:50%;background:#ffd16c;box-shadow:0 0 12px #ffd16c;animation:hmPulse 1.5s ease-in-out infinite}
+#henova-maintenance-screen .hm-safe{margin:0;padding-top:17px;border-top:1px solid #ffffff25;color:#d7e9d5;font-size:13px;line-height:1.6}
+#henova-maintenance-screen .hm-safe strong{color:#fff0c7}
+#henova-maintenance-screen .hm-footer{margin-top:22px;color:#b8d0b4;font-size:10px;letter-spacing:2.5px;font-weight:800}
+@keyframes hmPulse{50%{opacity:.35;transform:scale(.78)}}
+@media(prefers-reduced-motion:reduce){#henova-maintenance-screen .hm-dot{animation:none}}
+
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
@@ -2571,7 +2590,18 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v1
 }
 
 </style>
-</head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
+<script>document.documentElement.classList.add("henova-maintenance");</script>
+</head><body><section id="henova-maintenance-screen" role="main" aria-live="polite" aria-label="HENOVA maintenance">
+  <div class="hm-card">
+    <div class="hm-mark" aria-hidden="true">🐔</div>
+    <div class="hm-brand">HENOVA FARM</div>
+    <h1>We’ll Be Back Soon</h1>
+    <p class="hm-copy">Our farm is taking a short break while we make improvements and prepare a better experience for everyone.</p>
+    <div class="hm-status"><span class="hm-dot"></span> SYSTEM MAINTENANCE</div>
+    <p class="hm-safe"><strong>Your progress is safe.</strong><br>Your eggs, coins, and account data remain محفوظة وآمنة.</p>
+    <div class="hm-footer">THANK YOU FOR YOUR PATIENCE</div>
+  </div>
+</section><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 
 
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
