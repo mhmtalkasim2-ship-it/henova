@@ -2687,6 +2687,28 @@ function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=
 function daily(){return henovaAction('daily')}
 function henovaOpenPromoCodes(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_PROMO_CODES');}
 let henovaPromoRedeemBusy=false;
+function henovaShowPromoMembershipCard(status={}){
+ const old=document.getElementById('henova-promo-membership-overlay');if(old)old.remove();
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ const title=ar?'اشترك بالقناتين أولاً':tr?'Önce iki kanala katıl':'Join both channels first';
+ const desc=ar?'لازم تكون مشترك بقناة HENOVA وقناة السحب حتى تقدر تستخدم كود المكافأة.':tr?'Promo kodunu kullanmak için HENOVA ve çekim kanalına katılmalısın.':'You must join the HENOVA channel and the Withdrawals channel before you can redeem a promo code.';
+ const row=(id,label,joined,url)=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;border:1px solid #dcebd9;border-radius:13px;margin:9px 0;background:#f7fbf4"><span style="font-weight:800">'+label+'</span><span id="'+id+'" style="font-size:12px;color:'+(joined?'#21864a':'#b47724')+'">'+(joined?(ar?'✅ مشترك':tr?'✅ Katıldın':'✅ Joined'):(ar?'❌ غير مشترك':tr?'❌ Katılmadın':'❌ Not joined'))+'</span><a href="'+url+'" target="_blank" style="background:#267b4a;color:white;text-decoration:none;padding:8px 10px;border-radius:10px;font-size:12px">'+(ar?'انضمام':tr?'Katıl':'Join')+'</a></div>';
+ const overlay=document.createElement('div');overlay.id='henova-promo-membership-overlay';overlay.className='overlay';
+ overlay.innerHTML='<div class="modal" style="max-width:430px;text-align:center"><div style="font-size:42px">🔒</div><h3 style="margin:8px 0;color:#285b3e">'+title+'</h3><p style="font-size:13px;line-height:1.6;color:#637565">'+desc+'</p>'+row('henova-promo-member-henova','🐔 HENOVA',status.henova,'https://t.me/HENOVA_FARM')+row('henova-promo-member-withdrawals','💸 Withdrawals',status.withdrawals,'https://t.me/HENOVA_WITHDRAWALS')+'<button id="henova-promo-membership-check" style="width:100%;border:0;border-radius:13px;background:linear-gradient(#93db59,#52a82d);color:#173d20;padding:13px;margin-top:8px;font-weight:900">'+(ar?'تحقّق من الاشتراك':tr?'Üyeliği kontrol et':'I have joined – Verify')+'</button><button onclick="document.getElementById(\'henova-promo-membership-overlay\')?.remove()" style="width:100%;border:0;background:transparent;color:#70806f;padding:10px;margin-top:4px">'+(ar?'إغلاق':tr?'Kapat':'Close')+'</button></div>';
+ document.body.appendChild(overlay);
+ document.getElementById('henova-promo-membership-check').onclick=henovaVerifyPromoMembership;
+}
+async function henovaVerifyPromoMembership(){
+ const check=document.getElementById('henova-promo-membership-check');if(check)check.disabled=true;
+ try{
+  const r=await henovaCall('promo_membership_check');
+  const set=(id,joined)=>{const el=document.getElementById(id);if(el){el.textContent=joined?(s.lang==='ar'?'✅ مشترك':s.lang==='tr'?'✅ Katıldın':'✅ Joined'):(s.lang==='ar'?'❌ غير مشترك':s.lang==='tr'?'❌ Katılmadın':'❌ Not joined');el.style.color=joined?'#21864a':'#b47724';}};
+  set('henova-promo-member-henova',r.henova);set('henova-promo-member-withdrawals',r.withdrawals);
+  if(r.allJoined){document.getElementById('henova-promo-membership-overlay')?.remove();henovaRedeemPromo();}
+  else toast(s.lang==='ar'?'اشترك بالقناتين ثم اضغط تحقق مرة أخرى.':s.lang==='tr'?'İki kanala da katıl ve tekrar kontrol et.':'Join both channels, then verify again.');
+ }catch(e){toast(s.lang==='ar'?'تعذر التحقق حالياً. حاول مرة أخرى.':s.lang==='tr'?'Şu anda doğrulanamadı. Tekrar dene.':'Could not verify membership. Please try again.');}
+ finally{if(check?.isConnected)check.disabled=false;}
+}
 async function henovaRedeemPromo(){
  if(henovaPromoRedeemBusy)return;
  const input=document.getElementById('henova-promo-input');
@@ -2742,7 +2764,11 @@ async function henovaRedeemPromo(){
   henovaShowRewardCard(amount,unit,isGift);
  }catch(e){
   const reason=String(e?.message||e||'');
-  if(reason==='ad_verification_required'){
+  if(reason==='channel_membership_required'){
+   henovaShowPromoMembershipCard({henova:e.henova===true,withdrawals:e.withdrawals===true});
+  }else if(reason==='membership_verification_unavailable'){
+   toast(s.lang==='ar'?'تعذر التحقق من الاشتراك. حاول لاحقاً.':s.lang==='tr'?'Üyelik kontrol edilemiyor. Daha sonra tekrar dene.':'Membership check unavailable. Please try again later.');
+  }else if(reason==='ad_verification_required'){
    henovaAdNotice('short');
   }else if(reason==='code_fully_claimed'){
    toast(s.lang==='ar'?'❌ لم تستلم المكافأة: انتهت حصة هذا الكود واستخدمه جميع الأشخاص المسموح لهم.':s.lang==='tr'?'❌ Ödül alınmadı: Bu kodun tüm kullanım hakları doldu.':'❌ Reward not received: this promo code has reached its claim limit.');
