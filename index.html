@@ -2720,7 +2720,6 @@ async function henovaRedeemPromo(){
  const code=String(input?.value||'').trim().toUpperCase();
  if(!/^[A-Z0-9]{5,24}$/.test(code))return toast(s.lang==='ar'?'أدخل كوداً صالحاً':s.lang==='tr'?'Geçerli bir kod girin':'Enter a valid code');
  if(!window.Telegram?.WebApp?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
- if(!window.Adsgram?.init)return toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');
  const btn=document.getElementById('henova-promo-redeem');
  const originalLabel=btn?.textContent||'';
  henovaPromoRedeemBusy=true;
@@ -2731,6 +2730,7 @@ async function henovaRedeemPromo(){
    henovaShowPromoMembershipCard({henova:membership?.henova===true,withdrawals:membership?.withdrawals===true});
    return;
   }
+  if(!window.Adsgram?.init)return toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');
   const session=await henovaCall('promo_ad_start',{code});
   if(!session?.session_id)throw Error('promo_session_unavailable');
 
