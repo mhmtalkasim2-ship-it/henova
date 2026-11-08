@@ -2613,15 +2613,18 @@ function henovaApplyState(st){
   s.start=Date.parse(st.production_started_at)||Date.now();s.daily=st.daily_claimed_on||'';s.dailyStreak=Math.min(7,Math.max(0,Number(st.daily_streak)||0));henovaReferralCount=Math.max(0,Number(st.referrals_count)||0);henovaReferralEggs=Math.max(0,Number(st.referral_eggs_earned)||0);henovaReferralCoins=Math.max(0,Number(st.referral_coins_earned)||0);henovaInviteThreeProgress=Math.min(3,Math.max(0,Number(st.invite_three_progress)||0));henovaInviteThreeRewarded=st.invite_three_rewarded===true;henovaDailyInviteProgress=Math.min(1,Math.max(0,Number(st.invite_daily_progress)||0));henovaDailyInviteRewarded=st.invite_daily_rewarded===true;henovaChannelNext=st.channel_next_at?Date.parse(st.channel_next_at):0;
 }
 
+let henovaInitialStateSynced=false;
 async function henovaCall(action,details={}){
   const initData=window.Telegram?.WebApp?.initData;
   if(!initData)throw Error('Open HENOVA inside Telegram');
+  const apiAction=action==='state'&&henovaInitialStateSynced?'state_refresh':action;
   const response=await fetch(HENOVA_API_URL,{
     method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({initData,action,...details}),cache:'no-store'
+    body:JSON.stringify({initData,action:apiAction,...details}),cache:'no-store'
   });
   const data=await response.json();
   if(!response.ok || data?.ok===false){const err=new Error(String(data?.error||'server_unavailable'));err.diagnostics=data?.diagnostics||data?.recipient_checks||data?.checked;err.henova=data?.henova===true;err.withdrawals=data?.withdrawals===true;throw err;}
+  if(action==='state'&&apiAction==='state'&&data?.ok===true&&data?.state)henovaInitialStateSynced=true;
   return data;
 }
 async function henovaLoad(){
