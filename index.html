@@ -2037,7 +2037,7 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
  #view .hv-home-sponsored-card .hv-sponsored-action{padding:0!important}
  #view .hv-home-sponsored-card adsgram-task{min-height:50px!important}
 /* Home AdsGram: original task widget only, no extra card/container styling */
-main.farm-mode .scene .hv-home-sponsored-card{
+main.farm-mode #view>.hv-home-sponsored-card{
  position:absolute!important;left:50%!important;right:auto!important;
  bottom:calc(env(safe-area-inset-bottom) + 174px)!important;
  transform:translateX(-50%)!important;width:min(250px,calc(100% - 24px))!important;
@@ -2046,18 +2046,18 @@ main.farm-mode .scene .hv-home-sponsored-card{
  background:transparent!important;border:0!important;border-radius:0!important;
  box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;
 }
-main.farm-mode .scene .hv-home-sponsored-card adsgram-task{
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task{
  display:block!important;width:100%!important;max-width:100%!important;
  min-height:0!important;height:auto!important;margin:0!important;padding:0!important;
  background:transparent!important;border:0!important;box-shadow:none!important;
 }
-main.farm-mode .scene .hv-home-sponsored-card .hv-adsgram-yellow-button{
+main.farm-mode #view>.hv-home-sponsored-card .hv-adsgram-yellow-button{
  min-width:0!important;width:auto!important;min-height:28px!important;height:28px!important;
  padding:4px 12px!important;border-radius:8px!important;font-size:11px!important;line-height:1!important;
 }
 @media(max-width:360px){
- main.farm-mode .scene .hv-home-sponsored-card{width:min(225px,calc(100% - 20px))!important}
- main.farm-mode .scene .hv-home-sponsored-card .hv-adsgram-yellow-button{min-height:26px!important;height:26px!important;padding:3px 9px!important;font-size:10px!important}
+ main.farm-mode #view>.hv-home-sponsored-card{width:min(225px,calc(100% - 20px))!important}
+ main.farm-mode #view>.hv-home-sponsored-card .hv-adsgram-yellow-button{min-height:26px!important;height:26px!important;padding:3px 9px!important;font-size:10px!important}
 }
 #view .hv-sponsored-task-vertical{min-height:0!important}
 #view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
@@ -4625,9 +4625,6 @@ if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.
  if(tab===0){
   const a=henovaAdsgramLabels();
   el.insertAdjacentHTML('beforeend','<div class="hv-home-sponsored-card"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div>');
-  const sponsoredHomeCard=el.querySelector('.hv-home-sponsored-card');
-  const farmScene=el.querySelector('.scene');
-  if(sponsoredHomeCard&&farmScene)farmScene.appendChild(sponsoredHomeCard);
   henovaAttachAdsgramTask();
  }
 
