@@ -2036,6 +2036,39 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
  #view .hv-home-sponsored-card .hv-sponsored-copy p{font-size:14px!important;margin:0 0 3px!important}
  #view .hv-home-sponsored-card .hv-sponsored-action{padding:0!important}
  #view .hv-home-sponsored-card adsgram-task{min-height:50px!important}
+/* Place the single home sponsored task inside a clear lower grass area of the farm scene */
+main.farm-mode .scene .hv-home-sponsored-card{
+ position:absolute!important;
+ left:50%!important;
+ right:auto!important;
+ bottom:calc(env(safe-area-inset-bottom) + 174px)!important;
+ transform:translateX(-50%)!important;
+ width:min( calc(100% - 28px), 360px)!important;
+ margin:0!important;
+ padding:10px 12px!important;
+ display:flex!important;
+ flex-direction:row!important;
+ align-items:center!important;
+ gap:9px!important;
+ z-index:18!important;
+ box-sizing:border-box!important;
+ background:linear-gradient(135deg,#fffdf2f2,#edf5e7f2)!important;
+ backdrop-filter:blur(7px);
+ box-shadow:0 5px 14px #24451d55!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card>div:first-child{flex:1 1 auto!important;min-width:0!important;gap:8px!important}
+main.farm-mode .scene .hv-home-sponsored-card img{width:38px!important;height:38px!important;flex:0 0 38px!important}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy h3{font-size:14px!important;line-height:1.15!important}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy p,
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy small{font-size:11px!important;line-height:1.2!important}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{flex:0 0 112px!important;width:112px!important;max-width:112px!important}
+main.farm-mode .scene .hv-home-sponsored-card adsgram-task{min-height:42px!important}
+@media(max-width:360px){
+ main.farm-mode .scene .hv-home-sponsored-card{width:calc(100% - 18px)!important;padding:8px!important;gap:6px!important}
+ main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{flex-basis:100px!important;width:100px!important;max-width:100px!important}
+ main.farm-mode .scene .hv-home-sponsored-card img{width:34px!important;height:34px!important;flex-basis:34px!important}
+}
+
  #view .hv-sponsored-task-vertical{min-height:0!important}
 #view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
 #view .hv-sponsored-task-vertical adsgram-task{display:block!important;max-width:100%;width:100%;overflow-wrap:normal;word-break:normal}
@@ -4603,8 +4636,8 @@ if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.
   const a=henovaAdsgramLabels();
   el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished hv-home-sponsored-card" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 48px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status" data-sponsored-status></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
   const sponsoredHomeCard=el.querySelector('.hv-home-sponsored-card');
-  const collectDock=el.querySelector('.collect-dock');
-  if(sponsoredHomeCard&&collectDock)collectDock.before(sponsoredHomeCard);
+  const farmScene=el.querySelector('.scene');
+  if(sponsoredHomeCard&&farmScene)farmScene.appendChild(sponsoredHomeCard);
   henovaAttachAdsgramTask();
  }
 
