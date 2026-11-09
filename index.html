@@ -2036,40 +2036,48 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
  #view .hv-home-sponsored-card .hv-sponsored-copy p{font-size:14px!important;margin:0 0 3px!important}
  #view .hv-home-sponsored-card .hv-sponsored-action{padding:0!important}
  #view .hv-home-sponsored-card adsgram-task{min-height:50px!important}
-/* Place the single home sponsored task inside a clear lower grass area of the farm scene */
+/* Compact home AdsGram badge: keep the farm scene visible */
 main.farm-mode .scene .hv-home-sponsored-card{
- position:absolute!important;
- left:50%!important;
- right:auto!important;
+ position:absolute!important;left:50%!important;right:auto!important;
  bottom:calc(env(safe-area-inset-bottom) + 174px)!important;
- transform:translateX(-50%)!important;
- width:min( calc(100% - 28px), 360px)!important;
- margin:0!important;
- padding:10px 12px!important;
- display:flex!important;
- flex-direction:row!important;
- align-items:center!important;
- gap:9px!important;
- z-index:18!important;
- box-sizing:border-box!important;
+ transform:translateX(-50%)!important;width: min(220px, calc(100% - 24px))!important;
+ min-height:0!important;height:auto!important;margin:0!important;padding:5px 7px!important;
+ display:flex!important;flex-direction:row!important;align-items:center!important;gap:5px!important;
+ z-index:18!important;box-sizing:border-box!important;overflow:hidden!important;
+ border:1px solid #d8c98e!important;border-radius:12px!important;
  background:linear-gradient(135deg,#fffdf2f2,#edf5e7f2)!important;
- backdrop-filter:blur(7px);
- box-shadow:0 5px 14px #24451d55!important;
+ box-shadow:0 2px 7px #24451d44!important;backdrop-filter:blur(5px);
 }
-main.farm-mode .scene .hv-home-sponsored-card>div:first-child{flex:1 1 auto!important;min-width:0!important;gap:8px!important}
-main.farm-mode .scene .hv-home-sponsored-card img{width:38px!important;height:38px!important;flex:0 0 38px!important}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy h3{font-size:14px!important;line-height:1.15!important}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy p,
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy small{font-size:11px!important;line-height:1.2!important}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{flex:0 0 112px!important;width:112px!important;max-width:112px!important}
-main.farm-mode .scene .hv-home-sponsored-card adsgram-task{min-height:42px!important}
+main.farm-mode .scene .hv-home-sponsored-card>div:first-child{
+ display:flex!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;gap:5px!important;align-items:center!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card img{
+ width:25px!important;height:25px!important;flex:0 0 25px!important;border-radius:7px!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy{min-width:0!important;gap:1px!important}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy h3{
+ font-size:10px!important;line-height:1.1!important;margin:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy p{
+ font-size:9px!important;line-height:1.1!important;margin:1px 0 0!important;white-space:nowrap!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy small{display:none!important}
+main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{
+ display:block!important;flex:0 0 72px!important;width:72px!important;max-width:72px!important;min-width:0!important;padding:0!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card adsgram-task{
+ display:block!important;width:100%!important;max-width:100%!important;min-height:30px!important;height:auto!important;
+}
+main.farm-mode .scene .hv-home-sponsored-card .hv-adsgram-yellow-button{
+ min-width:0!important;width:100%!important;min-height:29px!important;padding:5px 4px!important;
+ border-radius:8px!important;font-size:10px!important;line-height:1.05!important;
+}
 @media(max-width:360px){
- main.farm-mode .scene .hv-home-sponsored-card{width:calc(100% - 18px)!important;padding:8px!important;gap:6px!important}
- main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{flex-basis:100px!important;width:100px!important;max-width:100px!important}
- main.farm-mode .scene .hv-home-sponsored-card img{width:34px!important;height:34px!important;flex-basis:34px!important}
+ main.farm-mode .scene .hv-home-sponsored-card{width: min(205px, calc(100% - 20px))!important;padding:4px 6px!important;gap:4px!important}
+ main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{flex-basis:66px!important;width:66px!important;max-width:66px!important}
+ main.farm-mode .scene .hv-home-sponsored-card img{width:23px!important;height:23px!important;flex-basis:23px!important}
 }
-
- #view .hv-sponsored-task-vertical{min-height:0!important}
+#view .hv-sponsored-task-vertical{min-height:0!important}
 #view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
 #view .hv-sponsored-task-vertical adsgram-task{display:block!important;max-width:100%;width:100%;overflow-wrap:normal;word-break:normal}
 @media(max-width:390px){#view .hv-video-task-card .hv-task-avatar{width:48px;height:48px;flex-basis:48px}#view .hv-video-task-card{gap:10px!important}}
