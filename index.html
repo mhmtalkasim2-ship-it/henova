@@ -2040,23 +2040,36 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
 main.farm-mode #view>.hv-home-sponsored-card{
  position:absolute!important;left:50%!important;right:auto!important;
  bottom:calc(env(safe-area-inset-bottom) + 174px)!important;
- transform:translateX(-50%)!important;width:min(250px,calc(100% - 24px))!important;
+ transform:translateX(-50%)!important;width:min(320px,calc(100% - 20px))!important;
  height:auto!important;min-height:0!important;margin:0!important;padding:0!important;
  display:block!important;z-index:18!important;box-sizing:border-box!important;
  background:transparent!important;border:0!important;border-radius:0!important;
  box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;
 }
 main.farm-mode #view>.hv-home-sponsored-card adsgram-task{
- display:block!important;width:100%!important;max-width:100%!important;
+ display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;
  min-height:0!important;height:auto!important;margin:0!important;padding:0!important;
  background:transparent!important;border:0!important;box-shadow:none!important;
+ --adsgram-task-font-size:14px!important;
+}
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(title),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(name),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(description),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(text),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(reward),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task [slot="reward"]{
+ white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;
+}
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task [slot="reward"]{
+ display:inline-block!important;max-width:none!important;
 }
 main.farm-mode #view>.hv-home-sponsored-card .hv-adsgram-yellow-button{
  min-width:0!important;width:auto!important;min-height:28px!important;height:28px!important;
  padding:4px 12px!important;border-radius:8px!important;font-size:11px!important;line-height:1!important;
 }
 @media(max-width:360px){
- main.farm-mode #view>.hv-home-sponsored-card{width:min(225px,calc(100% - 20px))!important}
+ main.farm-mode #view>.hv-home-sponsored-card{width:calc(100% - 16px)!important}
+ main.farm-mode #view>.hv-home-sponsored-card adsgram-task{--adsgram-task-font-size:13px!important}
  main.farm-mode #view>.hv-home-sponsored-card .hv-adsgram-yellow-button{min-height:26px!important;height:26px!important;padding:3px 9px!important;font-size:10px!important}
 }
 #view .hv-sponsored-task-vertical{min-height:0!important}
