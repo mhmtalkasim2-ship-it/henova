@@ -4485,9 +4485,8 @@ async function henovaSponsoredRefreshCooldown(){
 setInterval(()=>{
  if(document.getElementById('henova-adsgram-task'))henovaSponsoredDrawCooldown();
 },1000);
-setInterval(()=>{
- if(document.getElementById('henova-adsgram-task')&&!document.hidden)void henovaSponsoredRefreshCooldown();
-},300000);
+// Cooldown is fetched when the task is shown and after an ad reward.
+// The countdown then runs locally; avoid a server request every five minutes.
 function henovaAttachAdsgramTask(){
  const tasks=[document.getElementById('henova-adsgram-task'),document.getElementById('henova-adsgram-task-58583')].filter(Boolean);
  if(!tasks.length)return;
