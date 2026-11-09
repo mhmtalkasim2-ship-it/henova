@@ -2036,46 +2036,28 @@ main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-but
  #view .hv-home-sponsored-card .hv-sponsored-copy p{font-size:14px!important;margin:0 0 3px!important}
  #view .hv-home-sponsored-card .hv-sponsored-action{padding:0!important}
  #view .hv-home-sponsored-card adsgram-task{min-height:50px!important}
-/* Compact home AdsGram badge: keep the farm scene visible */
+/* Home AdsGram: original task widget only, no extra card/container styling */
 main.farm-mode .scene .hv-home-sponsored-card{
  position:absolute!important;left:50%!important;right:auto!important;
  bottom:calc(env(safe-area-inset-bottom) + 174px)!important;
- transform:translateX(-50%)!important;width: min(220px, calc(100% - 24px))!important;
- min-height:0!important;height:auto!important;margin:0!important;padding:5px 7px!important;
- display:flex!important;flex-direction:row!important;align-items:center!important;gap:5px!important;
- z-index:18!important;box-sizing:border-box!important;overflow:hidden!important;
- border:1px solid #d8c98e!important;border-radius:12px!important;
- background:linear-gradient(135deg,#fffdf2f2,#edf5e7f2)!important;
- box-shadow:0 2px 7px #24451d44!important;backdrop-filter:blur(5px);
-}
-main.farm-mode .scene .hv-home-sponsored-card>div:first-child{
- display:flex!important;flex:1 1 auto!important;min-width:0!important;width:auto!important;gap:5px!important;align-items:center!important;
-}
-main.farm-mode .scene .hv-home-sponsored-card img{
- width:25px!important;height:25px!important;flex:0 0 25px!important;border-radius:7px!important;
-}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy{min-width:0!important;gap:1px!important}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy h3{
- font-size:10px!important;line-height:1.1!important;margin:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
-}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy p{
- font-size:9px!important;line-height:1.1!important;margin:1px 0 0!important;white-space:nowrap!important;
-}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-copy small{display:none!important}
-main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{
- display:block!important;flex:0 0 72px!important;width:72px!important;max-width:72px!important;min-width:0!important;padding:0!important;
+ transform:translateX(-50%)!important;width:min(250px,calc(100% - 24px))!important;
+ height:auto!important;min-height:0!important;margin:0!important;padding:0!important;
+ display:block!important;z-index:18!important;box-sizing:border-box!important;
+ background:transparent!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;
 }
 main.farm-mode .scene .hv-home-sponsored-card adsgram-task{
- display:block!important;width:100%!important;max-width:100%!important;min-height:30px!important;height:auto!important;
+ display:block!important;width:100%!important;max-width:100%!important;
+ min-height:0!important;height:auto!important;margin:0!important;padding:0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
 }
 main.farm-mode .scene .hv-home-sponsored-card .hv-adsgram-yellow-button{
- min-width:0!important;width:100%!important;min-height:29px!important;padding:5px 4px!important;
- border-radius:8px!important;font-size:10px!important;line-height:1.05!important;
+ min-width:0!important;width:auto!important;min-height:28px!important;height:28px!important;
+ padding:4px 12px!important;border-radius:8px!important;font-size:11px!important;line-height:1!important;
 }
 @media(max-width:360px){
- main.farm-mode .scene .hv-home-sponsored-card{width: min(205px, calc(100% - 20px))!important;padding:4px 6px!important;gap:4px!important}
- main.farm-mode .scene .hv-home-sponsored-card .hv-sponsored-action{flex-basis:66px!important;width:66px!important;max-width:66px!important}
- main.farm-mode .scene .hv-home-sponsored-card img{width:23px!important;height:23px!important;flex-basis:23px!important}
+ main.farm-mode .scene .hv-home-sponsored-card{width:min(225px,calc(100% - 20px))!important}
+ main.farm-mode .scene .hv-home-sponsored-card .hv-adsgram-yellow-button{min-height:26px!important;height:26px!important;padding:3px 9px!important;font-size:10px!important}
 }
 #view .hv-sponsored-task-vertical{min-height:0!important}
 #view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
@@ -4642,7 +4624,7 @@ document.querySelector('main').classList.toggle('hv-tasks-mode',tab===2);
 if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.start))/1000)),limit=Math.max(1,Math.floor(r*6));el.innerHTML='<section class="scene farm-v3" id="farm-scene"><img class="henova-farm-v11-background" src="./assets/henova-farm-pregrass-v38-restored.svg?v=20261102-independent-rollback-v42" alt="" aria-hidden="true" decoding="async" draggable="false"><div class="v3-sun"></div><div class="v3-hills"></div><div class="v3-field"></div><div class="v3-fence"></div><div class="v3-lane"></div><div class="v3-tree t1"><span>🍎</span></div><div class="v3-tree t2"><span>🍎</span></div><div class="v3-tree t3"><span>🍎</span></div><div class="v3-barn"></div><div class="v3-windmill"><div class="v3-rotor"><i></i><i></i><i></i><i></i><b></b></div></div><div class="henova-cartoon-hay" aria-hidden="true"></div><div class="v3-nest">🪺</div><div class="v3-feeder"><span></span></div><div class="v3-hay">🌾</div><div class="v3-grain"></div><div class="v3-lantern">🏮</div><div class="v3-hay-bales"></div><div class="v3-rock"></div><div class="v3-ground-details"></div><div class="v3-stones"></div><div class="henova-flower-cluster henova-flower-a" aria-hidden="true"></div><div class="henova-flower-cluster henova-flower-b" aria-hidden="true"></div><div class="farm-hen hen-a" role="button" tabindex="0" aria-label="Hen - tap for a cluck" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen walking and pecking" draggable="false"></div></div></div>'+henovaOwnedHensMarkup()+'<div class="farm-hen hen-b"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen feeding"></div><div class="farm-hen hen-c feeding"><img src="./assets/henova-hen-v6.svg?v=20261102-reference-hens" alt="Hen eating"></div></section><section class="collect-dock"><div class="collect-info"><strong>🥚 <span id="rate">'+num(r)+'</span> '+hvText('unit')+'</strong><small id="clock">'+(secs===0?hvText('done'):hvText('remain')+henovaTaskClock(secs))+'</small></div><div class="collect-action"><button id="collect" onclick="collect()" '+(!p?'disabled':'')+'>'+hvText('collect')+' · <span id="collect-count">'+p+'</span>/'+limit+'</button><div class="collect-meter"><div id="progress" style="width:'+(100*Math.min(1,Math.max(0,Date.now()-s.start)/(6*hr)))+'%"></div></div></div></section>'}
  if(tab===0){
   const a=henovaAdsgramLabels();
-  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical hv-sponsored-polished hv-home-sponsored-card" style="display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;direction:inherit"><div style="display:flex;align-items:center;gap:12px;width:100%;min-width:0"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex:0 0 48px"><div class="grow hv-sponsored-copy" style="flex:1;min-width:0"><h3>'+a.name+'</h3><p>🥚 '+a.reward+'</p><small>⏱ '+a.interval+'</small><small id="henova-adsgram-status" data-sponsored-status></small></div></div><div class="hv-sponsored-action" style="display:block!important;flex:none!important;width:100%!important;max-width:100%!important;min-width:0!important"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div></article>');
+  el.insertAdjacentHTML('beforeend','<div class="hv-home-sponsored-card"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div>');
   const sponsoredHomeCard=el.querySelector('.hv-home-sponsored-card');
   const farmScene=el.querySelector('.scene');
   if(sponsoredHomeCard&&farmScene)farmScene.appendChild(sponsoredHomeCard);
