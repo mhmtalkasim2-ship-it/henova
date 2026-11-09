@@ -4601,9 +4601,9 @@ async function henovaWatchRewardVideo(){
   }
   henovaAdNotice(credited?'success':'completed');
   if(!credited){
-   // Silent follow-up: never show a long "verifying" banner.
-   for(let i=0;i<8;i++){
-    await new Promise(r=>setTimeout(r,1500));
+   // Two bounded follow-ups only; avoid repeatedly polling the full player state.
+   for(let i=0;i<2;i++){
+    await new Promise(r=>setTimeout(r,2500));
     const fresh=await henovaCall('state').catch(()=>null);
     if(fresh?.state){
      henovaApplyState(fresh.state);render();
