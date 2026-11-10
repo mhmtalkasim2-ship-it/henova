@@ -4695,13 +4695,7 @@ if(tab===0){let p=prod(),r=rate(),secs=Math.max(0,Math.ceil((6*hr-(Date.now()-s.
   el.insertAdjacentHTML('beforeend','<aside class="hv-promo-hen-card" id="hv-promo-hen-card"><img class="hv-promo-hen-icon" src="./assets/henova-hen-v6.svg" alt="Promo hen"><div><b>Promo Hen</b><small>🥚 100 eggs / hour · '+Number(s.promoHen.eggs_reward||0).toLocaleString('en-US')+' total</small><strong id="hv-promo-hen-clock">'+henovaTaskClock(left)+'</strong></div></aside>');
  }
 }
- if(tab===0){
-  const a=henovaAdsgramLabels();
-  el.insertAdjacentHTML('beforeend','<div class="hv-home-sponsored-card"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+a.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+a.button+'</span><span slot="claim">'+a.claim+'</span><span slot="done">'+a.done+'</span></adsgram-task></div>');
-  henovaAttachAdsgramTask();
- }
-
- if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">'+hvText('packInfo')+'</p><p class="muted">'+({ar:'🐔 أول دجاجة مجانية، وكل دجاجة أساسية إضافية 750 عملة. يمكنك شراء 5 دجاجات كحد أقصى من كل نوع، ولكل نوع لون خاص به.',tr:'🐔 İlk tavuk ücretsiz. Her ek başlangıç tavuğu 750 jeton. Her türden en fazla 5 tavuk alabilirsin; her türün rengi farklıdır.',en:'🐔 Your first starter hen is free; each extra starter hen costs 750 coins. You can own up to 5 hens of each type. Every breed has a different color.'}[s.lang]||'')+'</p>'+H.map(h=>'<article class="item"><div class="face hv-breed-face"><img src="'+henovaBreedImage(h[0])+'" alt="'+h[2]+'" loading="lazy"></div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+(h[3]*6)+' '+(s.lang==='ar'?'بيضة كل 6 ساعات':s.lang==='tr'?'yumurta / 6 saat':'eggs / 6 hours')+' <small>('+h[3]+' '+hvText('eggsHour')+')</small></p><small>'+hvText('owned')+': '+ (s.hen[h[0]]||0)+'/5</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')" '+((s.hen[h[0]]||0)>=5?'disabled':'')+'>'+((s.hen[h[0]]||0)>=5?(s.lang==='ar'?'اكتمل 5/5':s.lang==='tr'?'Dolu 5/5':'Full 5/5'):(num(h[4])+' 🪙<br>'+names[6]))+'</button>':'<b>'+hvText('free')+'</b>')+'</article>').join('')+'<p class="warning">'+hvText('packWarning')+'</p>';
+  if(tab===1)el.innerHTML='<h1 class="title">🐣 '+names[1]+'</h1><p class="muted">'+hvText('packInfo')+'</p><p class="muted">'+({ar:'🐔 أول دجاجة مجانية، وكل دجاجة أساسية إضافية 750 عملة. يمكنك شراء 5 دجاجات كحد أقصى من كل نوع، ولكل نوع لون خاص به.',tr:'🐔 İlk tavuk ücretsiz. Her ek başlangıç tavuğu 750 jeton. Her türden en fazla 5 tavuk alabilirsin; her türün rengi farklıdır.',en:'🐔 Your first starter hen is free; each extra starter hen costs 750 coins. You can own up to 5 hens of each type. Every breed has a different color.'}[s.lang]||'')+'</p>'+H.map(h=>'<article class="item"><div class="face hv-breed-face"><img src="'+henovaBreedImage(h[0])+'" alt="'+h[2]+'" loading="lazy"></div><div class="grow"><h3>'+h[2]+'</h3><p>⚡ '+(h[3]*6)+' '+(s.lang==='ar'?'بيضة كل 6 ساعات':s.lang==='tr'?'yumurta / 6 saat':'eggs / 6 hours')+' <small>('+h[3]+' '+hvText('eggsHour')+')</small></p><small>'+hvText('owned')+': '+ (s.hen[h[0]]||0)+'/5</small></div>'+(h[4]?'<button onclick="purchase(\''+h[0]+'\')" '+((s.hen[h[0]]||0)>=5?'disabled':'')+'>'+((s.hen[h[0]]||0)>=5?(s.lang==='ar'?'اكتمل 5/5':s.lang==='tr'?'Dolu 5/5':'Full 5/5'):(num(h[4])+' 🪙<br>'+names[6]))+'</button>':'<b>'+hvText('free')+'</b>')+'</article>').join('')+'<p class="warning">'+hvText('packWarning')+'</p>';
 if(tab===2){
 queueMicrotask(henovaLoadPost80Status);
 const claimed=s.daily===new Date().toLocaleDateString('en-CA');
@@ -4730,7 +4724,9 @@ if(tab===2){
 const v=henovaVideoRewardText();
  el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
 
-// AdsGram allows one Task block per platform; keep task-56216 as the only sponsored task.
+// Keep the sponsored AdsGram task in the Tasks tab, not on the farm scene.
+ const sponsored=henovaAdsgramLabels();
+ el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical"><div class="hv-sponsored-copy"><h3>🥚 '+sponsored.name+'</h3><p>'+sponsored.reward+' · '+sponsored.interval+'</p><small data-sponsored-status>Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+sponsored.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+sponsored.button+'</span><span slot="claim">'+sponsored.claim+'</span><span slot="done">'+sponsored.done+'</span></adsgram-task></div></article>');
  henovaAttachAdsgramTask();
 }
 if(tab===3){
