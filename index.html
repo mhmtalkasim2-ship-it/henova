@@ -2651,8 +2651,8 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
 }
 @keyframes henovaStarterHouseVisit{
  0%,19%{transform:translate3d(57vw,65dvh,0);opacity:1}
- 40%{transform:translate3d(28vw,53dvh,0);opacity:1}
- 48%,74%{transform:translate3d(28vw,53dvh,0);opacity:0}
+ 40%{transform:translate3d(29vw,58dvh,0);opacity:1}
+ 48%,74%{transform:translate3d(29vw,58dvh,0);opacity:0}
  84%{transform:translate3d(42vw,57dvh,0);opacity:1}
  100%{transform:translate3d(57vw,65dvh,0);opacity:1}
 }
@@ -4554,7 +4554,7 @@ function henovaOwnedHensMarkup(){
      const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
      const duration=13+((i*3+breedIndex*2)%8);
      const delay=-((i*3+breedIndex*4)%duration);
-     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(28-point[0])/100);const houseDy=Math.round(sceneHeight*(53-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
+     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(29-point[0])/100);const houseDy=Math.round(sceneHeight*(58-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
      return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
