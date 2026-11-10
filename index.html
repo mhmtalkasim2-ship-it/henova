@@ -4721,12 +4721,13 @@ if(tab===2){
   el.insertAdjacentHTML('beforeend', `<article class='item' style='display:flex;align-items:center;gap:12px'><img src='https://t.me/i/userpic/320/MyAgeApp.jpg' alt='MyAgeApp' style='width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px'><div class='grow' style='min-width:0'><h3>${s.lang==='ar'?'انضم إلينا · MyAgeApp':s.lang==='tr'?'Bize Katıl · MyAgeApp':'Join Us · MyAgeApp'}</h3><p>🪙 +20 · ${s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only'}</p><small>${nPending}</small></div><div style='display:grid;gap:5px;flex:0 0 auto'><button onclick='henovaOpenUTYA()'>${nOpen}</button><button id='henova-utya-claim' onclick='henovaClaimUTYA()' ${henovaUTYAClaimed?'disabled':''}>${nClaim}</button></div></article>`);
 }
 if(tab===2){
-const v=henovaVideoRewardText();
- el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>');
-
-// Keep the sponsored AdsGram task in the Tasks tab, not on the farm scene.
+ // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
+ const v=henovaVideoRewardText();
  const sponsored=henovaAdsgramLabels();
- el.insertAdjacentHTML('beforeend','<article class="item hv-sponsored-card hv-sponsored-task-vertical"><div class="hv-sponsored-copy"><h3>🥚 '+sponsored.name+'</h3><p>'+sponsored.reward+' · '+sponsored.interval+'</p><small data-sponsored-status>Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+sponsored.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+sponsored.button+'</span><span slot="claim">'+sponsored.claim+'</span><span slot="done">'+sponsored.done+'</span></adsgram-task></div></article>');
+ const firstAdTasks='<article class="item hv-sponsored-card hv-sponsored-task-vertical"><div class="hv-sponsored-copy"><h3>🥚 '+sponsored.name+'</h3><p>'+sponsored.reward+' · '+sponsored.interval+'</p><small data-sponsored-status>Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🥚 '+sponsored.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+sponsored.button+'</span><span slot="claim">'+sponsored.claim+'</span><span slot="done">'+sponsored.done+'</span></adsgram-task></div></article>'+
+ '<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>';
+ const tasksHeading=el.querySelector('h1.title');
+ if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks);
  henovaAttachAdsgramTask();
 }
 if(tab===3){
