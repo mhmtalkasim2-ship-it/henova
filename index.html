@@ -2617,17 +2617,11 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v1
 
 </style>
 <style id="henova-hens-enter-house-20261110">
-/* Compact Telegram layout: avoid forced fullscreen while keeping the farm usable. */
-main.farm-mode{
- height:88dvh!important;
- min-height:560px!important;
- max-height:760px!important;
- margin:0 auto 12px!important;
- border-radius:0 0 22px 22px!important;
-}
+/* Preserve immersive full-screen farm and guide every hen to the visible barn doorway. */
+main.farm-mode{height:100dvh!important;min-height:640px!important;max-height:none!important;margin:0!important;border-radius:0!important}
 main.farm-mode #farm-scene.farm-v3{height:100%!important;inset:0!important}
-/* The detailed barn is at left 8%, top 43%, width 43%, height 23%.
-   Its arched doorway is around 32% across and 58% down the farm scene. */
+/* Final barn placement: left 6%, top 29%, width 41%, height 22%.
+   Door opening is centered near 29% x / 45% y of the farm scene. */
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
  animation:henovaOwnedHouseVisit 34s ease-in-out infinite!important;
  animation-delay:var(--house-delay,0s)!important;
@@ -2635,7 +2629,7 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
 }
 @keyframes henovaOwnedHouseVisit{
  0%,18%{transform:translate3d(0,0,0);opacity:1}
- 31%{transform:translate3d(calc(var(--house-dx,0px)*.58),calc(var(--house-dy,0px)*.58),0);opacity:1}
+ 34%{transform:translate3d(calc(var(--house-dx,0px)*.72),calc(var(--house-dy,0px)*.72),0);opacity:1}
  43%,62%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:0}
  76%{transform:translate3d(calc(var(--house-dx,0px)*.42),calc(var(--house-dy,0px)*.42),0);opacity:1}
  100%{transform:translate3d(0,0,0);opacity:1}
@@ -2646,9 +2640,9 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
 }
 @keyframes henovaStarterHouseVisit{
  0%,19%{transform:translate3d(57vw,65dvh,0);opacity:1}
- 33%{transform:translate3d(45vw,58dvh,0);opacity:1}
- 44%,63%{transform:translate3d(32vw,51dvh,0);opacity:0}
- 78%{transform:translate3d(45vw,58dvh,0);opacity:1}
+ 34%{transform:translate3d(29vw,45dvh,0);opacity:1}
+ 44%,63%{transform:translate3d(29vw,45dvh,0);opacity:0}
+ 78%{transform:translate3d(42vw,57dvh,0);opacity:1}
  100%{transform:translate3d(57vw,65dvh,0);opacity:1}
 }
 @media(prefers-reduced-motion:reduce){
@@ -4549,7 +4543,7 @@ function henovaOwnedHensMarkup(){
      const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
      const duration=13+((i*3+breedIndex*2)%8);
      const delay=-((i*3+breedIndex*4)%duration);
-     const houseDx=Math.round(window.innerWidth*(32-point[0])/100);const houseDy=Math.round(window.innerHeight*.88*(58-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
+     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(29-point[0])/100);const houseDy=Math.round(sceneHeight*(45-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
      return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
@@ -4860,8 +4854,14 @@ function setupTelegram(){
     app.expand();
     app.setHeaderColor?.('#347b48');
     app.setBackgroundColor?.('#72b452');
-    // Keep Telegram's normal Mini App window; do not force device fullscreen.
-    showFullscreenStatus('Telegram Mini App view');
+    // Restore the immersive full-screen farm on supported Telegram clients.
+    if(app.isVersionAtLeast?.('8.0') && typeof app.requestFullscreen==='function'){
+      if(!app.isFullscreen)app.requestFullscreen();
+      document.documentElement.classList.toggle('telegram-fullscreen',!!app.isFullscreen);
+    }else{
+      app.expand();
+    }
+    showFullscreenStatus(app.isFullscreen?'Fullscreen active':'Fullscreen requested when supported');
   }catch(error){
     showFullscreenStatus('Fullscreen setup failed');
     console.warn('Telegram fullscreen setup error:',error);
