@@ -2700,8 +2700,8 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
 
 
 <style id="henova-house-door-motion-final-20261110">
-/* Final override: the barn door is around x=32%, y=56% of the farm scene.
-   Walk down to the threshold, hide inside for five seconds, then return. */
+/* Corrected route: the visible house is above the hens in the rendered farm.
+   Walk diagonally UP toward the house, hide for five seconds, then return. */
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
   left:39%!important;top:48%!important;right:auto!important;bottom:auto!important;
   width:clamp(42px,11vw,58px)!important;
@@ -2712,9 +2712,9 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
 @keyframes henovaStarterRealDoorV5{
   0%{transform:translate3d(12vw,2vh,0);opacity:1}
   28%{transform:translate3d(0,0,0);opacity:1}
-  42%{transform:translate3d(-9vw,8vh,0);opacity:1}
-  43%,58.5%{transform:translate3d(-9vw,8vh,0);opacity:0}
-  59%{transform:translate3d(-9vw,8vh,0);opacity:1}
+  42%{transform:translate3d(-9vw,-8vh,0);opacity:1}
+  43%,58.5%{transform:translate3d(-9vw,-8vh,0);opacity:0}
+  59%{transform:translate3d(-9vw,-8vh,0);opacity:1}
   73%{transform:translate3d(0,0,0);opacity:1}
   88%,100%{transform:translate3d(12vw,2vh,0);opacity:1}
 }
@@ -4642,7 +4642,7 @@ function henovaOwnedHensMarkup(){
      const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
      const duration=13+((i*3+breedIndex*2)%8);
      const delay=-((i*3+breedIndex*4)%duration);
-     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(32-point[0])/100);const houseDy=Math.round(sceneHeight*(56-point[1])/100);const houseSequence=henSequenceIndex++;const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+(houseSequence*5)+'s;';
+     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(32-point[0])/100);const houseDy=Math.round(sceneHeight*(42-point[1])/100);const houseSequence=henSequenceIndex++;const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+(houseSequence*5)+'s;';
      return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
