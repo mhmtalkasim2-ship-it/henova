@@ -2624,9 +2624,21 @@ main.farm-mode #farm-scene.farm-v3{height:100%!important;inset:0!important}
    Its doorway center is around 30% across the scene; place the hen's body
    center on that opening and move its feet past the outer step before hiding. */
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
- animation:henovaOwnedHouseVisit 34s ease-in-out infinite!important;
+ animation:henovaOwnedHouseVisit 34s linear infinite!important;
  animation-delay:var(--house-delay,0s)!important;
  will-change:transform,opacity;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action img{
+ animation:henovaHouseWalkGait .62s steps(2,end) infinite!important;
+ transform-origin:50% 85%!important;
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a img{
+ animation:henovaHouseWalkGait .62s steps(2,end) infinite!important;
+ transform-origin:50% 85%!important;
+}
+@keyframes henovaHouseWalkGait{
+ 0%,100%{transform:translateY(0) rotate(0deg)}
+ 50%{transform:translateY(-2px) rotate(-1.2deg)}
 }
 @keyframes henovaOwnedHouseVisit{
  0%,18%{transform:translate3d(0,0,0);opacity:1}
@@ -2637,13 +2649,13 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
  100%{transform:translate3d(0,0,0);opacity:1}
 }
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
- animation:henovaStarterHouseVisit 32s ease-in-out infinite!important;
+ animation:henovaStarterHouseVisit 32s linear infinite!important;
  will-change:transform,opacity;
 }
 @keyframes henovaStarterHouseVisit{
  0%,19%{transform:translate3d(57vw,65dvh,0);opacity:1}
- 40%{transform:translate3d(22vw,44dvh,0);opacity:1}
- 49%,66%{transform:translate3d(22vw,44dvh,0);opacity:0}
+ 40%{transform:translate3d(20vw,39dvh,0);opacity:1}
+ 49%,66%{transform:translate3d(20vw,39dvh,0);opacity:0}
  80%{transform:translate3d(42vw,57dvh,0);opacity:1}
  100%{transform:translate3d(57vw,65dvh,0);opacity:1}
 }
@@ -4545,7 +4557,7 @@ function henovaOwnedHensMarkup(){
      const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
      const duration=13+((i*3+breedIndex*2)%8);
      const delay=-((i*3+breedIndex*4)%duration);
-     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(26-point[0])/100);const houseDy=Math.round(sceneHeight*(44-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
+     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(24-point[0])/100);const houseDy=Math.round(sceneHeight*(39-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
      return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
