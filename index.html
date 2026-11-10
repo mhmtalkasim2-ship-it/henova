@@ -4842,10 +4842,10 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
 // HENOVA AdsGram interstitial, Unit ID int-56161 (platform 53244).
 // AdsGram is currently in moderation; ad unavailability must never block the farm.
 
-// Entry interstitial: preserve the requested ad 5 seconds after opening HENOVA.
+// Entry interstitial: request immediately when the page scripts are ready.
 
 </script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span><script id="henova-entry-adsgram-isolated-v2">
-/* Isolated startup interstitial: wait for Telegram and AdsGram, then request once. */
+/* Isolated startup interstitial: begin immediately, wait for Telegram and AdsGram, then request once. */
 (function(){
   var didRequest=false;
   function start(){
@@ -4877,8 +4877,8 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
     }
     showWhenReady();
   }
-  // Keep the original five-second entry delay; wait up to 30 seconds for both SDKs.
-  setTimeout(start,5000);
+  // Start immediately; poll only for SDK readiness (maximum 30 seconds).
+  start();
 })();
 </script>
 
