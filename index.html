@@ -2706,38 +2706,41 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
   left:39%!important;top:48%!important;right:auto!important;bottom:auto!important;
   width:clamp(42px,11vw,58px)!important;
   height:auto!important;
-  animation:henovaStarterRealDoorV5 32s linear infinite!important;
+  animation:henovaStarterRealDoorV6 34s linear infinite!important;
   will-change:transform,opacity;
 }
-@keyframes henovaStarterRealDoorV5{
+@keyframes henovaStarterRealDoorV6{
   0%{transform:translate3d(12vw,2vh,0);opacity:1}
-  28%{transform:translate3d(0,0,0);opacity:1}
-  42%{transform:translate3d(-9vw,-8vh,0);opacity:1}
-  43%,58.5%{transform:translate3d(-9vw,-8vh,0);opacity:0}
-  59%{transform:translate3d(-9vw,-8vh,0);opacity:1}
-  73%{transform:translate3d(0,0,0);opacity:1}
-  88%,100%{transform:translate3d(12vw,2vh,0);opacity:1}
+  25%{transform:translate3d(0,0,0);opacity:1}
+  /* Reach the second step, then take one more clear step through the doorway. */
+  38%{transform:translate3d(-9vw,-8vh,0);opacity:1}
+  46%{transform:translate3d(-13vw,-12vh,0);opacity:1}
+  47%,61.5%{transform:translate3d(-13vw,-12vh,0);opacity:0}
+  62%{transform:translate3d(-13vw,-12vh,0);opacity:1}
+  76%{transform:translate3d(0,0,0);opacity:1}
+  90%,100%{transform:translate3d(12vw,2vh,0);opacity:1}
 }
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
-  animation:henovaStarterDoorFacingV5 32s steps(1,end) infinite!important;
+  animation:henovaStarterDoorFacingV6 34s steps(1,end) infinite!important;
 }
-@keyframes henovaStarterDoorFacingV5{
-  0%,41.9%{transform:scaleX(-1)}
-  42%,58.9%{transform:scaleX(-1)}
-  59%,100%{transform:scaleX(1)}
+@keyframes henovaStarterDoorFacingV6{
+  0%,61.9%{transform:scaleX(-1)}
+  62%,100%{transform:scaleX(1)}
 }
 /* Owned hens use the same actual doorway target; stagger their first visit. */
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
-  animation:henovaOwnedRealDoorV5 36s linear infinite!important;
+  animation:henovaOwnedRealDoorV6 38s linear infinite!important;
   animation-delay:var(--house-delay,0s)!important;
   will-change:transform,opacity;
 }
-@keyframes henovaOwnedRealDoorV5{
+@keyframes henovaOwnedRealDoorV6{
   0%,5%{transform:translate3d(0,0,0);opacity:1}
-  34%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:1}
-  35%,49%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:0}
-  50%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:1}
-  76%{transform:translate3d(0,0,0);opacity:1}
+  30%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:1}
+  /* Continue beyond the steps and fully inside the barn. */
+  38%{transform:translate3d(calc(var(--house-dx,0px) - 16px),calc(var(--house-dy,0px) - 16px),0);opacity:1}
+  39%,53.5%{transform:translate3d(calc(var(--house-dx,0px) - 16px),calc(var(--house-dy,0px) - 16px),0);opacity:0}
+  54%{transform:translate3d(calc(var(--house-dx,0px) - 16px),calc(var(--house-dy,0px) - 16px),0);opacity:1}
+  78%{transform:translate3d(0,0,0);opacity:1}
   100%{transform:translate3d(0,0,0);opacity:1}
 }
 @media(prefers-reduced-motion:reduce){
