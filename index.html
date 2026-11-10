@@ -2663,34 +2663,33 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
 </style>
 
 <style id="henova-starter-house-entry-correction-20261110">
-/* Correct the starter hen's house visit using the established farmhouse-side
-   anchor (39%,48%). Keep the existing hen artwork, dimensions and handlers. */
+/* Move fully past the visible steps and through the doorway. Keep the
+   established hen size and artwork; only its travel path is changed. */
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
-  left:51%!important;top:50%!important;right:auto!important;bottom:auto!important;
-  width:clamp(38px,8.2vw,54px)!important;
-  animation:henovaStarterDoorVisitV2 32s linear infinite!important;
+  left:39%!important;top:48%!important;right:auto!important;bottom:auto!important;
+  width:clamp(67px,16vw,94px)!important;
+  animation:henovaStarterDoorVisitV3 32s linear infinite!important;
   will-change:transform,opacity;
 }
-@keyframes henovaStarterDoorVisitV2{
-  /* Walk from the current grass position toward the farmhouse doorway. */
-  0%,8%{transform:translate3d(0,0,0);opacity:1}
-  30%{transform:translate3d(-12vw,-2vh,0);opacity:1}
-  /* Cross the threshold completely and remain hidden inside for five seconds. */
-  38%{transform:translate3d(-12vw,-2vh,0);opacity:0}
-  54%{transform:translate3d(-12vw,-2vh,0);opacity:0}
-  /* Come back out through the same doorway. */
-  64%{transform:translate3d(-12vw,-2vh,0);opacity:1}
-  76%{transform:translate3d(-7vw,-1vh,0);opacity:1}
-  88%{transform:translate3d(-2vw,0,0);opacity:1}
-  100%{transform:translate3d(0,0,0);opacity:1}
+@keyframes henovaStarterDoorVisitV3{
+  /* Approach the steps from the grass. */
+  0%{transform:translate3d(12vw,2vh,0);opacity:1}
+  30%{transform:translate3d(0,0,0);opacity:1}
+  /* Continue beyond the steps, through the doorway and fully inside. */
+  42%{transform:translate3d(-8vw,-6vh,0);opacity:1}
+  44%,59.6%{transform:translate3d(-8vw,-6vh,0);opacity:0}
+  /* Five seconds hidden inside, then come back out through the same door. */
+  60%{transform:translate3d(-8vw,-6vh,0);opacity:1}
+  72%{transform:translate3d(0,0,0);opacity:1}
+  88%,100%{transform:translate3d(12vw,2vh,0);opacity:1}
 }
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
-  animation:henovaStarterDoorFacingV2 32s steps(1,end) infinite!important;
+  animation:henovaStarterDoorFacingV3 32s steps(1,end) infinite!important;
 }
-@keyframes henovaStarterDoorFacingV2{
-  0%,29.9%{transform:scaleX(-1)}
-  30%,63.9%{transform:scaleX(1)}
-  64%,100%{transform:scaleX(-1)}
+@keyframes henovaStarterDoorFacingV3{
+  0%,41.9%{transform:scaleX(-1)}
+  42%,59.9%{transform:scaleX(-1)}
+  60%,100%{transform:scaleX(1)}
 }
 @media(prefers-reduced-motion:reduce){
   body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
