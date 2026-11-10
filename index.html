@@ -2663,30 +2663,30 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
 </style>
 
 <style id="henova-starter-house-entry-correction-20261110">
-/* Move fully past the visible steps and through the doorway. Keep the
-   established hen size and artwork; only its travel path is changed. */
+/* Restore the original starter-hen scale and carry it beyond the steps,
+   farther through the farmhouse doorway before hiding it indoors. */
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
   left:39%!important;top:48%!important;right:auto!important;bottom:auto!important;
-  width:clamp(67px,16vw,94px)!important;
-  animation:henovaStarterDoorVisitV3 32s linear infinite!important;
+  width:clamp(61px,14vw,82px)!important;
+  animation:henovaStarterDoorVisitV4 32s linear infinite!important;
   will-change:transform,opacity;
 }
-@keyframes henovaStarterDoorVisitV3{
-  /* Approach the steps from the grass. */
+@keyframes henovaStarterDoorVisitV4{
+  /* Approach the farmhouse steps. */
   0%{transform:translate3d(12vw,2vh,0);opacity:1}
   30%{transform:translate3d(0,0,0);opacity:1}
-  /* Continue beyond the steps, through the doorway and fully inside. */
-  42%{transform:translate3d(-8vw,-6vh,0);opacity:1}
-  44%,59.6%{transform:translate3d(-8vw,-6vh,0);opacity:0}
-  /* Five seconds hidden inside, then come back out through the same door. */
-  60%{transform:translate3d(-8vw,-6vh,0);opacity:1}
+  /* Continue well past the steps and cross fully into the house. */
+  42%{transform:translate3d(-14vw,-12vh,0);opacity:1}
+  44%,59.6%{transform:translate3d(-14vw,-12vh,0);opacity:0}
+  /* Reappear at the inner doorway after five seconds and walk back out. */
+  60%{transform:translate3d(-14vw,-12vh,0);opacity:1}
   72%{transform:translate3d(0,0,0);opacity:1}
   88%,100%{transform:translate3d(12vw,2vh,0);opacity:1}
 }
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
-  animation:henovaStarterDoorFacingV3 32s steps(1,end) infinite!important;
+  animation:henovaStarterDoorFacingV4 32s steps(1,end) infinite!important;
 }
-@keyframes henovaStarterDoorFacingV3{
+@keyframes henovaStarterDoorFacingV4{
   0%,41.9%{transform:scaleX(-1)}
   42%,59.9%{transform:scaleX(-1)}
   60%,100%{transform:scaleX(1)}
