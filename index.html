@@ -2616,6 +2616,38 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v1
 }
 
 </style>
+<style id="henova-hens-enter-house-20261110">
+/* All farm hens take turns walking to the coop, disappearing inside briefly, then coming back out. */
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
+ animation:henovaOwnedHouseVisit 34s ease-in-out infinite!important;
+ animation-delay:var(--house-delay,0s)!important;
+ will-change:transform,opacity;
+}
+@keyframes henovaOwnedHouseVisit{
+ 0%,18%{transform:translate3d(0,0,0);opacity:1}
+ 31%{transform:translate3d(calc(var(--house-dx,0px)*.42),calc(var(--house-dy,0px)*.42),0);opacity:1}
+ 43%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:0}
+ 62%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:0}
+ 76%{transform:translate3d(calc(var(--house-dx,0px)*.48),calc(var(--house-dy,0px)*.48),0);opacity:1}
+ 100%{transform:translate3d(0,0,0);opacity:1}
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+ animation:henovaStarterHouseVisit 32s ease-in-out infinite!important;
+ will-change:transform,opacity;
+}
+@keyframes henovaStarterHouseVisit{
+ 0%,19%{transform:translate3d(0,0,0);opacity:1}
+ 33%{transform:translate3d(-10vw,-3vh,0);opacity:1}
+ 44%{transform:translate3d(-25vw,-8vh,0);opacity:0}
+ 63%{transform:translate3d(-25vw,-8vh,0);opacity:0}
+ 78%{transform:translate3d(-11vw,-3vh,0);opacity:1}
+ 100%{transform:translate3d(0,0,0);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{animation:none!important;opacity:1!important;transform:none!important}
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 
 
@@ -4509,7 +4541,7 @@ function henovaOwnedHensMarkup(){
      const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
      const duration=13+((i*3+breedIndex*2)%8);
      const delay=-((i*3+breedIndex*4)%duration);
-     const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;';
+     const houseDx=Math.round(window.innerWidth*(14-point[0])/100);const houseDy=Math.round(window.innerHeight*.70*(34-point[1])/100);const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+((i*2+breedIndex*3)%17)+'s;';
      return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
