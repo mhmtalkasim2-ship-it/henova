@@ -2753,39 +2753,42 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
 
 
 <style id="henova-house-entry-final-fix-20261111">
-/* Final doorway alignment: aim at the actual upper doorway, not the lower stair landing.
-   Keep the existing hen scale, artwork, farm layout and all gameplay logic unchanged. */
+/* Align the free hen from its real farm starting point to the doorway in the V38 scene.
+   The doorway is higher and to the right of the hen's starting position. */
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
-  animation:henovaStarterDoorEntryV7 34s linear infinite!important;
+  left:25%!important;bottom:23%!important;top:auto!important;right:auto!important;
+  animation:henovaStarterDoorEntryV8 34s linear infinite!important;
+  will-change:transform,opacity;
 }
-@keyframes henovaStarterDoorEntryV7{
+@keyframes henovaStarterDoorEntryV8{
   0%{transform:translate3d(12vw,2vh,0);opacity:1}
   25%{transform:translate3d(0,0,0);opacity:1}
-  34%{transform:translate3d(-5vw,-4vh,0);opacity:1}
-  42%{transform:translate3d(-13vw,-11vh,0);opacity:1}
-  43%,61.5%{transform:translate3d(-13vw,-11vh,0);opacity:0}
-  62%{transform:translate3d(-13vw,-11vh,0);opacity:1}
+  34%{transform:translate3d(4vw,-12vh,0);opacity:1}
+  42%{transform:translate3d(8vw,-37vh,0);opacity:1}
+  43%,61.5%{transform:translate3d(8vw,-41vh,0);opacity:0}
+  62%{transform:translate3d(8vw,-41vh,0);opacity:1}
   77%{transform:translate3d(0,0,0);opacity:1}
   90%,100%{transform:translate3d(12vw,2vh,0);opacity:1}
 }
 body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
-  animation:henovaStarterDoorFacingV7 34s steps(1,end) infinite!important;
+  animation:henovaStarterDoorFacingV8 34s steps(1,end) infinite!important;
 }
-@keyframes henovaStarterDoorFacingV7{
+@keyframes henovaStarterDoorFacingV8{
   0%,61.9%{transform:scaleX(-1)}
   62%,100%{transform:scaleX(1)}
 }
-/* Purchased hens use the same doorway coordinates and enter in a 5-second stagger. */
+/* Purchased hens target the same doorway and continue a little farther inside before hiding. */
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
-  animation:henovaOwnedDoorEntryV7 38s linear infinite!important;
+  animation:henovaOwnedDoorEntryV8 38s linear infinite!important;
   animation-delay:var(--house-delay,0s)!important;
+  will-change:transform,opacity;
 }
-@keyframes henovaOwnedDoorEntryV7{
+@keyframes henovaOwnedDoorEntryV8{
   0%,5%{transform:translate3d(0,0,0);opacity:1}
   30%{transform:translate3d(var(--house-dx,0px),var(--house-dy,0px),0);opacity:1}
-  36%{transform:translate3d(calc(var(--house-dx,0px) - 12px),calc(var(--house-dy,0px) - 22px),0);opacity:1}
-  38%,53.5%{transform:translate3d(calc(var(--house-dx,0px) - 12px),calc(var(--house-dy,0px) - 22px),0);opacity:0}
-  54%{transform:translate3d(calc(var(--house-dx,0px) - 12px),calc(var(--house-dy,0px) - 22px),0);opacity:1}
+  36%{transform:translate3d(var(--house-dx,0px),calc(var(--house-dy,0px) - 4vh),0);opacity:1}
+  38%,53.5%{transform:translate3d(var(--house-dx,0px),calc(var(--house-dy,0px) - 4vh),0);opacity:0}
+  54%{transform:translate3d(var(--house-dx,0px),calc(var(--house-dy,0px) - 4vh),0);opacity:1}
   78%{transform:translate3d(0,0,0);opacity:1}
   100%{transform:translate3d(0,0,0);opacity:1}
 }
@@ -4688,7 +4691,7 @@ function henovaOwnedHensMarkup(){
      const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
      const duration=13+((i*3+breedIndex*2)%8);
      const delay=-((i*3+breedIndex*4)%duration);
-     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(33-point[0])/100);const houseDy=Math.round(sceneHeight*(39-point[1])/100);const houseSequence=henSequenceIndex++;const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+(houseSequence*5)+'s;';
+     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(33-point[0])/100);const houseDy=Math.round(sceneHeight*(42-point[1])/100);const houseSequence=henSequenceIndex++;const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+(houseSequence*5)+'s;';
      return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
