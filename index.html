@@ -2837,108 +2837,6 @@ function henovaApplyState(st){
 }
 
 
-let henovaTopupBusy=false;
-function henovaBuildTopupCommentBoc(comment){
- const textBytes=new TextEncoder().encode(comment);
- if(textBytes.length>120)throw Error('Payment reference is too long');
- const cellData=new Uint8Array(4+textBytes.length);
- cellData.set(textBytes,4);
- const totalCellBytes=cellData.length+2;
- const bytes=new Uint8Array(13+cellData.length);
- bytes.set([0xb5,0xee,0x9c,0x72,0x01,0x01,0x01,0x01,0x00,totalCellBytes,0x00,0x00,cellData.length*2],0);
- bytes.set(cellData,13);
- let binary='';
- for(const byte of bytes)binary+=String.fromCharCode(byte);
- return btoa(binary);
-}
-function henovaTopupStatus(message){
- const node=document.getElementById('henova-gram-topup-status');
- if(node)node.textContent=message;
-}
-async function henovaGetTopupWallet(){
- if(!window.TON_CONNECT_UI?.TonConnectUI)throw Error('TON Connect is not ready. Reopen HENOVA and try again.');
- if(!henovaTonUI)henovaTonUI=new window.TON_CONNECT_UI.TonConnectUI({
-  manifestUrl:'https://mhmtalkasim2-ship-it.github.io/henova/tonconnect-manifest.json'
- });
- if(!henovaTonUI.wallet){
-  await henovaTonUI.openModal();
-  return null;
- }
- const wallet=henovaTonUI.wallet;
- if(wallet.account?.chain!=='-239')throw Error('Please switch your wallet to TON Mainnet.');
- if(!/^0:[a-f0-9]{64}$/i.test(String(wallet.account?.address||'')))throw Error('Unsupported TON wallet address.');
- return wallet;
-}
-async function henovaStartGramTopup(){
- if(henovaTopupBusy)return;
- henovaTopupBusy=true;
- const button=document.getElementById('henova-gram-topup-pay');
- if(button)button.disabled=true;
- try{
-  const wallet=await henovaGetTopupWallet();
-  if(!wallet){henovaTopupStatus('Connect your wallet, then press Pay again.');toast('Connect your TON wallet first.');return;}
-  const requestId=crypto.randomUUID();
-  localStorage.setItem('henova-pending-gram-topup',requestId);
-  const invoice=await henovaCall('create_gram_topup',{
-   requestId,senderAddress:wallet.account.address
-  });
-  if(!invoice?.ok||invoice.amount_nano!=='200000000')throw Error(invoice?.error||'topup_intent_invalid');
-  const comment='HENOVA_TOPUP:'+requestId;
-  const result=await henovaTonUI.sendTransaction({
-   validUntil:Math.floor(Date.now()/1000)+300,
-   network:'-239',
-   from:wallet.account.address,
-   messages:[{
-    address:invoice.destination_address,
-    amount:'200000000',
-    payload:henovaBuildTopupCommentBoc(comment)
-   }]
-  });
-  if(!result?.boc)throw Error('Wallet did not return a transaction receipt. Check your wallet before retrying.');
-  henovaTopupStatus('Payment submitted. Waiting for TON network confirmation…');
-  toast('Payment submitted. Coins appear after confirmation.');
-  await new Promise(resolve=>setTimeout(resolve,3500));
-  henovaTopupBusy=false;
-  await henovaCheckGramTopup();
- }catch(error){
-  const message=String(error?.message||'payment_failed');
-  console.warn('HENOVA GRAM top-up',message.slice(0,120));
-  henovaTopupStatus('Payment status: '+message);
-  toast(message.length>95?message.slice(0,95):message);
- }finally{
-  henovaTopupBusy=false;
-  if(button)button.disabled=false;
- }
-}
-async function henovaCheckGramTopup(){
- if(henovaTopupBusy)return;
- const requestId=localStorage.getItem('henova-pending-gram-topup');
- if(!requestId)return toast('No pending GRAM top-up to check.');
- henovaTopupBusy=true;
- const button=document.getElementById('henova-gram-topup-check');
- if(button)button.disabled=true;
- henovaTopupStatus('Checking the TON blockchain…');
- try{
-  const result=await henovaCall('verify_gram_topup',{requestId});
-  if(result?.credited===true){
-   localStorage.removeItem('henova-pending-gram-topup');
-   await henovaLoad();
-   henovaTopupStatus('Confirmed: '+Number(result.coins_added||750).toLocaleString('en-US')+' Coins added to your balance.');
-   toast('GRAM payment confirmed · 750 Coins added!');
-  }else{
-   henovaTopupStatus('Not confirmed yet. If you have sent 0.2 GRAM, please check again shortly.');
-   toast('Payment is not confirmed yet. Please check again.');
-  }
- }catch(error){
-  const message=String(error?.message||'verification_unavailable');
-  henovaTopupStatus('Verification: '+message);
-  toast(message.length>95?message.slice(0,95):message);
- }finally{
-  henovaTopupBusy=false;
-  if(button)button.disabled=false;
- }
-}
-
 let henovaInitialStateSynced=false;
 async function henovaCall(action,details={}){
   const initData=window.Telegram?.WebApp?.initData;
@@ -5032,13 +4930,10 @@ el.innerHTML='<section class="hv-friends-hero"><h1>'+w.heading+'</h1><p>'+w.sub+
 '<section class="hv-friends-empty"><span>🎁</span><strong>'+w.empty+'</strong><p>'+w.foot+'</p></section>';
 }
 if(tab===4){
-const topupWord={title:'Add Coins',info:'Pay 0.2 GRAM on TON to receive 750 Coins. Coins are added only after on-chain confirmation.',pay:'Pay 0.2 GRAM',check:'Check payment',balance:'Coins balance'};
 const word=s.lang==='ar'?{title:'سحب GRAM',status:'السحب قيد التجهيز',wallet:'عنوان محفظة TON',save:'حفظ العنوان',saved:'العنوان المحفوظ',pending:'العنوان محفوظ، لكن ملكية المحفظة لم تُتحقق بعد',info:'يتم تجهيز السحب الآمن عبر شبكة TON. التحويلات المالية متوقفة حالياً لحين انتهاء اختبارات الأمان.',history:'طلبات السحب',empty:'لا توجد طلبات سحب',button:'السحب غير متاح الآن'}:s.lang==='tr'?{title:'GRAM çekimi',status:'Çekimler hazırlanıyor',wallet:'TON cüzdan adresi',save:'Adresi kaydet',saved:'Kayıtlı adres',pending:'Adres kaydedildi; cüzdan sahipliği henüz doğrulanmadı',info:'TON üzerinden güvenli çekim hazırlanıyor. Ödemeler güvenlik testleri tamamlanana kadar kapalı.',history:'Çekim geçmişi',empty:'Çekim talebi yok',button:'Çekimler şu anda kapalı'}:{title:'GRAM withdrawal',status:'Withdrawals in preparation',wallet:'TON wallet address',save:'Save address',saved:'Saved address',pending:'Address saved; wallet ownership not yet verified',info:'Secure TON payouts are being prepared. Payments are disabled until security checks are complete.',history:'Withdrawal history',empty:'No withdrawal requests',button:'Withdrawals unavailable'};
 el.innerHTML='<div class="henova-wallet-page hv-simple-withdraw">'+
 '<h1 class="henova-wallet-heading">💎 '+word.title+'</h1>'+
-'<section class="henova-wallet-card hv-gram-topup"><h3>🪙 '+topupWord.title+'</h3><p class="henova-wallet-info">'+topupWord.info+'</p><div class="hv-withdraw-total"><span>'+topupWord.balance+'</span><strong>'+num(s.coins)+' Coins</strong></div><button id="henova-gram-topup-pay" class="henova-wallet-save" onclick="henovaStartGramTopup()">↗ '+topupWord.pay+'</button><button id="henova-gram-topup-check" class="henova-wallet-save" onclick="henovaCheckGramTopup()">✓ '+topupWord.check+'</button><p id="henova-gram-topup-status" class="henova-wallet-note" aria-live="polite"></p></section>'+
-
-'<p class="hv-withdraw-subtitle">'+(s.lang==='ar'?'اسحب أرباح البيض إلى محفظتك':s.lang==='tr'?'Yumurtalarını cüzdanına çek':'Withdraw eggs to your wallet')+'</p>'+
+''<p class="hv-withdraw-subtitle">'+(s.lang==='ar'?'اسحب أرباح البيض إلى محفظتك':s.lang==='tr'?'Yumurtalarını cüzdanına çek':'Withdraw eggs to your wallet')+'</p>'+
 '<section class="hv-withdraw-summary"><small>'+hvText('avail')+'</small><strong>🥚 '+num(s.eggs)+'</strong><p>≈ <span id="hv-withdraw-balance-gram">'+(s.eggs*hvGramPerEgg).toFixed(6)+'</span> GRAM</p><div class="hv-withdraw-pill">💎 GRAM · TON</div></section>'+
 '<section class="henova-wallet-card"><label class="henova-wallet-label" for="henova-ton-wallet">'+word.wallet+'</label><input class="henova-wallet-input" id="henova-ton-wallet" type="text" dir="ltr" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="EQ... / UQ..." maxlength="48"><button class="henova-wallet-save" onclick="henovaSaveTonWallet()">'+word.save+'</button><p id="henova-wallet-info" class="henova-wallet-note"></p></section>'+
 '<section class="henova-wallet-card hv-withdraw-form"><label class="henova-wallet-label" for="hv-withdraw-eggs">'+(s.lang==='ar'?'المبلغ بالبيض':s.lang==='tr'?'Yumurta miktarı':'Egg amount')+'</label><div class="hv-amount-line">🥚 <input id="hv-withdraw-eggs" type="number" inputmode="numeric" min="500" step="1" value="'+Math.min(s.eggs,10000)+'" oninput="henovaUpdateSimpleWithdrawal()"><strong id="hv-withdraw-gram">0 GRAM</strong></div><div class="hv-withdraw-percent">'+[25,50,75,100].map(x=>'<button type="button" onclick="henovaSetWithdrawalPercent('+x+')">'+(x===100?'Max':x+'%')+'</button>').join('')+'</div><div class="hv-withdraw-total"><span>'+(s.lang==='ar'?'ستستلم':s.lang==='tr'?'Alacağınız':'You receive')+'</span><strong id="hv-withdraw-net">0 GRAM</strong></div><small id="hv-withdraw-rule"></small><button id="hv-withdraw-submit" class="henova-wallet-save" onclick="henovaSubmitSimpleWithdrawal()" disabled>↑ '+(s.lang==='ar'?'سحب':s.lang==='tr'?'Çek':'Withdraw')+'</button><p id="hv-withdraw-state" class="henova-wallet-note">'+word.info+'</p></section>'+
