@@ -5025,43 +5025,7 @@ if(window.henovaMuted){const b=document.getElementById('sound-toggle');if(b)b.te
 
 // Entry interstitial: request immediately when the page scripts are ready.
 
-</script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span><script id="henova-entry-adsgram-isolated-v2">
-/* Isolated startup interstitial: begin immediately, wait for Telegram and AdsGram, then request once. */
-(function(){
-  var didRequest=false;
-  function start(){
-    if(didRequest)return;
-    var tries=0;
-    function showWhenReady(){
-      if(didRequest)return;
-      var telegramReady=!!window.Telegram?.WebApp;
-      var adsgramReady=!!window.Adsgram && typeof window.Adsgram.init==='function';
-      if(!telegramReady||!adsgramReady){
-        if(++tries<60){setTimeout(showWhenReady,500);return;}
-        console.warn('HENOVA entry ad prerequisites unavailable',{telegram:telegramReady,adsgram:adsgramReady});
-        return;
-      }
-      didRequest=true;
-      try{
-        var ad=window.Adsgram.init({blockId:'int-56161',debug:false});
-        if(ad.addEventListener){
-          ad.addEventListener('onStart',function(){console.info('HENOVA entry ad started')});
-          ad.addEventListener('onBannerNotFound',function(){console.info('HENOVA entry ad: no available inventory')});
-          ad.addEventListener('onError',function(e){console.warn('HENOVA entry ad render error',e)});
-        }
-        Promise.resolve(ad.show()).then(function(result){
-          console.info('HENOVA entry ad request completed',result||'');
-        }).catch(function(e){
-          console.info('HENOVA entry ad unavailable:',e&&(e.description||e.message||e));
-        });
-      }catch(e){console.warn('HENOVA entry AdsGram failed:',e&&(e.message||e))}
-    }
-    showWhenReady();
-  }
-  // Start immediately; poll only for SDK readiness (maximum 30 seconds).
-  start();
-})();
-</script>
+</script><span id="fullscreen-status" role="status" aria-live="polite" class="fullscreen-status">Loading Telegram display mode</span><!-- HENOVA ENTRY INTERSTITIAL AD REMOVED -->
 
 
 
