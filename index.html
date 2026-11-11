@@ -2916,7 +2916,27 @@ async function henovaAction(action,item){
 const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem('henova-display-preferences-v1',JSON.stringify({lang:s.lang})),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const rate=()=>H.reduce((a,h)=>a+h[3]*(s.hen[h[0]]||0),0)*(1+[0,.10,.20,.35,.50,.75][Math.min(5,s.fan||0)]),prod=()=>Math.floor(Math.min(6*hr,Math.max(0,Date.now()-s.start))*rate()/hr);
 function toast(m){let n=document.getElementById('notice');n.textContent=m;n.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>n.classList.add('hidden'),2700)}
-function collect(){if(!prod())return toast('No eggs available yet');return henovaAction('collect')}
+let henovaCollectAdBusy=false;
+async function collect(){
+ if(henovaCollectAdBusy||henovaBusy)return;
+ if(!prod())return toast('No eggs available yet');
+ henovaCollectAdBusy=true;
+ const button=document.getElementById('collect');
+ if(button)button.disabled=true;
+ try{
+  // Show the former entry interstitial only after the user taps Collect Eggs.
+  // Ad failure or no-fill must never prevent collecting earned eggs.
+  if(window.Adsgram?.init){
+   try{await window.Adsgram.init({blockId:'int-56161',debug:false}).show();}
+   catch(error){console.warn('Collect interstitial unavailable or skipped',error);}
+  }
+  await henovaAction('collect');
+ }finally{
+  henovaCollectAdBusy=false;
+  const currentButton=document.getElementById('collect');
+  if(currentButton)currentButton.disabled=!prod();
+ }
+}
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;
 if((Number(s.hen[id])||0)>=5)return toast(hvError('hen_limit_reached'));
