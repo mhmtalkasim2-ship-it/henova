@@ -4702,11 +4702,11 @@ function henovaOwnedHensMarkup(){
 const HENOVA_ADSGRAM_TASK='task-56216';
 function henovaAdsgramLabels(){
 return ({
- en:{name:'Complete Sponsored Task',reward:'50 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
- ar:{name:'أكمل المهمة الممولة',reward:'50 عملة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
- tr:{name:'Sponsorlu Görevi Tamamla',reward:'50 jeton',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
+ en:{name:'Complete Sponsored Task',reward:'30 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
+ ar:{name:'أكمل المهمة الممولة',reward:'30 عملة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
+ tr:{name:'Sponsorlu Görevi Tamamla',reward:'30 jeton',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
 })[s.lang]||({
-name:'Complete Sponsored Task',reward:'50 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
+name:'Complete Sponsored Task',reward:'30 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
 });
 }
 let henovaSponsoredExpires=Infinity;
@@ -4802,7 +4802,7 @@ async function henovaWatchSponsoredReward(){
      localStorage.setItem(key,String(entry.id));
      const fresh=await henovaCall('state').catch(()=>null);
      if(fresh?.state){henovaApplyState(fresh.state);render();}
-     henovaShowRewardCard(50,'coins');
+     henovaShowRewardCard(30,'coins');
      return;
     }
    }
