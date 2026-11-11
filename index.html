@@ -2845,7 +2845,7 @@ function henovaBuildTopupCommentBoc(comment){
  cellData.set(textBytes,4);
  const totalCellBytes=cellData.length+2;
  const bytes=new Uint8Array(13+cellData.length);
- bytes.set([0xb5,0xee,0x9c,0x72,0x01,0x01,0x01,0x01,0x00,totalCellBytes,0x00,0x01,cellData.length*2],0);
+ bytes.set([0xb5,0xee,0x9c,0x72,0x01,0x01,0x01,0x01,0x00,totalCellBytes,0x00,0x00,cellData.length*2],0);
  bytes.set(cellData,13);
  let binary='';
  for(const byte of bytes)binary+=String.fromCharCode(byte);
@@ -2898,6 +2898,7 @@ async function henovaStartGramTopup(){
   henovaTopupStatus('Payment submitted. Waiting for TON network confirmation…');
   toast('Payment submitted. Coins appear after confirmation.');
   await new Promise(resolve=>setTimeout(resolve,3500));
+  henovaTopupBusy=false;
   await henovaCheckGramTopup();
  }catch(error){
   const message=String(error?.message||'payment_failed');
