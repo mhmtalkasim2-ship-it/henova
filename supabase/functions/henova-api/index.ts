@@ -237,10 +237,16 @@ Deno.serve(async (request) => {
         if(slice.remainingBits<32||Number(slice.loadUint(32))!==0)return "";
         return slice.loadStringTail();
       };
-      try{return parseCell(Cell.fromBase64(bodyValue));}catch{}
+      try{
+        const decodedComment=parseCell(Cell.fromBase64(bodyValue));
+        if(decodedComment)return decodedComment;
+      }catch{}
       try{
         const cells=Cell.fromBoc(Buffer.from(bodyValue,"hex"));
-        if(cells.length)return parseCell(cells[0]);
+        if(cells.length){
+          const decodedComment=parseCell(cells[0]);
+          if(decodedComment)return decodedComment;
+        }
       }catch{}
       return "";
     };
@@ -265,7 +271,8 @@ Deno.serve(async (request) => {
         const transactions=Array.isArray(payload?.transactions)?payload.transactions:[];
         for(const tx of transactions){
           const msg=tx?.in_msg;
-          if(!msg||tx.emulated===true||tx.description?.aborted===true||msg.bounced===true)continue;
+          if(!msg||tx.emulated===true||tx.description?.aborted===true||msg.bounced===true||
+             !Number.isSafeInteger(Number(tx.mc_block_seqno))||Number(tx.mc_block_seqno)<=0)continue;
           if(rawAddress(msg.source)!==senderRaw||rawAddress(msg.destination||tx.account)!==destinationRaw)continue;
           let value=0n;
           try{value=BigInt(String(msg.value||"0"));}catch{continue;}
