@@ -2813,15 +2813,29 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-ex
   will-change:auto!important;
 }
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
-  animation:henovaPurchasedHenExitV1 3.2s cubic-bezier(.2,.72,.28,1) both!important;
+  animation:henovaPurchasedHenExitV2 8.5s cubic-bezier(.35,.08,.25,1) both!important;
   translate:0 0!important;
   will-change:transform,opacity;
 }
-@keyframes henovaPurchasedHenExitV1{
-  0%{transform:translate3d(var(--purchase-entry-x),var(--purchase-entry-y),0) scale(.78);opacity:0}
-  12%{opacity:1}
-  78%{transform:translate3d(0,0,0) scale(1.04);opacity:1}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .hen-facing{
+  animation:henovaPurchasedHenFacingV2 8.5s steps(1,end) both!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .hen-action{
+  animation:none!important;
+  transform:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .hen-action img{
+  animation:henovaHouseWalkGait 1.05s steps(2,end) infinite!important;
+}
+@keyframes henovaPurchasedHenExitV2{
+  0%{transform:translate3d(var(--purchase-entry-x),var(--purchase-entry-y),0) scale(.88);opacity:1}
+  12%{transform:translate3d(calc(var(--purchase-entry-x)*.88),calc(var(--purchase-entry-y)*.88),0) scale(.9);opacity:1}
+  88%{transform:translate3d(0,0,0) scale(1.02);opacity:1}
   100%{transform:translate3d(0,0,0) scale(1);opacity:1}
+}
+@keyframes henovaPurchasedHenFacingV2{
+  0%,88%{transform:scaleX(1)}
+  89%,100%{transform:scaleX(-1)}
 }
 @media(prefers-reduced-motion:reduce){
   main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
@@ -4744,8 +4758,8 @@ function henovaOwnedHensMarkup(){
      const point=points[i];
      const sceneWidth=Math.min(520,document.querySelector('main')?.clientWidth||window.innerWidth);
      const sceneHeight=document.getElementById('farm-scene')?.clientHeight||Math.round(sceneWidth*1.18);
-     const entryDx=Math.round(sceneWidth*(31-point[0])/100);
-     const entryDy=Math.round(sceneHeight*(37-point[1])/100);
+     const entryDx=Math.round(sceneWidth*(30-point[0])/100);
+     const entryDy=Math.round(sceneHeight*(43-point[1])/100);
      const isNewPurchase=henovaPurchasedHenArrival?.breed===breed&&i===count-1;
      const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;':'';
      const arrivalClass=isNewPurchase?' henova-new-purchase-exit':'';
