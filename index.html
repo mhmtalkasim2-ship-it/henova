@@ -4722,11 +4722,11 @@ function henovaOwnedHensMarkup(){
 const HENOVA_ADSGRAM_TASK='task-56216';
 function henovaAdsgramLabels(){
 return ({
- en:{name:'Complete Sponsored Task',reward:'30 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
- ar:{name:'أكمل المهمة الممولة',reward:'30 عملة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
- tr:{name:'Sponsorlu Görevi Tamamla',reward:'30 jeton',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
+ en:{name:'Complete Sponsored Task',reward:'500 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
+ ar:{name:'أكمل المهمة الممولة',reward:'500 عملة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
+ tr:{name:'Sponsorlu Görevi Tamamla',reward:'500 jeton',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
 })[s.lang]||({
-name:'Complete Sponsored Task',reward:'30 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
+name:'Complete Sponsored Task',reward:'500 coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
 });
 }
 let henovaSponsoredExpires=Infinity;
@@ -4788,9 +4788,9 @@ async function henovaVideoCooldownRefresh(){
 setInterval(henovaVideoCooldownDraw,1000);
 
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Advertisement',desc:'50 coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
- ar:{title:'شاهد الإعلان',desc:'50 عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'50 jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
+ return ({en:{title:'Watch Advertisement',desc:'500 coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
+ ar:{title:'شاهد الإعلان',desc:'500 عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
+ tr:{title:'Reklam İzle',desc:'500 jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit,isGift=false){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -4822,7 +4822,7 @@ async function henovaWatchSponsoredReward(){
      localStorage.setItem(key,String(entry.id));
      const fresh=await henovaCall('state').catch(()=>null);
      if(fresh?.state){henovaApplyState(fresh.state);render();}
-     henovaShowRewardCard(30,'coins');
+     henovaShowRewardCard(500,'coins');
      return;
     }
    }
