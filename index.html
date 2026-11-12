@@ -2797,6 +2797,38 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
   main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{animation:none!important;transform:none!important;opacity:1!important}
 }
 </style>
+<style id="henova-purchase-only-hen-exit-20261112">
+/* Existing hens stay in their farm positions. Only the newly purchased hen
+   gets a one-time walk from the farmhouse doorway to its assigned spot. */
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  animation:none!important;
+  translate:0 0!important;
+  opacity:1!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+  animation:none!important;
+  translate:0 0!important;
+  transform:none!important;
+  opacity:1!important;
+  will-change:auto!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
+  animation:henovaPurchasedHenExitV1 3.2s cubic-bezier(.2,.72,.28,1) both!important;
+  translate:0 0!important;
+  will-change:transform,opacity;
+}
+@keyframes henovaPurchasedHenExitV1{
+  0%{transform:translate3d(var(--purchase-entry-x),var(--purchase-entry-y),0) scale(.78);opacity:0}
+  12%{opacity:1}
+  78%{transform:translate3d(0,0,0) scale(1.04);opacity:1}
+  100%{transform:translate3d(0,0,0) scale(1);opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
+    animation:none!important;transform:none!important;opacity:1!important
+  }
+}
+</style>
 </head><body><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 
 
@@ -2898,6 +2930,10 @@ async function henovaAction(action,item){
       henovaApplyState(fresh.state);
     }
     localStorage.removeItem('henova-pending-action-v1');
+    if(action==='purchase'){
+      henovaPurchasedHenArrival={breed:item||'',startedAt:Date.now()};
+      tab=0;
+    }
     render();
     if(action==='collect'){
       const diff=Math.max(0,s.eggs-previousEggs);
@@ -4698,23 +4734,23 @@ const HENOVA_HEN_SPOTS={
  royal:[[10,79],[23,83],[7,88],[27,91],[43,83]],
  legend:[[48,74],[58,77],[71,91],[89,77],[91,89]]
 };
+let henovaPurchasedHenArrival=null;
 function henovaOwnedHensMarkup(){
- let henSequenceIndex=0;
  return H.map(h=>{
    const breed=h[0];
    const count=Math.max(0,Math.min(HENOVA_MAX_HENS_PER_BREED,Math.floor(Number(s.hen[breed])||0))-(breed==='starter'?1:0));
    const points=HENOVA_HEN_SPOTS[breed];
    return Array.from({length:count},(_,i)=>{
      const point=points[i];
-     const breedIndex=H.findIndex(t=>t[0]===breed);
-     const towardCenter=point[0]>65?-1:1;
-     const dx=towardCenter*(17+((i*7+breedIndex*4)%16));
-     const dy=-3-((i+breedIndex)%4)*3;
-     const middleX=Math.round(dx*.52),middleY=Math.round(dy*.52);
-     const duration=13+((i*3+breedIndex*2)%8);
-     const delay=-((i*3+breedIndex*4)%duration);
-     const farmScene=document.getElementById('farm-scene');const sceneWidth=farmScene?.clientWidth||window.innerWidth;const sceneHeight=farmScene?.clientHeight||window.innerHeight;const houseDx=Math.round(sceneWidth*(31-point[0])/100);const houseDy=Math.round(sceneHeight*(37-point[1])/100);const houseSequence=henSequenceIndex++;const variables='--wander-x:'+dx+'px;--wander-y:'+dy+'px;--wander-mid-x:'+middleX+'px;--wander-mid-y:'+middleY+'px;--wander-facing:'+towardCenter+';--wander-home-facing:'+(-towardCenter)+';--wander-duration:'+duration+'s;--wander-delay:'+delay+'s;--house-dx:'+houseDx+'px;--house-dy:'+houseDy+'px;--house-delay:'+(houseSequence*5)+'s;';
-     return '<div class="henova-owned-hen henova-breed-'+breed+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+variables+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
+     const sceneWidth=Math.min(520,document.querySelector('main')?.clientWidth||window.innerWidth);
+     const sceneHeight=document.getElementById('farm-scene')?.clientHeight||Math.round(sceneWidth*1.18);
+     const entryDx=Math.round(sceneWidth*(31-point[0])/100);
+     const entryDy=Math.round(sceneHeight*(37-point[1])/100);
+     const isNewPurchase=henovaPurchasedHenArrival?.breed===breed&&i===count-1;
+     const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;':'';
+     const arrivalClass=isNewPurchase?' henova-new-purchase-exit':'';
+     if(isNewPurchase)henovaPurchasedHenArrival=null;
+     return '<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+entryStyle+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
 }
