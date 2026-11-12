@@ -146,6 +146,24 @@ Deno.serve(async (request) => {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+  // Ensure FK-backed records are only written after the authenticated player exists.
+  // This also safely initializes genuinely new users and preserves referral handling.
+  const ensurePlayerRecord = async () => {
+    const { data: existing, error: lookupError } = await admin.from("henova_players")
+      .select("telegram_id").eq("telegram_id", telegram.id).maybeSingle();
+    if (lookupError) return { ok: false, code: lookupError.code || "lookup_failed" };
+    if (existing) return { ok: true };
+    const { error: registerError } = await admin.rpc("henova_register_player", {
+      p_telegram_id: telegram.id,
+      p_first_name: telegram.first_name,
+      p_username: telegram.username,
+      p_inviter_id: telegram.referral_id,
+    });
+    if (registerError) return { ok: false, code: registerError.code || "registration_failed" };
+    const { data: created, error: verifyError } = await admin.from("henova_players")
+      .select("telegram_id").eq("telegram_id", telegram.id).maybeSingle();
+    return { ok: !!created && !verifyError, code: verifyError?.code || (!created ? "player_missing" : null) };
+  };
   // Read-only diagnostic reserved for a configured Telegram admin.
   // No player initialization or balances are changed by this action.
   if (body?.action === "diagnostic") {
@@ -308,6 +326,11 @@ Deno.serve(async (request) => {
     return reply(data,data?.ok?200:(data?.error==="cooldown"?429:400));
   }
   if(action==="presence_ping"){
+    const playerReady=await ensurePlayerRecord();
+    if(!playerReady.ok){
+      console.warn("HENOVA presence skipped; player initialization unavailable",playerReady.code);
+      return reply({ok:false,error:"player_initialization_unavailable"},503);
+    }
     const {error}=await admin.from("henova_presence").upsert({telegram_id:telegram.id,last_seen_at:new Date().toISOString()},{onConflict:"telegram_id"});
     return error?reply({ok:false,error:"presence_unavailable"},503):reply({ok:true});
   }
@@ -1629,6 +1652,11 @@ Deno.serve(async (request) => {
     return reply(data);
   }
   if(action==="ad_view_start"){
+    const playerReady=await ensurePlayerRecord();
+    if(!playerReady.ok){
+      console.warn("HENOVA ad session skipped; player initialization unavailable",playerReady.code);
+      return reply({ok:false,error:"player_initialization_unavailable"},503);
+    }
     const {data,error}=await admin.from("henova_ad_view_sessions").insert({telegram_id:telegram.id}).select("id").single();
     if(error){console.error("HENOVA ad session insert failed",error.code,error.message);return reply({ok:false,error:"session_unavailable",diagnostics:{code:error.code,message:error.message}},503);}
     return reply({ok:true,session_id:data.id,min_seconds:14});
@@ -1964,6 +1992,11 @@ Deno.serve(async (request) => {
       for(let bit=0;bit<8;bit++)crc=(crc&0x8000)?((crc<<1)^0x1021)&65535:(crc<<1)&65535;
     }
     if(crc!==((raw[34]<<8)|raw[35]))return reply({ok:false,error:"invalid_ton_wallet"},400);
+    const playerReady=await ensurePlayerRecord();
+    if(!playerReady.ok){
+      console.warn("HENOVA wallet save blocked; player initialization unavailable",playerReady.code);
+      return reply({ok:false,error:"player_initialization_unavailable"},503);
+    }
     const {error}=await admin.from("henova_ton_wallets").upsert({
       telegram_id:telegram.id,wallet_address:address,verified_owner:false,updated_at:new Date().toISOString()
     },{onConflict:"telegram_id"});
