@@ -2848,7 +2848,16 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .h
 
 <div id="overlay" class="overlay hidden" onclick="closeModal(event)"><div class="modal" onclick="event.stopPropagation()"><h2>⚙️ Settings</h2><label>Language</label><select id="lang" onchange="changeLang(this.value)"><option value="en">English</option><option value="ar">العربية</option><option value="tr">Türkçe</option></select><p class="muted">HENOVA demo • No real payments</p><p class="muted" style="font-size:10px">Real hen sound: <a href="https://commons.wikimedia.org/wiki/File:Hen_announcing_shes_lain_an_egg.ogg" target="_blank" rel="noopener">alys</a> (Public Domain).</p><button class="primary" onclick="closeModal()">Close</button></div></div><div id="notice" class="notice hidden"></div>
 <div id="henova-leaderboard" class="hv-leaderboard-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="hv-rank-title" onclick="if(event.target===this)henovaCloseLeaderboard()"><section class="hv-leaderboard-sheet"><div class="hv-leaderboard-top"><div><span class="hv-rank-overline">HENOVA</span><h2 id="hv-rank-title">🏆 Leaderboard</h2></div><button class="hv-leaderboard-close" onclick="henovaCloseLeaderboard()" type="button" aria-label="Close">✕</button></div><div id="henova-leaderboard-body" aria-live="polite"></div></section></div>
-<script>
+<style id="henova-gram-mining-style">
+.hv-gram-mining{max-width:520px;margin:12px auto;padding:18px;border-radius:25px;background:linear-gradient(155deg,#13243c,#1b3554 58%,#274a68);color:#f7f3e9;box-shadow:0 12px 30px #12263b30}
+.hv-gram-mining-top{display:flex;gap:13px;align-items:center}.hv-gram-gem{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:18px;background:linear-gradient(145deg,#ffe59b,#d39a32);font-size:31px;box-shadow:inset 0 2px 6px #fff8}
+.hv-gram-mining h1{font-size:21px;margin:0 0 5px;color:#ffe4a0}.hv-gram-mining p{font-size:12px;line-height:1.5;color:#c4d4e4;margin:4px 0}
+.hv-gram-balance{margin:20px 0 12px;padding:18px;border:1px solid #d6b86b66;border-radius:18px;background:#ffffff0d;text-align:center}.hv-gram-balance small,.hv-gram-stats small{display:block;color:#b8c9d9;font-size:11px}.hv-gram-balance strong{display:block;margin-top:6px;font-size:29px;letter-spacing:.3px;color:#ffe09a;font-variant-numeric:tabular-nums}.hv-gram-balance strong span{font-size:15px}
+.hv-gram-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.hv-gram-stats>div{min-width:0;padding:12px 7px;border-radius:14px;background:#ffffff12;text-align:center}.hv-gram-stats b{display:block;margin-top:6px;font-size:12px;color:#fff1c9;overflow-wrap:anywhere}
+.hv-gram-session{margin-top:14px;padding:16px;border-radius:18px;background:#f8f4e9;color:#21364b}.hv-gram-session-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.hv-gram-session-head b{font-size:13px}.hv-gram-session-head strong{font-size:19px;font-variant-numeric:tabular-nums;color:#a36a12}.hv-gram-session p{color:#647789;margin:10px 0 14px}
+.hv-gram-button{width:100%;padding:14px;border:0;border-radius:14px;background:linear-gradient(#ffe28b,#e8ad43);color:#543b0c;font-weight:900;box-shadow:0 4px #b9812b}.hv-gram-button:disabled{opacity:.55;box-shadow:none}
+.hv-gram-admin-note{margin-top:13px;text-align:center;font-size:10px;color:#9fb4c7}
+</style><script>
 const K='henova-demo-v1', hr=3600000, H=[['starter','🐔','Starter Hen',10,750],['red','🐓','Red Hen',30,1500],['gold','🐤','Golden Hen',60,3000],['royal','👑','Royal Hen',120,10000],['legend','🌟','Legendary Hen',250,25000]];
 const L={en:['Farm','Packs','Tasks','Friends','Wallet','Collect Eggs','Buy','Withdraw'],ar:['المزرعة','الحزم','المهام','الأصدقاء','المحفظة','جمع البيض','شراء','سحب'],tr:['Çiftlik','Paketler','Görevler','Arkadaşlar','Cüzdan','Yumurtaları Topla','Satın Al','Çek']};
 // Balances are now server-authoritative. Only the visual language setting stays local.
@@ -2859,7 +2868,7 @@ function henovaTelegramLanguage(){
   return ['ar','tr','en'].includes(lang)?lang:'en';
 }
 let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:henovaTelegramLanguage(),fan:0,promoHen:null};
-let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0,henovaInviteThreeProgress=0,henovaInviteThreeRewarded=false,henovaDailyInviteProgress=0,henovaDailyInviteRewarded=false;
+let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0,henovaInviteThreeProgress=0,henovaInviteThreeRewarded=false,henovaDailyInviteProgress=0,henovaDailyInviteRewarded=false;\nlet henovaGramMiningState={balance:'0',total_mined:'0',mining_started_at:null,mining_ends_at:null},henovaGramMiningBusy=false;\nfunction henovaIsGramMiningAdmin(){return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'')==='1035565575'}
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
 function henovaAdminLaunchRequested(){const app=window.Telegram?.WebApp;const p=new URLSearchParams(location.search);return p.get('admin')==='payouts'||p.get('startapp')==='admin_payouts'||p.get('tgWebAppStartParam')==='admin_payouts'||app?.initDataUnsafe?.start_param==='admin_payouts'}
@@ -4497,7 +4506,30 @@ function shareInvite(){const u=henovaReferralLink();if(!u)return toast('Open HEN
 function settings(){document.getElementById('lang').value=s.lang;document.getElementById('overlay').classList.remove('hidden')}
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){if(!['en','ar','tr'].includes(x))return;s.lang=x;save();render()}
-function openTab(i){document.body.classList.remove('henova-payout-admin-active');tab=i;render()}
+function openTab(i){if(i===5&&!henovaIsGramMiningAdmin())return;document.body.classList.remove('henova-payout-admin-active');tab=i;render();if(i===5)henovaGramMiningLoad()}
+async function henovaGramMiningLoad(){
+ if(!henovaIsGramMiningAdmin())return;
+ try{const r=await henovaCall('gram_mining_state');if(r?.ok&&r.state)henovaGramMiningState=r.state;else throw Error(r?.error||'gram_mining_unavailable');render()}
+ catch(e){console.warn('GRAM mining state unavailable',e);toast('GRAM Mining: '+String(e.message||e).slice(0,70))}
+}
+async function henovaGramMiningAction(action){
+ if(!henovaIsGramMiningAdmin()||henovaGramMiningBusy)return;
+ henovaGramMiningBusy=true;render();
+ try{
+  const r=await henovaCall(action);
+  if(action==='gram_mining_claim'&&r?.ok)toast('Claimed '+Number(r.claimed||0).toFixed(3)+' GRAM');
+  else if(action==='gram_mining_start'&&r?.status==='mining')toast('GRAM mining started');
+  await henovaGramMiningLoad();
+ }catch(e){toast(String(e.message||e).replaceAll('_',' ').slice(0,90))}
+ finally{henovaGramMiningBusy=false;render()}
+}
+function henovaGramMiningClock(){
+ const end=Date.parse(henovaGramMiningState.mining_ends_at||'');
+ if(!Number.isFinite(end))return '—';
+ const sec=Math.max(0,Math.ceil((end-Date.now())/1000));
+ if(!sec)return '00:00:00';
+ return [Math.floor(sec/3600),Math.floor(sec%3600/60),sec%60].map(x=>String(x).padStart(2,'0')).join(':');
+}
 
 /* One click / tap gives a short synthesized chicken-like cluck, without external audio. */
 // Soft morning countryside ambiance: small birdsong notes and a rare quiet real hen.
@@ -4924,7 +4956,7 @@ async function henovaWatchRewardVideo(){
 function render(){
 updateFarmIdentity();
 const el=document.getElementById('view');document.getElementById('balance').textContent=num(s.eggs);document.getElementById('coins').textContent=num(s.coins);
-const names=t(),icons=['🏡','🐣','📋','👥','💰'];
+const names=t(),icons=['🏡','🐣','📋','👥','💰'];if(henovaIsGramMiningAdmin()){names.push(s.lang==='ar'?'تعدين GRAM':s.lang==='tr'?'GRAM Madenciliği':'GRAM Mining');icons.push('💎')}
 const labels=document.querySelectorAll('.stats small');if(labels.length===2){labels[0].textContent=s.lang==='ar'?'بيض':s.lang==='tr'?'YUMURTA':'EGGS';labels[1].textContent=s.lang==='ar'?'عملات':s.lang==='tr'?'JETON':'COINS';}document.getElementById('nav').innerHTML=icons.map((v,i)=>'<button class="'+(i===tab?'active':'')+'" onclick="openTab('+i+')"><span>'+v+'</span>'+names[i]+'</button>').join('');
 document.querySelector('main').dir=s.lang==='ar'?'rtl':'ltr';document.querySelector('main').classList.toggle('farm-mode',tab===0);
 // Task layout only: hide header balances without modifying player data.
@@ -4991,6 +5023,15 @@ el.innerHTML='<div class="henova-wallet-page hv-simple-withdraw">'+
 '<section class="henova-wallet-card"><h3>📋 '+word.history+'</h3><div id="henova-payout-history" class="henova-wallet-history">'+word.empty+'</div></section></div>';
 
 henovaRefreshPayoutSetup();
+}
+if(tab===5&&henovaIsGramMiningAdmin()){
+ const end=Date.parse(henovaGramMiningState.mining_ends_at||'');
+ const running=Number.isFinite(end)&&end>Date.now();
+ const ready=Number.isFinite(end)&&end<=Date.now();
+ const balance=Number(henovaGramMiningState.balance||0);
+ const total=Number(henovaGramMiningState.total_mined||0);
+ const w=s.lang==='ar'?{title:'تعدين GRAM التجريبي',desc:'هذا القسم مخصص لحساب الإدارة فقط خلال الاختبار.',balance:'رصيد GRAM',total:'إجمالي التعدين',rate:'مكافأة الجلسة',duration:'مدة الجلسة',start:'ابدأ التعدين',claim:'استلام 0.001 GRAM',running:'التعدين جارٍ',ready:'المكافأة جاهزة للاستلام',idle:'لا توجد جلسة تعدين نشطة',wait:'يتوقف التعدين تلقائياً بعد ساعتين. لا تبدأ جلسة جديدة قبل استلام المكافأة.'}:s.lang==='tr'?{title:'GRAM Madenciliği · Test',desc:'Test sırasında bu bölüm yalnızca yönetici hesabına açıktır.',balance:'GRAM bakiyesi',total:'Toplam kazanç',rate:'Oturum ödülü',duration:'Oturum süresi',start:'Madenciliği başlat',claim:'0.001 GRAM al',running:'Madencilik sürüyor',ready:'Ödül almaya hazır',idle:'Aktif madencilik oturumu yok',wait:'Madencilik iki saat sonra otomatik durur. Ödülü almadan yeni oturum başlamaz.'}:{title:'GRAM Mining · Admin Trial',desc:'This section is available only to the admin account during testing.',balance:'GRAM balance',total:'Total mined',rate:'Session reward',duration:'Session length',start:'Start Mining',claim:'Claim 0.001 GRAM',running:'Mining in progress',ready:'Reward ready to claim',idle:'No active mining session',wait:'Mining stops automatically after two hours. A new session cannot start until the reward is claimed.'};
+ el.innerHTML='<section class="hv-gram-mining"><div class="hv-gram-mining-top"><div class="hv-gram-gem">💎</div><div><h1>'+w.title+'</h1><p>'+w.desc+'</p></div></div><div class="hv-gram-balance"><small>'+w.balance+'</small><strong>'+balance.toFixed(9)+' <span>GRAM</span></strong></div><div class="hv-gram-stats"><div><small>'+w.total+'</small><b>'+total.toFixed(9)+'</b></div><div><small>'+w.rate+'</small><b>0.001 GRAM</b></div><div><small>'+w.duration+'</small><b>02:00:00</b></div></div><div class="hv-gram-session"><div class="hv-gram-session-head"><b>⛏️ '+(running?w.running:ready?w.ready:w.idle)+'</b><strong id="hv-gram-clock">'+(running?henovaGramMiningClock():ready?'00:00:00':'—')+'</strong></div><p>'+w.wait+'</p>'+(ready?'<button class="hv-gram-button" onclick="henovaGramMiningAction(\'gram_mining_claim\')" '+(henovaGramMiningBusy?'disabled':'')+'>'+w.claim+'</button>':running?'<button class="hv-gram-button" disabled>'+w.running+'</button>':'<button class="hv-gram-button" onclick="henovaGramMiningAction(\'gram_mining_start\')" '+(henovaGramMiningBusy?'disabled':'')+'>'+w.start+'</button>')+'</div><div class="hv-gram-admin-note">🔒 Admin Telegram ID: 1035565575</div></section>';
 }
 if(tab===0)prepareFarmArtwork();
 }
