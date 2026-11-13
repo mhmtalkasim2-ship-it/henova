@@ -4510,7 +4510,7 @@ function settings(){document.getElementById('lang').value=s.lang;document.getEle
 function closeModal(){document.getElementById('overlay').classList.add('hidden')}
 function changeLang(x){if(!['en','ar','tr'].includes(x))return;s.lang=x;save();render()}
 function openTab(i){if(i===5&&!henovaIsGramMiningAdmin())return;document.body.classList.remove('henova-payout-admin-active');tab=i;render();if(i===5)henovaGramMiningLoad()}
-async async function henovaGramMiningLoad(){
+async function henovaGramMiningLoad(){
  if(!henovaIsGramMiningAdmin())return;
  try{const r=await henovaCall('gram_mining_state');if(r?.ok&&r.state)henovaGramMiningState=r.state;else throw Error(r?.error||'gram_mining_unavailable');render()}
  catch(e){console.warn('GRAM mining state unavailable',e);toast('GRAM Mining: '+String(e.message||e).slice(0,70))}
