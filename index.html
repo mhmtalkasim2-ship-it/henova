@@ -2868,7 +2868,8 @@ function henovaTelegramLanguage(){
   return ['ar','tr','en'].includes(lang)?lang:'en';
 }
 let s={eggs:0,coins:0,hen:{starter:1},start:Date.now(),daily:'',lang:['en','ar','tr'].includes(preference.lang)?preference.lang:henovaTelegramLanguage(),fan:0,promoHen:null};
-let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0,henovaInviteThreeProgress=0,henovaInviteThreeRewarded=false,henovaDailyInviteProgress=0,henovaDailyInviteRewarded=false;\nlet henovaGramMiningState={balance:'0',total_mined:'0',mining_started_at:null,mining_ends_at:null},henovaGramMiningBusy=false;
+let tab=0,henovaReady=false,henovaBusy=false,henovaReferralCount=0,henovaReferralEggs=0,henovaReferralCoins=0,henovaChannelNext=0,henovaInviteThreeProgress=0,henovaInviteThreeRewarded=false,henovaDailyInviteProgress=0,henovaDailyInviteRewarded=false;
+let henovaGramMiningState={balance:'0',total_mined:'0',mining_started_at:null,mining_ends_at:null},henovaGramMiningBusy=false;
 function henovaIsGramMiningAdmin(){return String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'')==='1035565575'}
 const HENOVA_API_URL='https://gnkyduafxivfyrpoznnp.supabase.co/functions/v1/henova-api';
 function henovaIsTelegram(){return !!window.Telegram?.WebApp?.initData}
