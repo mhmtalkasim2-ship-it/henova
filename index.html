@@ -4354,7 +4354,7 @@ async function henovaPrepareWalletProof(){
   toast('Verification challenge prepared. Reconnect Tonkeeper. No payout was initiated.');
  }catch(e){const message=String(e?.message||'unknown_error');if(status)status.textContent='Wallet verification: '+message;toast(message.length>110?message.slice(0,110):message);}
 }
-let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=1000000,hvGramPerEgg=0.00001,hvWalletVerified=false,hvEligibilityPercent=0,hvEligibilityGoal=25,hvEligibilityReady=false;
+let hvPayoutReady=false,hvMinEggs=500,hvMaxEggs=1000000,hvGramPerEgg=0.000001,hvWalletVerified=false,hvEligibilityPercent=0,hvEligibilityGoal=25,hvEligibilityReady=false;
 function henovaSetWithdrawalPercent(p){
  const input=document.getElementById('hv-withdraw-eggs');
  if(!input)return;
@@ -4367,7 +4367,8 @@ function henovaUpdateSimpleWithdrawal(){
  const amount=Number(input.value),valid=Number.isSafeInteger(amount)&&amount>=hvMinEggs&&amount<=hvMaxEggs&&amount<=Number(s.eggs);
  const gram=valid?amount*hvGramPerEgg:Math.max(0,(Number.isFinite(amount)?amount:0)*hvGramPerEgg);
  const formatted=gram.toFixed(6).replace(/0+$/,'').replace(/\\.$/,'');
- const v=document.getElementById('hv-withdraw-gram'),net=document.getElementById('hv-withdraw-net'),rule=document.getElementById('hv-withdraw-rule');
+ const v=document.getElementById('hv-withdraw-gram'),net=document.getElementById('hv-withdraw-net'),rule=document.getElementById('hv-withdraw-rule'),balance=document.getElementById('hv-withdraw-balance-gram');
+ if(balance)balance.textContent=((Number(s.eggs)||0)*hvGramPerEgg).toFixed(6).replace(/0+$/,'').replace(/\\.$/,'');
  if(v)v.textContent=formatted+' GRAM';
  if(net)net.textContent=formatted+' GRAM';
  if(rule){
@@ -4473,7 +4474,7 @@ async function henovaRefreshPayoutSetup(){
   hvWalletVerified=data.wallet?.verified_owner===true;
   hvMinEggs=Number(data.payout?.min_eggs)||500;
   hvMaxEggs=Number(data.payout?.max_eggs)||1000000;
-  hvGramPerEgg=Number(data.payout?.gram_per_egg)||0.00001;
+  hvGramPerEgg=Number(data.payout?.gram_per_egg)||0.000001;
   hvEligibilityPercent=Math.max(0,Math.min(100,Number(data.eligibility?.percent)||0));
   hvEligibilityGoal=Number(data.eligibility?.goal)||25;
   hvEligibilityReady=data.eligibility?.eligible===true;
