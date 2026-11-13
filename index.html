@@ -4531,6 +4531,17 @@ async function henovaGramMiningAction(action){
  if(!henovaIsGramMiningAdmin()||henovaGramMiningBusy)return;
  henovaGramMiningBusy=true;render();
  try{
+  if(action==='gram_mining_claim'){
+   if(!window.Telegram?.WebApp?.initData)throw Error('Open HENOVA in Telegram');
+   if(!window.Adsgram?.init)throw Error(s.lang==='ar'?'خدمة الإعلان غير جاهزة، أعد فتح التطبيق':'AdsGram is not ready. Reopen the app.');
+   const session=await henovaCall('ad_view_start');
+   if(!session?.ok||!session?.session_id)throw Error(session?.error||'ad_session_unavailable');
+   let completed=false;
+   try{await window.Adsgram.init({blockId:'int-56730',debug:false}).show();completed=true}
+   catch(adError){console.warn('GRAM mining ad not completed',adError);const reason=String(adError?.description||adError?.message||adError||'').toLowerCase();if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available/.test(reason))throw Error(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً':'No ad available right now. Try again later.');}
+   const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
+   if(!completed||!checked?.min_seconds_met)throw Error(s.lang==='ar'?'يجب إكمال الإعلان قبل جمع GRAM':'Please complete the ad before claiming GRAM.');
+  }
   const r=await henovaCall(action);
   if(action==='gram_mining_claim'&&r?.ok){
    const claimed=Number(r.claimed||0);
@@ -5015,10 +5026,8 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 
 if(tab===2){
  // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
- const v=henovaVideoRewardText();
  const sponsored=henovaAdsgramLabels();
  const firstAdTasks='<article class="item hv-sponsored-card hv-sponsored-task-vertical"><div class="hv-sponsored-copy"><h3>🪙 '+sponsored.name+'</h3><p>'+sponsored.reward+' · '+sponsored.interval+'</p><small data-sponsored-status>Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🪙 '+sponsored.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+sponsored.button+'</span><span slot="claim">'+sponsored.claim+'</span><span slot="done">'+sponsored.done+'</span></adsgram-task></div></article>'+
- '<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>' +
  '<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Victors_Company_bot.jpg" alt="Victor\'s Company" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Victor\'s Company':s.lang==='tr'?'Bize Katıl · Victor\'s Company':'Join Us · Victor\'s Company')+'</h3><p>🪙 +2,500 · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenVictorsCompany()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-victors-company-claim" onclick="henovaClaimVictorsCompany()" '+(henovaVictorsCompanyClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
  const tasksHeading=el.querySelector('h1.title');
  if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks);
