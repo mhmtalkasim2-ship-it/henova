@@ -2971,17 +2971,61 @@ let henovaCollectAdBusy=false;
 async function collect(){
  if(henovaCollectAdBusy||henovaBusy)return;
  if(!prod())return toast('No eggs available yet');
+ if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA in Telegram');
+ if(!window.Adsgram?.init)return toast('AdsGram failed to load. Reopen the app.');
  henovaCollectAdBusy=true;
  const button=document.getElementById('collect');
+ const hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());
+ const previousEggs=s.eggs;
  if(button)button.disabled=true;
  try{
-  // Show the former entry interstitial only after the user taps Collect Eggs.
-  // Ad failure or no-fill must never prevent collecting earned eggs.
-  if(window.Adsgram?.init){
-   try{await window.Adsgram.init({blockId:'int-56161',debug:false}).show();}
-   catch(error){console.warn('Collect interstitial unavailable or skipped',error);}
+  const session=await henovaCall('collect_ad_start');
+  if(!session?.ok||!session?.session_id){
+   if(session?.error==='collect_cooldown'){
+    const sec=Math.max(1,Number(session.retry_after_seconds)||3600);
+    const mins=Math.ceil(sec/60);
+    toast('Next egg collection in '+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m'));
+    return;
+   }
+   throw Error(session?.error||'collect_ad_unavailable');
   }
-  await henovaAction('collect');
+  let adResult;
+  try{
+   adResult=await window.Adsgram.init({blockId:'int-57642',debug:false}).show();
+   if(!adResult||adResult.done!==true||adResult.error===true){
+    toast('Please watch the ad to the end to collect eggs.');
+    return;
+   }
+  }catch(error){
+   console.warn('Collect rewarded ad skipped or unavailable',error);
+   toast('The ad did not complete. Please try again.');
+   return;
+  }
+  const checked=await henovaCall('collect_ad_check',{session_id:session.session_id});
+  if(!checked?.min_seconds_met){
+   toast('Please watch the ad for at least 13 seconds.');
+   return;
+  }
+  const result=await henovaCall('collect_after_ad',{session_id:session.session_id,requestId:crypto.randomUUID()});
+  if(!result?.ok){
+   if(result?.error==='collect_cooldown'){
+    const mins=Math.ceil(Math.max(1,Number(result.retry_after_seconds)||3600)/60);
+    toast('Next egg collection in '+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m'));
+    return;
+   }
+   throw Error(result?.error||'collect_unavailable');
+  }
+  s.eggs=Number(result.eggs);s.coins=Number(result.coins);
+  s.hen={starter:Number(result.starter)||0,red:Number(result.red)||0,gold:Number(result.gold)||0,royal:Number(result.royal)||0,legend:Number(result.legend)||0};
+  s.fan=Number(result.fan)||0;s.start=Date.parse(result.production_started_at)||Date.now();
+  render();
+  const diff=Math.max(0,s.eggs-previousEggs);
+  if(diff>0){playCollectEggs(hens,diff);toast('+'+diff+' eggs collected!');}
+  else toast('No eggs available yet.');
+ }catch(error){
+  console.warn('HENOVA rewarded collection failed',error);
+  toast(hvError(error.message));
+  try{const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render();}}catch{}
  }finally{
   henovaCollectAdBusy=false;
   const currentButton=document.getElementById('collect');
