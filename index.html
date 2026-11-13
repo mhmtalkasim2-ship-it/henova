@@ -2970,11 +2970,12 @@ function toast(m){let n=document.getElementById('notice');n.textContent=m;n.clas
 let henovaCollectAdBusy=false;
 async function collect(){
  if(henovaCollectAdBusy||henovaBusy)return;
- if(!prod())return toast('No eggs available yet');
- if(!window.Telegram?.WebApp?.initData)return toast('Open HENOVA in Telegram');
- if(!window.Adsgram?.init)return toast('AdsGram failed to load. Reopen the app.');
+ if(!prod())return toast(s.lang==='ar'?'لا يوجد بيض جاهز للجمع بعد.':s.lang==='tr'?'Henüz toplanacak yumurta yok.':'No eggs available yet.');
+ if(!window.Telegram?.WebApp?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
+ if(!window.Adsgram?.init)return toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');
  henovaCollectAdBusy=true;
  const button=document.getElementById('collect');
+ const originalLabel=button?.textContent||'';
  const hens=[...document.querySelectorAll('#farm-scene .farm-hen')].filter(e=>e.getClientRects().length&&e.getBoundingClientRect().width>0).map(e=>e.getBoundingClientRect());
  const previousEggs=s.eggs;
  if(button)button.disabled=true;
@@ -2982,35 +2983,40 @@ async function collect(){
   const session=await henovaCall('collect_ad_start');
   if(!session?.ok||!session?.session_id){
    if(session?.error==='collect_cooldown'){
-    const sec=Math.max(1,Number(session.retry_after_seconds)||3600);
-    const mins=Math.ceil(sec/60);
-    toast('Next egg collection in '+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m'));
+    const sec=Math.max(1,Number(session.retry_after_seconds)||3600),mins=Math.ceil(sec/60);
+    const duration=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
+    toast(s.lang==='ar'?'يمكنك جمع البيض مجدداً بعد '+duration:s.lang==='tr'?'Yumurtaları '+duration+' sonra tekrar toplayabilirsin':'You can collect eggs again in '+duration);
     return;
    }
    throw Error(session?.error||'collect_ad_unavailable');
   }
+  const ad=window.Adsgram.init({blockId:'int-57642',debug:false});
   let adResult;
   try{
-   adResult=await window.Adsgram.init({blockId:'int-57642',debug:false}).show();
+   adResult=await ad.show();
    if(!adResult||adResult.done!==true||adResult.error===true){
-    toast('Please watch the ad to the end to collect eggs.');
+    console.warn('Collect advertisement did not complete',adResult);
+    toast(s.lang==='ar'?'يجب مشاهدة الإعلان حتى النهاية لاستلام البيض.':s.lang==='tr'?'Yumurtaları almak için reklamı sonuna kadar izleyin.':'Please watch the ad to the end to collect your eggs.');
     return;
    }
   }catch(error){
-   console.warn('Collect rewarded ad skipped or unavailable',error);
-   toast('The ad did not complete. Please try again.');
+   console.warn('Collect advertisement unavailable, skipped or failed',error);
+   const reason=String(error?.description||error?.message||error||'').toLowerCase();
+   if(/no.?ads|no.?fill|not available|not found|no inventory|unavailable|no ads available|banner/.test(reason)){
+    toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');
+   }else{
+    toast(s.lang==='ar'?'لم يكتمل الإعلان. حاول مرة أخرى.':s.lang==='tr'?'Reklam tamamlanmadı. Tekrar deneyin.':'The ad did not complete. Please try again.');
+   }
    return;
   }
   const checked=await henovaCall('collect_ad_check',{session_id:session.session_id});
-  if(!checked?.min_seconds_met){
-   toast('Please watch the ad for at least 13 seconds.');
-   return;
-  }
+  if(!checked?.min_seconds_met){henovaAdNotice('collect_short');return;}
   const result=await henovaCall('collect_after_ad',{session_id:session.session_id,requestId:crypto.randomUUID()});
   if(!result?.ok){
    if(result?.error==='collect_cooldown'){
     const mins=Math.ceil(Math.max(1,Number(result.retry_after_seconds)||3600)/60);
-    toast('Next egg collection in '+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m'));
+    const duration=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
+    toast(s.lang==='ar'?'يمكنك جمع البيض مجدداً بعد '+duration:s.lang==='tr'?'Yumurtaları '+duration+' sonra tekrar toplayabilirsin':'You can collect eggs again in '+duration);
     return;
    }
    throw Error(result?.error||'collect_unavailable');
@@ -3020,19 +3026,24 @@ async function collect(){
   s.fan=Number(result.fan)||0;s.start=Date.parse(result.production_started_at)||Date.now();
   render();
   const diff=Math.max(0,s.eggs-previousEggs);
-  if(diff>0){playCollectEggs(hens,diff);toast('+'+diff+' eggs collected!');}
-  else toast('No eggs available yet.');
+  if(diff>0){
+   playCollectEggs(hens,diff);
+   toast(s.lang==='ar'?'✅ تم جمع '+diff.toLocaleString('en-US')+' بيضة بنجاح!':s.lang==='tr'?'✅ '+diff.toLocaleString('en-US')+' yumurta toplandı!':'✅ '+diff.toLocaleString('en-US')+' eggs collected!');
+  }else toast(s.lang==='ar'?'لا يوجد بيض جاهز للجمع بعد.':s.lang==='tr'?'Henüz toplanacak yumurta yok.':'No eggs available yet.');
  }catch(error){
   console.warn('HENOVA rewarded collection failed',error);
   if(error.message==='collect_cooldown'){
    const mins=Math.ceil(Math.max(1,Number(error.retryAfterSeconds)||3600)/60);
-   toast('Next egg collection in '+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m'));
-  }else toast(hvError(error.message));
+   const duration=mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m';
+   toast(s.lang==='ar'?'يمكنك جمع البيض مجدداً بعد '+duration:s.lang==='tr'?'Yumurtaları '+duration+' sonra tekrar toplayabilirsin':'You can collect eggs again in '+duration);
+  }else{
+   toast(s.lang==='ar'?'تعذر بدء الإعلان أو جمع البيض، حاول مرة أخرى.':s.lang==='tr'?'Reklam veya yumurta toplama başlatılamadı. Tekrar deneyin.':'Could not start the ad or collect eggs. Please try again.');
+  }
   try{const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render();}}catch{}
  }finally{
   henovaCollectAdBusy=false;
   const currentButton=document.getElementById('collect');
-  if(currentButton)currentButton.disabled=!prod();
+  if(currentButton){currentButton.disabled=!prod();if(currentButton===button)currentButton.textContent=originalLabel;}
  }
 }
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
@@ -4917,9 +4928,9 @@ async function henovaWatchSponsoredReward(){
 }
 function henovaAdWatchMessage(kind){
  const messages={
-  ar:{short:'شاهد الإعلان حتى النهاية ليتم احتسابه',completed:'✅ اكتملت مشاهدة الإعلان',success:'✅ تم احتساب الإعلان بنجاح!'},
-  en:{short:'Watch the advertisement to the end to earn the reward.',completed:'✅ Advertisement completed',success:'✅ Advertisement successfully credited!'},
-  tr:{short:'Ödül için reklamı sonuna kadar izleyin.',completed:'✅ Reklam izleme tamamlandı',success:'✅ Reklam ödülü başarıyla eklendi!'}
+  ar:{short:'شاهد الإعلان حتى النهاية ليتم احتسابه',collect_short:'شاهد الإعلان لمدة 13 ثانية على الأقل لاستلام البيض.',completed:'✅ اكتملت مشاهدة الإعلان',success:'✅ تم احتساب الإعلان بنجاح!'},
+  en:{short:'Watch the advertisement to the end to earn the reward.',collect_short:'Watch the ad for at least 13 seconds to collect your eggs.',completed:'✅ Advertisement completed',success:'✅ Advertisement successfully credited!'},
+  tr:{short:'Ödül için reklamı sonuna kadar izleyin.',collect_short:'Yumurtaları toplamak için reklamı en az 13 saniye izleyin.',completed:'✅ Reklam izleme tamamlandı',success:'✅ Reklam ödülü başarıyla eklendi!'}
  };
  return (messages[s.lang]||messages.en)[kind];
 }
