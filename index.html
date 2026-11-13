@@ -3221,7 +3221,7 @@ async function henovaClaimNGMCloud(){
 let henovaUTYAOpened=false,henovaUTYABusy=false,henovaUTYAClaimed=false;
 function henovaOpenUTYA(){
  henovaUTYAOpened=true;
- window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/averonnetworkbot?start=UTYA1035565575');
+ window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/Victors_Company_bot/app?startapp=ref_5599121F94');
 }
 async function henovaClaimUTYA(){
  if(henovaUTYABusy||henovaUTYAClaimed)return;
@@ -3234,7 +3234,7 @@ async function henovaClaimUTYA(){
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaUTYAClaimed=true;
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
-  if(result.claimed)henovaShowRewardCard(500,'eggs');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
+  if(result.claimed)henovaShowRewardCard(1000,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaUTYABusy=false;const current=document.getElementById('henova-utya-claim');if(current)current.disabled=henovaUTYAClaimed}
 }
@@ -4967,19 +4967,12 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 }
 
 if(tab===2){
- const nTitle=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join Us';
- const nDesc=s.lang==='ar'?'500 بيضة · مرة واحدة':s.lang==='tr'?'500 yumurta · Tek seferlik':'500 eggs · One time only';
- const nOpen=s.lang==='ar'?'فتح البوت':s.lang==='tr'?'Botu Aç':'Open Bot';
- const nClaim=s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim';
- const nPending=s.lang==='ar'?'افتح البوت ثم استلم مكافأة الزيارة لمرة واحدة':s.lang==='tr'?'Botu aç, tek seferlik ziyaret ödülünü al':'Open bot, then claim one-time visit reward';
-  el.insertAdjacentHTML('beforeend', `<article class='item' style='display:flex;align-items:center;gap:12px'><img src='https://t.me/i/userpic/320/averonnetworkbot.jpg' alt='Averon Network' style='width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px'><div class='grow' style='min-width:0'><h3>${s.lang==='ar'?'انضم إلينا · Averon Network':s.lang==='tr'?'Bize Katıl · Averon Network':'Join Us · Averon Network'}</h3><p>🪙 +20 · ${s.lang==='ar'?'مرة واحدة':s.lang==='tr'?'Tek seferlik':'One time only'}</p><small>${nPending}</small></div><div style='display:grid;gap:5px;flex:0 0 auto'><button onclick='henovaOpenUTYA()'>${nOpen}</button><button id='henova-utya-claim' onclick='henovaClaimUTYA()' ${henovaUTYAClaimed?'disabled':''}>${nClaim}</button></div></article>`);
-}
-if(tab===2){
  // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
  const v=henovaVideoRewardText();
  const sponsored=henovaAdsgramLabels();
  const firstAdTasks='<article class="item hv-sponsored-card hv-sponsored-task-vertical"><div class="hv-sponsored-copy"><h3>🪙 '+sponsored.name+'</h3><p>'+sponsored.reward+' · '+sponsored.interval+'</p><small data-sponsored-status>Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🪙 '+sponsored.reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+sponsored.button+'</span><span slot="claim">'+sponsored.claim+'</span><span slot="done">'+sponsored.done+'</span></adsgram-task></div></article>'+
- '<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>';
+ '<article class="item hv-sponsored-card hv-video-task-card"><div class="hv-task-top"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" loading="lazy" class="hv-task-avatar"><div class="grow hv-sponsored-copy"><h3>'+v.title+'</h3><p>'+v.desc+'</p></div></div><div class="hv-sponsored-action hv-video-task-action"><button id="henova-reward-video-btn" onclick="henovaWatchRewardVideo()">'+v.button+'</button></div></article>' +
+ '<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Victors_Company_bot.jpg" alt="Victor\'s Company" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Victor\'s Company':s.lang==='tr'?'Bize Katıl · Victor\'s Company':'Join Us · Victor\'s Company')+'</h3><p>🪙 +1,000 · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenUTYA()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-utya-claim" onclick="henovaClaimUTYA()" '+(henovaUTYAClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
  const tasksHeading=el.querySelector('h1.title');
  if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks);
  henovaAttachAdsgramTask();
