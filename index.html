@@ -2904,7 +2904,7 @@ async function henovaLoad(){
     henovaApplyState(data.state);
     henovaReady=true;
     render();
-    if(data.welcome_gift===true)henovaShowRewardCard(10000,'eggs',true);
+    if(data.welcome_gift===true)henovaShowRewardCard(1000,'eggs',true);
     if(henovaAdminLaunchRequested())henovaShowAdminPayouts();
   }catch(error){
     henovaReady=false;
