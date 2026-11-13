@@ -3234,7 +3234,7 @@ async function henovaClaimVictorsCompany(){
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaVictorsCompanyClaimed=true;
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
-  if(result.claimed)henovaShowRewardCard(1000,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
+  if(result.claimed)henovaShowRewardCard(2500,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaVictorsCompanyBusy=false;const current=document.getElementById('henova-victors-company-claim');if(current)current.disabled=henovaVictorsCompanyClaimed}
 }
