@@ -2893,7 +2893,7 @@ async function henovaCall(action,details={}){
     body:JSON.stringify({initData,action:apiAction,...details}),cache:'no-store'
   });
   const data=await response.json();
-  if(!response.ok || data?.ok===false){const err=new Error(String(data?.error||'server_unavailable'));err.diagnostics=data?.diagnostics||data?.recipient_checks||data?.checked;err.henova=data?.henova===true;err.withdrawals=data?.withdrawals===true;throw err;}
+  if(!response.ok || data?.ok===false){const err=new Error(String(data?.error||'server_unavailable'));err.diagnostics=data?.diagnostics||data?.recipient_checks||data?.checked;err.henova=data?.henova===true;err.withdrawals=data?.withdrawals===true;err.retryAfterSeconds=Number(data?.retry_after_seconds)||0;throw err;}
   if(action==='state'&&apiAction==='state'&&data?.ok===true&&data?.state)henovaInitialStateSynced=true;
   return data;
 }
@@ -3024,7 +3024,10 @@ async function collect(){
   else toast('No eggs available yet.');
  }catch(error){
   console.warn('HENOVA rewarded collection failed',error);
-  toast(hvError(error.message));
+  if(error.message==='collect_cooldown'){
+   const mins=Math.ceil(Math.max(1,Number(error.retryAfterSeconds)||3600)/60);
+   toast('Next egg collection in '+(mins>=60?Math.floor(mins/60)+'h '+(mins%60)+'m':mins+'m'));
+  }else toast(hvError(error.message));
   try{const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render();}}catch{}
  }finally{
   henovaCollectAdBusy=false;
