@@ -3023,31 +3023,34 @@ async function henovaAction(action,item){
 const num=n=>Number(n).toLocaleString('en-US'),t=()=>L[s.lang]||L.en,save=()=>localStorage.setItem('henova-display-preferences-v1',JSON.stringify({lang:s.lang})),time=n=>String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
 const rate=()=>H.reduce((a,h)=>a+h[3]*(s.hen[h[0]]||0),0)*(1+[0,.10,.20,.35,.50,.75][Math.min(5,s.fan||0)]),prod=()=>Math.floor(Math.min(6*hr,Math.max(0,Date.now()-s.start))*rate()/hr);
 function toast(m){let n=document.getElementById('notice');n.textContent=m;n.classList.remove('hidden');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>n.classList.add('hidden'),2700)}
-let henovaCollectAdBusy=false;
 async function collect(){
- if(henovaCollectAdBusy||henovaBusy)return;
+ if(henovaBusy)return;
  if(!prod())return toast('No eggs available yet');
- henovaCollectAdBusy=true;
- const button=document.getElementById('collect');
- if(button)button.disabled=true;
+ // Collect Eggs is now ad-free; earned eggs are collected immediately.
+ await henovaAction('collect');
+}
+let henovaLegendPurchaseAdBusy=false;
+async function showLegendaryPurchaseAd(){
+ if(henovaLegendPurchaseAdBusy||henovaBusy)return;
+ henovaLegendPurchaseAdBusy=true;
  try{
-  // Show the former entry interstitial only after the user taps Collect Eggs.
-  // Ad failure or no-fill must never prevent collecting earned eggs.
+  // Show the interstitial only when the user chooses to buy a Legendary Hen.
+  // Ad failure or no-fill must never block the purchase.
   if(window.Adsgram?.init){
    try{await window.Adsgram.init({blockId:'int-56161',debug:false}).show();}
-   catch(error){console.warn('Collect interstitial unavailable or skipped',error);}
+   catch(error){console.warn('Legendary purchase interstitial unavailable or skipped',error);}
   }
-  await henovaAction('collect');
- }finally{
-  henovaCollectAdBusy=false;
-  const currentButton=document.getElementById('collect');
-  if(currentButton)currentButton.disabled=!prod();
- }
+ }finally{henovaLegendPurchaseAdBusy=false;}
 }
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
-function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;
+async function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;
 if((Number(s.hen[id])||0)>=100)return toast(hvError('hen_limit_reached'));
 if(s.coins<h[4]){openTab(4);toast('Not enough Coins. Top up with GRAM in Wallet.');return;}
+if(id==='legend'){
+ if(henovaLegendPurchaseAdBusy||henovaBusy)return;
+ await showLegendaryPurchaseAd();
+ if(henovaBusy)return;
+}
 return henovaAction('purchase',id)}
 function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=5)return toast('Power Fans are at maximum level');if(s.coins<prices[lv]){openTab(4);toast('Not enough Coins. Top up with GRAM in Wallet.');return;}return henovaAction('boost')}
 function daily(){return henovaAction('daily')}
