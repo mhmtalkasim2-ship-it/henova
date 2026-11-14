@@ -3056,6 +3056,21 @@ let henovaPromoRedeemBusy=false;
 let henovaPromoStartBusy=false;
 let henovaPromoPendingSessionId=null;
 let henovaPromoPendingCode=null;
+function henovaSavePromoPending(){
+ const uid=String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'');
+ if(!uid||!henovaPromoPendingSessionId||!henovaPromoPendingCode)return;
+ try{localStorage.setItem('henova-promo-pending-'+uid,JSON.stringify({sessionId:henovaPromoPendingSessionId,code:henovaPromoPendingCode}));}catch{}
+}
+function henovaClearPromoPending(){
+ const uid=String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'');
+ if(uid)try{localStorage.removeItem('henova-promo-pending-'+uid);}catch{}
+ henovaPromoPendingSessionId=null;henovaPromoPendingCode=null;
+}
+try{
+ const uid=String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id||'');
+ const saved=uid?JSON.parse(localStorage.getItem('henova-promo-pending-'+uid)||'null'):null;
+ if(saved?.sessionId&&saved?.code){henovaPromoPendingSessionId=String(saved.sessionId);henovaPromoPendingCode=String(saved.code);}
+}catch{}
 function henovaShowPromoMembershipCard(status={}){
  const old=document.getElementById('henova-promo-membership-overlay');if(old)old.remove();
  const ar=s.lang==='ar',tr=s.lang==='tr';
@@ -3119,9 +3134,14 @@ async function henovaRevealPromoSponsoredTask(){
  if(!/^[A-Z0-9]{5,24}$/.test(code))return toast(s.lang==='ar'?'أدخل كوداً صالحاً':s.lang==='tr'?'Geçerli bir kod girin':'Enter a valid code');
  if(!window.Telegram?.WebApp?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
  if(henovaPromoPendingSessionId&&henovaPromoPendingCode===code){
-  const existing=document.getElementById('henova-promo-sponsored-wrap');
-  if(existing){existing.style.cssText='display:block!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;max-width:100%!important;max-height:none!important;overflow:visible!important;opacity:1!important;pointer-events:auto!important;z-index:1!important;visibility:visible!important;margin-top:12px!important';existing.setAttribute('aria-hidden','false');}
-  henovaAttachAdsgramTask();return;
+  const prior=await henovaCall('promo_ad_check',{session_id:henovaPromoPendingSessionId}).catch(()=>null);
+  if(prior?.completed&&prior?.min_seconds_met){await henovaRedeemPromo();return}
+  if(prior?.ok&&Number(prior.elapsed_seconds)<600){
+   const existing=document.getElementById('henova-promo-sponsored-wrap');
+   if(existing){existing.style.cssText='display:block!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;max-width:100%!important;max-height:none!important;overflow:visible!important;opacity:1!important;pointer-events:auto!important;z-index:1!important;visibility:visible!important;margin-top:12px!important';existing.setAttribute('aria-hidden','false');}
+   henovaAttachAdsgramTask();return;
+  }
+  henovaClearPromoPending();
  }
  henovaPromoStartBusy=true;
  const reveal=document.getElementById('henova-promo-reveal');
@@ -3136,6 +3156,7 @@ async function henovaRevealPromoSponsoredTask(){
   if(!session?.ok||!session?.session_id)throw Error(String(session?.error||'promo_session_unavailable'));
   henovaPromoPendingSessionId=String(session.session_id);
   henovaPromoPendingCode=code;
+  henovaSavePromoPending();
   const redeem=document.getElementById('henova-promo-redeem');
   if(redeem){redeem.disabled=true;redeem.textContent='Complete the sponsored task to claim code';redeem.style.background='#9aa39a';redeem.style.color='#e8eee8';redeem.style.opacity='.65';redeem.style.cursor='not-allowed'}
   const wrap=document.getElementById('henova-promo-sponsored-wrap');
@@ -3178,8 +3199,7 @@ async function henovaRedeemPromo(){
   }
   const r=await henovaCall('redeem_promo_code',{code,session_id:sessionId});
   if(!r?.ok)throw Error(String(r?.error||'promo_claim_not_confirmed'));
-  henovaPromoPendingSessionId=null;
-  henovaPromoPendingCode=null;
+  henovaClearPromoPending();
   const fresh=await henovaCall('state');
   if(fresh?.state){henovaApplyState(fresh.state);render();}
   const amount=Number(r.eggs??r.coins??0);
@@ -3206,9 +3226,14 @@ async function henovaRedeemPromo(){
    toast(s.lang==='ar'?'تعذر التحقق من الاشتراك. حاول لاحقاً.':s.lang==='tr'?'Üyelik kontrol edilemiyor. Daha sonra tekrar dene.':'Membership check unavailable. Please try again later.');
   }else if(reason==='ad_verification_required'){
    toast(s.lang==='ar'?'لم يكتمل الإعلان الممول بعد.':s.lang==='tr'?'Sponsorlu reklam henüz tamamlanmadı.':'The sponsored task has not completed yet.');
+  }else if(reason==='promo_session_expired'){
+   henovaClearPromoPending();
+   toast(s.lang==='ar'?'انتهت مهلة المهمة. اضغط Claim لبدء محاولة جديدة.':s.lang==='tr'?'Görev süresi doldu. Yeni deneme için Claim düğmesine bas.':'The task session expired. Press Claim to start a new attempt.');
   }else if(reason==='code_fully_claimed'){
+   henovaClearPromoPending();
    toast(s.lang==='ar'?'انتهت حصة هذا الكود.':s.lang==='tr'?'Bu kodun kullanım hakkı doldu.':'This promo code has reached its claim limit.');
   }else if(reason==='already_claimed'){
+   henovaClearPromoPending();
    toast(s.lang==='ar'?'سبق لك استخدام هذا الكود.':s.lang==='tr'?'Bu kodu daha önce kullandın.':'You have already claimed this code.');
   }else if(['invalid_code','invalid_or_expired_code'].includes(reason)){
    toast(s.lang==='ar'?'الكود غير صالح أو منتهي الصلاحية.':s.lang==='tr'?'Kod geçersiz veya süresi dolmuş.':'This code is invalid or expired.');
