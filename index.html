@@ -3248,7 +3248,7 @@ async function henovaRedeemPromo(){
 }
 async function henovaCompletePromoFromSponsoredTask(){
  const sessionId=henovaPromoPendingSessionId;
- if(!sessionId){toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();return}
+ if(!sessionId){toast(s.lang==='ar'?'أدخل كوداً واضغط Claim أولاً.':s.lang==='tr'?'Önce kodu girip Claim düğmesine bas.':'Enter a promo code and press Claim first.');return}
  for(let i=0;i<12;i++){
   const status=await henovaCall('promo_ad_check',{session_id:sessionId}).catch(()=>null);
   if(status?.completed){
@@ -4957,7 +4957,7 @@ function henovaAttachAdsgramTask(){
   task.style.pointerEvents='none';
   task.addEventListener('reward',()=>{
    if(henovaPromoPendingSessionId){toast(henovaAdsgramLabels().pending);void henovaCompletePromoFromSponsoredTask();}
-   else{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();}
+   else{toast(s.lang==='ar'?'أدخل كوداً واضغط Claim أولاً.':s.lang==='tr'?'Önce kodu girip Claim düğmesine bas.':'Enter a promo code and press Claim first.');}
    setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000);
   });
   task.addEventListener('onBannerNotFound',()=>{const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');if(status)status.textContent=henovaAdsgramLabels().unavailable});
