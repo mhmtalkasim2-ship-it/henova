@@ -3374,8 +3374,8 @@ async function henovaCheckWithdrawals(){
  const field=document.getElementById('withdraw-channel-status');
  try{
   const result=await henovaCall('verify_withdrawals_channel');
-  const message=!result.joined?hvError('not_joined'):result.reward_claimed?(s.lang==='ar'?'✅ تم إضافة 20 عملة إلى رصيدك':s.lang==='tr'?'✅ Bakiyene 20 jeton eklendi':'✅ 20 coins added to your balance'):(s.lang==='ar'?'✅ تم تأكيد الاشتراك، المكافأة مستلمة سابقاً':s.lang==='tr'?'✅ Üyelik onaylandı, ödül daha önce alındı':'✅ Membership verified; reward already claimed');
-  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);render();henovaShowRewardCard(500,'eggs')}
+  const message=!result.joined?hvError('not_joined'):result.reward_claimed?(s.lang==='ar'?'✅ تم إضافة 20 عملة إلى رصيدك':s.lang==='tr'?'✅ Bakiyene 10M jeton eklendi':'✅ 20 coins added to your balance'):(s.lang==='ar'?'✅ تم تأكيد الاشتراك، المكافأة مستلمة سابقاً':s.lang==='tr'?'✅ Üyelik onaylandı, ödül daha önce alındı':'✅ Membership verified; reward already claimed');
+  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);render();henovaShowRewardCard(10000000,'coins')}
   if(field)field.textContent=message;
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
@@ -3395,7 +3395,7 @@ async function henovaCheckPromoCodesTask(){
    const state=await henovaCall('state');
    henovaApplyState(state.state);
    render();
-   henovaShowRewardCard(500,'eggs');
+   henovaShowRewardCard(10000000,'coins');
   }
   if(field)field.textContent=message;
   toast(message);
@@ -4826,7 +4826,7 @@ function toggleFarmSound(){
  toast(hvText(window.henovaMuted?'soundOff':'soundOn'));
 }
 function updateFarmIdentity(){const u=window.Telegram?.WebApp?.initDataUnsafe?.user;let name=u?.first_name||'HENOVA',handle=u?.username?'@'+u.username:'CHICKEN FARM';document.getElementById('farm-user-name').textContent=name.toUpperCase();document.getElementById('farm-user-handle').textContent=handle;document.getElementById('farm-avatar').textContent=name.slice(0,1).toUpperCase()}
-const HV_TEXT={"en":{"daily":"Daily Login","dailyDesc":"+500 to 10,000 Eggs / day","claimed":"Claimed","claim":"Claim","taskDesc":"500 Eggs / 6 hours","ready":"Ready","open":"Open Channel","verify":"Verify & Claim","packInfo":"Additional hens increase your eggs per hour during each 6-hour production session.","eggsHour":"eggs/hour","owned":"Owned","free":"FREE","packWarning":"Each extra hen is permanent and adds to the eggs collected every 6-hour session.","avail":"AVAILABLE EGGS","demo":"DEMO ONLY","min":"Minimum","freq":"Withdrawal frequency: once every 24 hours","qty":"Eggs to withdraw","warn":"Payouts and deposits are disabled until a secure, funded payment backend is configured.","withdraw":"Withdraw • Coming soon","soundOn":"Sound on","soundOff":"Sound off","unit":"eggs/h","remain":"Remaining: ","done":"6 hours completed — collect eggs","collect":"Collect","join":"Join the channel first","unavailable":"Channel verification unavailable"},"ar":{"daily":"تسجيل الدخول اليومي","dailyDesc":"+500 إلى 10,000 بيضة يومياً","claimed":"تم الاستلام","claim":"استلام","taskDesc":"500 بيضة كل 6 ساعات","ready":"جاهزة","open":"فتح القناة","verify":"تحقق واستلم","packInfo":"زيادة عدد الدجاج ترفع إنتاج البيض كل ساعة خلال جلسة مدتها 6 ساعات.","eggsHour":"بيضة/ساعة","owned":"تمتلك","free":"مجاني","packWarning":"كل دجاجة تشتريها تبقى عندك وتزيد كمية البيض خلال كل جلسة مدتها 6 ساعات.","avail":"البيض المتاح","demo":"تجريبي فقط","min":"الحد الأدنى","freq":"السحب مرة واحدة كل 24 ساعة","qty":"كمية البيض للسحب","warn":"الإيداع والسحب معطّلان حتى تجهيز نظام دفع آمن وممول.","withdraw":"السحب • قريباً","soundOn":"الصوت مفعّل","soundOff":"الصوت مغلق","unit":"بيضة/س","remain":"المتبقي: ","done":"اكتملت 6 ساعات — اجمع البيض","collect":"اجمع","join":"اشترك بالقناة أولاً","unavailable":"تعذر التحقق من القناة"},"tr":{"daily":"Günlük Giriş","dailyDesc":"Günde +500–10.000 Yumurta","claimed":"Alındı","claim":"Al","taskDesc":"6 saatte 500 Yumurta","ready":"Hazır","open":"Kanalı Aç","verify":"Doğrula ve Al","packInfo":"Daha fazla tavuk, 6 saatlik üretim süresinde saatlik yumurta üretimini artırır.","eggsHour":"yumurta/saat","owned":"Sahip olunan","free":"ÜCRETSİZ","packWarning":"Satın aldığın her ek tavuk kalıcıdır ve her 6 saatlik oturumda daha fazla yumurta üretir.","avail":"MEVCUT YUMURTALAR","demo":"SADECE DEMO","min":"Minimum","freq":"Para çekme sıklığı: 24 saatte bir","qty":"Çekilecek yumurta","warn":"Güvenli ve fonlanmış ödeme sistemi kurulana kadar ödemeler devre dışıdır.","withdraw":"Çekim • Yakında","soundOn":"Ses açık","soundOff":"Ses kapalı","unit":"yumurta/sa","remain":"Kalan: ","done":"6 saat tamamlandı — yumurtaları topla","collect":"Topla","join":"Önce kanala katıl","unavailable":"Kanal doğrulanamadı"}};
+const HV_TEXT={"en":{"daily":"Daily Login","dailyDesc":"10M Coins / day","claimed":"Claimed","claim":"Claim","taskDesc":"10M Coins / 6 hours","ready":"Ready","open":"Open Channel","verify":"Verify & Claim","packInfo":"Additional hens increase your eggs per hour during each 6-hour production session.","eggsHour":"eggs/hour","owned":"Owned","free":"FREE","packWarning":"Each extra hen is permanent and adds to the eggs collected every 6-hour session.","avail":"AVAILABLE EGGS","demo":"DEMO ONLY","min":"Minimum","freq":"Withdrawal frequency: once every 24 hours","qty":"Eggs to withdraw","warn":"Payouts and deposits are disabled until a secure, funded payment backend is configured.","withdraw":"Withdraw • Coming soon","soundOn":"Sound on","soundOff":"Sound off","unit":"eggs/h","remain":"Remaining: ","done":"6 hours completed — collect eggs","collect":"Collect","join":"Join the channel first","unavailable":"Channel verification unavailable"},"ar":{"daily":"تسجيل الدخول اليومي","dailyDesc":"10M عملة يومياً","claimed":"تم الاستلام","claim":"استلام","taskDesc":"10M عملة كل 6 ساعات","ready":"جاهزة","open":"فتح القناة","verify":"تحقق واستلم","packInfo":"زيادة عدد الدجاج ترفع إنتاج البيض كل ساعة خلال جلسة مدتها 6 ساعات.","eggsHour":"بيضة/ساعة","owned":"تمتلك","free":"مجاني","packWarning":"كل دجاجة تشتريها تبقى عندك وتزيد كمية البيض خلال كل جلسة مدتها 6 ساعات.","avail":"البيض المتاح","demo":"تجريبي فقط","min":"الحد الأدنى","freq":"السحب مرة واحدة كل 24 ساعة","qty":"كمية البيض للسحب","warn":"الإيداع والسحب معطّلان حتى تجهيز نظام دفع آمن وممول.","withdraw":"السحب • قريباً","soundOn":"الصوت مفعّل","soundOff":"الصوت مغلق","unit":"بيضة/س","remain":"المتبقي: ","done":"اكتملت 6 ساعات — اجمع البيض","collect":"اجمع","join":"اشترك بالقناة أولاً","unavailable":"تعذر التحقق من القناة"},"tr":{"daily":"Günlük Giriş","dailyDesc":"Günde 10M Jeton","claimed":"Alındı","claim":"Al","taskDesc":"6 saatte 10M Jeton","ready":"Hazır","open":"Kanalı Aç","verify":"Doğrula ve Al","packInfo":"Daha fazla tavuk, 6 saatlik üretim süresinde saatlik yumurta üretimini artırır.","eggsHour":"yumurta/saat","owned":"Sahip olunan","free":"ÜCRETSİZ","packWarning":"Satın aldığın her ek tavuk kalıcıdır ve her 6 saatlik oturumda daha fazla yumurta üretir.","avail":"MEVCUT YUMURTALAR","demo":"SADECE DEMO","min":"Minimum","freq":"Para çekme sıklığı: 24 saatte bir","qty":"Çekilecek yumurta","warn":"Güvenli ve fonlanmış ödeme sistemi kurulana kadar ödemeler devre dışıdır.","withdraw":"Çekim • Yakında","soundOn":"Ses açık","soundOff":"Ses kapalı","unit":"yumurta/sa","remain":"Kalan: ","done":"6 saat tamamlandı — yumurtaları topla","collect":"Topla","join":"Önce kanala katıl","unavailable":"Kanal doğrulanamadı"}};
 function hvError(code){
  const errors={
  already_claimed:{en:'Daily reward already claimed today',ar:'استلمت المكافأة اليومية بالفعل، ارجع غداً',tr:'Günlük ödülünü bugün zaten aldın'},
@@ -5000,7 +5000,7 @@ setInterval(henovaVideoCooldownDraw,1000);
 function henovaVideoRewardText(){
  return ({en:{title:'Watch Advertisement',desc:'10M coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
  ar:{title:'شاهد الإعلان',desc:'10M عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'10M jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'Optional ad · No egg reward',button:'Watch Ad',unavailable:'Ad unavailable'};
+ tr:{title:'Reklam İzle',desc:'10M jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'10M coins · Complete the ad',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit,isGift=false){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -5032,7 +5032,7 @@ async function henovaWatchSponsoredReward(){
      localStorage.setItem(key,String(entry.id));
      const fresh=await henovaCall('state').catch(()=>null);
      if(fresh?.state){henovaApplyState(fresh.state);render();}
-     henovaShowRewardCard(10000000,'coins');
+     henovaShowRewardCard(500,'coins');
      return;
     }
    }
