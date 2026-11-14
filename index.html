@@ -3128,7 +3128,7 @@ async function henovaRedeemPromo(){
   const session=await henovaCall('promo_ad_start',{code});
   if(!session?.session_id)throw Error('promo_session_unavailable');
 
-  const ad=window.Adsgram.init({blockId:'56732',debug:false});
+  const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
   let adResult;
   try{
    adResult=await ad.show();
@@ -4562,17 +4562,7 @@ async function henovaGramMiningAction(action){
  if(!henovaIsGramMiningAdmin()||henovaGramMiningBusy)return;
  henovaGramMiningBusy=true;render();
  try{
-  if(action==='gram_mining_claim'){
-   if(!window.Telegram?.WebApp?.initData)throw Error('Open HENOVA in Telegram');
-   if(!window.Adsgram?.init)throw Error(s.lang==='ar'?'خدمة الإعلان غير جاهزة، أعد فتح التطبيق':'AdsGram is not ready. Reopen the app.');
-   const session=await henovaCall('ad_view_start');
-   if(!session?.ok||!session?.session_id)throw Error(session?.error||'ad_session_unavailable');
-   let completed=false;
-   try{await window.Adsgram.init({blockId:'int-56730',debug:false}).show();completed=true}
-   catch(adError){console.warn('GRAM mining ad not completed',adError);const reason=String(adError?.description||adError?.message||adError||'').toLowerCase();if(/no.?ads|no.?fill|not available|no inventory|unavailable|no ads available/.test(reason))throw Error(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً':'No ad available right now. Try again later.');}
-   const checked=await henovaCall('ad_view_check',{session_id:session.session_id});
-   if(!completed||!checked?.min_seconds_met)throw Error(s.lang==='ar'?'يجب إكمال الإعلان قبل جمع GRAM':'Please complete the ad before claiming GRAM.');
-  }
+
   const r=await henovaCall(action);
   if(action==='gram_mining_claim'&&r?.ok){
    const claimed=Number(r.claimed||0);
