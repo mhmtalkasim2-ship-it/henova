@@ -5345,4 +5345,61 @@ html body main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen{
 
 .hv-gram-live{margin:14px 0 16px;padding:15px 16px;border:1px solid #58d7ef55;border-radius:17px;background:linear-gradient(135deg,#081b2b,#102f45 58%,#14283c);box-shadow:inset 0 1px 0 #ffffff12,0 8px 22px #0003}.hv-gram-live-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.hv-gram-live-head small{font-size:11px;color:#b8d9e9}.hv-gram-live-head b{font-size:clamp(16px,4vw,21px);font-variant-numeric:tabular-nums;color:#8df4e6;text-shadow:0 0 14px #35d9d477;white-space:nowrap}.hv-gram-live-track{height:8px;margin-top:12px;border-radius:20px;background:#ffffff16;overflow:hidden;box-shadow:inset 0 1px 3px #0008}.hv-gram-live-track i{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#22a6c8,#61f0d0,#f5d17c);box-shadow:0 0 12px #5cebd988;transition:width .8s linear}.hv-gram-live-foot{display:block;margin-top:7px;text-align:right;color:#a9c7d7;font-size:10px;font-variant-numeric:tabular-nums}
 </style>
+
+<style id="henova-ground-feeding-motion-20261114">
+/* Restore gentle, visible chicken movement. Hens stroll slowly on the grass,
+   pause, and repeatedly lower their heads to peck at food on the ground. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  animation:henovaGroundWalkV28 30s ease-in-out infinite!important;
+  opacity:1!important;
+  will-change:transform;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  animation:henovaGroundFacingV28 30s steps(1,end) infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  display:block!important;
+  transform-origin:70% 76%!important;
+  animation:henovaGroundPeckV28 7s ease-in-out infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
+  animation:none!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+  animation:henovaGroundWalkV28 30s ease-in-out infinite!important;
+  animation-delay:var(--wander-delay,-2s)!important;
+  opacity:1!important;
+  will-change:transform;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit) .hen-facing{
+  animation:henovaGroundFacingV28 30s steps(1,end) infinite!important;
+  animation-delay:var(--wander-delay,-2s)!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit) .hen-action{
+  display:block!important;
+  transform-origin:70% 76%!important;
+  animation:henovaGroundPeckV28 7s ease-in-out infinite!important;
+  animation-delay:var(--peck-delay,-1s)!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit) .hen-action img{
+  animation:none!important;
+}
+@keyframes henovaGroundWalkV28{
+  0%,10%{transform:translate3d(0,0,0)}
+  25%{transform:translate3d(2vw,-.4vh,0)}
+  39%,61%{transform:translate3d(3.2vw,0,0)}
+  76%{transform:translate3d(1.4vw,.2vh,0)}
+  90%,100%{transform:translate3d(0,0,0)}
+}
+@keyframes henovaGroundFacingV28{
+  0%,38.9%{transform:scaleX(1)}
+  39%,89.9%{transform:scaleX(-1)}
+  90%,100%{transform:scaleX(1)}
+}
+@keyframes henovaGroundPeckV28{
+  0%,20%,35%,55%,70%,90%,100%{transform:translateY(0) rotate(0deg)}
+  25%,40%,60%,75%{transform:translateY(5px) rotate(17deg)}
+  30%,45%,65%,80%{transform:translateY(1px) rotate(4deg)}
+}
+</style>
 </body></html>
