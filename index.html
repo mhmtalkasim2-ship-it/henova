@@ -3053,6 +3053,9 @@ function upgradeFan(){let lv=s.fan||0,prices=[500,1500,4000,10000,25000];if(lv>=
 function daily(){return henovaAction('daily')}
 function henovaOpenPromoCodes(){window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/HENOVA_PROMO_CODES');}
 let henovaPromoRedeemBusy=false;
+let henovaPromoStartBusy=false;
+let henovaPromoPendingSessionId=null;
+let henovaPromoPendingCode=null;
 function henovaShowPromoMembershipCard(status={}){
  const old=document.getElementById('henova-promo-membership-overlay');if(old)old.remove();
  const ar=s.lang==='ar',tr=s.lang==='tr';
@@ -3075,7 +3078,7 @@ async function henovaVerifyPromoMembership(){
   const r=await henovaCall('promo_membership_check');
   const set=(id,joined)=>{const el=document.getElementById(id);if(el){el.textContent=joined?(s.lang==='ar'?'✅ مشترك':s.lang==='tr'?'✅ Katıldın':'✅ Joined'):(s.lang==='ar'?'❌ غير مشترك':s.lang==='tr'?'❌ Katılmadın':'❌ Not joined');el.style.color=joined?'#21864a':'#b47724';}};
   set('henova-promo-member-henova',r.henova);set('henova-promo-member-withdrawals',r.withdrawals);
-  if(r.allJoined){document.getElementById('henova-promo-membership-overlay')?.remove();henovaRedeemPromo();}
+  if(r.allJoined){document.getElementById('henova-promo-membership-overlay')?.remove();henovaRevealPromoSponsoredTask();}
   else toast(s.lang==='ar'?'اشترك بالقناتين ثم اضغط تحقق مرة أخرى.':s.lang==='tr'?'İki kanala da katıl ve tekrar kontrol et.':'Join both channels, then verify again.');
  }catch(e){toast(s.lang==='ar'?'تعذر التحقق حالياً. حاول مرة أخرى.':s.lang==='tr'?'Şu anda doğrulanamadı. Tekrar dene.':'Could not verify membership. Please try again.');}
  finally{if(check?.isConnected)check.disabled=false;}
@@ -3109,64 +3112,74 @@ function henovaShowPromoHenRewardCard(hours,totalEggs){
  btn.onclick=()=>{shade.remove();openTab(0)};
  card.append(ico,h,details,rate,btn);shade.appendChild(card);document.body.appendChild(shade);
 }
-function henovaRevealPromoSponsoredTask(){
- const wrap=document.getElementById('henova-promo-sponsored-wrap');
- if(!wrap)return;
- // First Claim reveals the sponsored card only; promo redemption stays locked.
- const redeem=document.getElementById('henova-promo-redeem');
- if(redeem){redeem.disabled=true;redeem.style.background='#9aa39a';redeem.style.color='#e8eee8';redeem.style.opacity='.65';redeem.style.cursor='not-allowed'}
- wrap.style.cssText='display:block!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;max-width:100%!important;max-height:none!important;overflow:visible!important;opacity:1!important;pointer-events:auto!important;z-index:1!important;visibility:visible!important;margin-top:12px!important';
- wrap.setAttribute('aria-hidden','false');
- henovaAttachAdsgramTask();
-}
-async function henovaRedeemPromo(){
- if(henovaPromoRedeemBusy)return;
+async function henovaRevealPromoSponsoredTask(){
+ if(henovaPromoStartBusy)return;
  const input=document.getElementById('henova-promo-input');
  const code=String(input?.value||'').trim().toUpperCase();
  if(!/^[A-Z0-9]{5,24}$/.test(code))return toast(s.lang==='ar'?'أدخل كوداً صالحاً':s.lang==='tr'?'Geçerli bir kod girin':'Enter a valid code');
  if(!window.Telegram?.WebApp?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
- const btn=document.getElementById('henova-promo-redeem');
- const originalLabel=btn?.textContent||'';
- henovaPromoRedeemBusy=true;
- if(btn)btn.disabled=true;
+ if(henovaPromoPendingSessionId&&henovaPromoPendingCode===code){
+  const existing=document.getElementById('henova-promo-sponsored-wrap');
+  if(existing){existing.style.cssText='display:block!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;max-width:100%!important;max-height:none!important;overflow:visible!important;opacity:1!important;pointer-events:auto!important;z-index:1!important;visibility:visible!important;margin-top:12px!important';existing.setAttribute('aria-hidden','false');}
+  henovaAttachAdsgramTask();return;
+ }
+ henovaPromoStartBusy=true;
+ const reveal=document.getElementById('henova-promo-reveal');
+ if(reveal)reveal.disabled=true;
  try{
   const membership=await henovaCall('promo_membership_check');
   if(!membership?.allJoined){
    henovaShowPromoMembershipCard({henova:membership?.henova===true,withdrawals:membership?.withdrawals===true});
    return;
   }
-  if(!window.Adsgram?.init)return toast(s.lang==='ar'?'تعذر تحميل خدمة AdsGram. أعد فتح التطبيق.':s.lang==='tr'?'AdsGram yüklenemedi. Uygulamayı yeniden açın.':'AdsGram failed to load. Reopen the app.');
   const session=await henovaCall('promo_ad_start',{code});
-  if(!session?.session_id)throw Error('promo_session_unavailable');
-
-  const ad=window.Adsgram.init({blockId:'int-56730',debug:false});
-  let adResult;
-  try{
-   adResult=await ad.show();
-   if(!adResult||adResult.done!==true||adResult.error===true){
-    console.warn('Promo advertisement did not complete',adResult);
-    toast(s.lang==='ar'?'يجب مشاهدة الإعلان حتى النهاية لاستلام مكافأة الكود.':s.lang==='tr'?'Kod ödülünü almak için reklamı sonuna kadar izleyin.':'Please watch the ad to the end to claim the promo reward.');
-    return;
-   }
-  }catch(err){
-   console.warn('Promo advertisement unavailable, skipped or failed',err);
-   const reason=String(err?.description||err?.message||err||'').toLowerCase();
-   if(/no.?ads|no.?fill|not available|not found|no inventory|unavailable|no ads available|banner/.test(reason)){
-    toast(s.lang==='ar'?'لا يوجد إعلان متاح حالياً، حاول لاحقاً.':s.lang==='tr'?'Şu anda reklam yok. Daha sonra tekrar deneyin.':'No ads available right now. Please try later.');
-   }else{
-    toast(s.lang==='ar'?'لم يكتمل الإعلان. حاول مرة أخرى.':s.lang==='tr'?'Reklam tamamlanmadı. Tekrar deneyin.':'The ad did not complete. Please try again.');
-   }
+  if(!session?.ok||!session?.session_id)throw Error(String(session?.error||'promo_session_unavailable'));
+  henovaPromoPendingSessionId=String(session.session_id);
+  henovaPromoPendingCode=code;
+  const redeem=document.getElementById('henova-promo-redeem');
+  if(redeem){redeem.disabled=true;redeem.textContent='Complete the sponsored task to claim code';redeem.style.background='#9aa39a';redeem.style.color='#e8eee8';redeem.style.opacity='.65';redeem.style.cursor='not-allowed'}
+  const wrap=document.getElementById('henova-promo-sponsored-wrap');
+  if(!wrap)return;
+  wrap.style.cssText='display:block!important;position:relative!important;left:auto!important;top:auto!important;width:100%!important;height:auto!important;max-width:100%!important;max-height:none!important;overflow:visible!important;opacity:1!important;pointer-events:auto!important;z-index:1!important;visibility:visible!important;margin-top:12px!important';
+  wrap.setAttribute('aria-hidden','false');
+  const status=wrap.querySelector('[data-sponsored-status]');
+  if(status)status.textContent='Complete the sponsored task to claim your promo code';
+  henovaAttachAdsgramTask();
+ }catch(e){
+  const reason=String(e?.message||e||'');
+  if(reason==='channel_membership_required'||reason==='membership_verification_unavailable'){
+   henovaShowPromoMembershipCard({henova:e.henova===true,withdrawals:e.withdrawals===true});
+  }else if(reason==='already_claimed'){
+   toast(s.lang==='ar'?'سبق لك استخدام هذا الكود.':s.lang==='tr'?'Bu kodu daha önce kullandın.':'You have already claimed this code.');
+  }else if(reason==='invalid_code'||reason==='invalid_or_expired_code'){
+   toast(s.lang==='ar'?'الكود غير صالح أو منتهي الصلاحية.':s.lang==='tr'?'Kod geçersiz veya süresi dolmuş.':'This code is invalid or expired.');
+  }else{
+   console.warn('Promo task start',e);
+   toast(s.lang==='ar'?'تعذر بدء المهمة. حاول مرة أخرى.':s.lang==='tr'?'Görev başlatılamadı. Tekrar dene.':'Could not start the sponsored task. Please try again.');
+  }
+ }finally{
+  henovaPromoStartBusy=false;
+  if(reveal)reveal.disabled=false;
+ }
+}
+async function henovaRedeemPromo(){
+ if(henovaPromoRedeemBusy)return;
+ const code=henovaPromoPendingCode;
+ const sessionId=henovaPromoPendingSessionId;
+ if(!code||!sessionId)return toast(s.lang==='ar'?'ابدأ المهمة الممولة أولاً.':s.lang==='tr'?'Önce sponsorlu görevi başlat.':'Start the sponsored task first.');
+ const btn=document.getElementById('henova-promo-redeem');
+ henovaPromoRedeemBusy=true;
+ if(btn)btn.disabled=true;
+ try{
+  const checked=await henovaCall('promo_ad_check',{session_id:sessionId});
+  if(!checked?.completed||!checked?.min_seconds_met){
+   toast(s.lang==='ar'?'لم يؤكد الخادم إكمال المهمة بعد.':s.lang==='tr'?'Görev henüz sunucu tarafından doğrulanmadı.':'The server has not confirmed task completion yet.');
    return;
   }
-
-  const checked=await henovaCall('promo_ad_check',{session_id:session.session_id});
-  if(!checked?.min_seconds_met){
-   henovaAdNotice('short');
-   return;
-  }
-
-  const r=await henovaCall('redeem_promo_code',{code,session_id:session.session_id});
+  const r=await henovaCall('redeem_promo_code',{code,session_id:sessionId});
   if(!r?.ok)throw Error(String(r?.error||'promo_claim_not_confirmed'));
+  henovaPromoPendingSessionId=null;
+  henovaPromoPendingCode=null;
   const fresh=await henovaCall('state');
   if(fresh?.state){henovaApplyState(fresh.state);render();}
   const amount=Number(r.eggs??r.coins??0);
@@ -3183,6 +3196,8 @@ async function henovaRedeemPromo(){
    toast(successMessage);
    henovaShowRewardCard(amount,unit,isGift);
   }
+  const wrap=document.getElementById('henova-promo-sponsored-wrap');
+  if(wrap){wrap.style.display='none';wrap.setAttribute('aria-hidden','true')}
  }catch(e){
   const reason=String(e?.message||e||'');
   if(reason==='channel_membership_required'){
@@ -3190,28 +3205,35 @@ async function henovaRedeemPromo(){
   }else if(reason==='membership_verification_unavailable'){
    toast(s.lang==='ar'?'تعذر التحقق من الاشتراك. حاول لاحقاً.':s.lang==='tr'?'Üyelik kontrol edilemiyor. Daha sonra tekrar dene.':'Membership check unavailable. Please try again later.');
   }else if(reason==='ad_verification_required'){
-   henovaAdNotice('short');
+   toast(s.lang==='ar'?'لم يكتمل الإعلان الممول بعد.':s.lang==='tr'?'Sponsorlu reklam henüz tamamlanmadı.':'The sponsored task has not completed yet.');
   }else if(reason==='code_fully_claimed'){
-   toast(s.lang==='ar'?'❌ لم تستلم المكافأة: انتهت حصة هذا الكود واستخدمه جميع الأشخاص المسموح لهم.':s.lang==='tr'?'❌ Ödül alınmadı: Bu kodun tüm kullanım hakları doldu.':'❌ Reward not received: this promo code has reached its claim limit.');
+   toast(s.lang==='ar'?'انتهت حصة هذا الكود.':s.lang==='tr'?'Bu kodun kullanım hakkı doldu.':'This promo code has reached its claim limit.');
   }else if(reason==='already_claimed'){
-   toast(s.lang==='ar'?'⚠️ لم تستلم مكافأة جديدة: سبق لك استخدام هذا الكود.':s.lang==='tr'?'⚠️ Yeni ödül verilmedi: Bu kodu daha önce kullandın.':'⚠️ No new reward: you have already claimed this code.');
+   toast(s.lang==='ar'?'سبق لك استخدام هذا الكود.':s.lang==='tr'?'Bu kodu daha önce kullandın.':'You have already claimed this code.');
   }else if(['invalid_code','invalid_or_expired_code'].includes(reason)){
-   toast(s.lang==='ar'?'❌ لم تستلم المكافأة: الكود غير صالح أو منتهي الصلاحية.':s.lang==='tr'?'❌ Ödül alınmadı: Kod geçersiz veya süresi dolmuş.':'❌ Reward not received: the code is invalid or expired.');
+   toast(s.lang==='ar'?'الكود غير صالح أو منتهي الصلاحية.':s.lang==='tr'?'Kod geçersiz veya süresi dolmuş.':'This code is invalid or expired.');
   }else{
    console.warn('Promo redeem',e);
-   toast(s.lang==='ar'?'تعذر بدء الإعلان أو استلام الكود، حاول مرة أخرى.':s.lang==='tr'?'Reklam veya kod işlemi başlatılamadı. Tekrar deneyin.':'Could not start the ad or claim the code. Please try again.');
+   toast(s.lang==='ar'?'تعذر استلام الكود، حاول مرة أخرى.':s.lang==='tr'?'Kod alınamadı. Tekrar dene.':'Could not claim the promo code. Please try again.');
   }
  }finally{
   henovaPromoRedeemBusy=false;
-  const current=document.getElementById('henova-promo-redeem');
-  if(current){
-   current.disabled=false;
-   if(current===btn){
-    current.textContent=originalLabel;
-    current.style.background='linear-gradient(#93db59,#52a82d)';
-   }
-  }
+  if(btn)btn.disabled=!henovaPromoPendingSessionId;
  }
+}
+async function henovaCompletePromoFromSponsoredTask(){
+ const sessionId=henovaPromoPendingSessionId;
+ if(!sessionId){toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();return}
+ for(let i=0;i<12;i++){
+  const status=await henovaCall('promo_ad_check',{session_id:sessionId}).catch(()=>null);
+  if(status?.completed){
+   if(status.min_seconds_met){await henovaRedeemPromo();setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000);return}
+   toast(s.lang==='ar'?'اكتملت المهمة لكن الحد الأدنى للوقت لم يتحقق.':s.lang==='tr'?'Görev tamamlandı ancak gereken süre dolmadı.':'Task completed, but the minimum time requirement was not met.');
+   return;
+  }
+  await new Promise(resolve=>setTimeout(resolve,1500));
+ }
+ toast(s.lang==='ar'?'وصل تأكيد الإعلان، لكن الخادم لم يؤكد المهمة بعد. أعد المحاولة بعد لحظات.':s.lang==='tr'?'Reklam onayı alındı ancak sunucu henüz görevi doğrulamadı. Biraz sonra tekrar dene.':'Ad confirmation was received, but the server has not confirmed the task yet. Please retry in a moment.');
 }
 
 function henovaTaskClock(n){return [Math.floor(n/3600),Math.floor(n%3600/60),n%60].map(x=>String(x).padStart(2,'0')).join(':')}
@@ -4906,13 +4928,11 @@ function henovaAttachAdsgramTask(){
   if(task.dataset.henovaBound==='1')return;
   task.dataset.henovaBound='1';
   task.style.pointerEvents='none';
-  task.addEventListener('click',()=>{
-   // A click on AdsGram's own task widget unlocks the separate promo-code Claim button.
-   // This is only a UI unlock; it does not grant any sponsored-task reward.
-   const redeem=document.getElementById('henova-promo-redeem');
-   if(redeem){redeem.disabled=false;redeem.style.background='linear-gradient(#93db59,#52a82d)';redeem.style.color='#fff';redeem.style.opacity='1';redeem.style.cursor='pointer'}
+  task.addEventListener('reward',()=>{
+   if(henovaPromoPendingSessionId){toast(henovaAdsgramLabels().pending);void henovaCompletePromoFromSponsoredTask();}
+   else{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();}
+   setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000);
   });
-  task.addEventListener('reward',()=>{toast(henovaAdsgramLabels().pending);henovaWatchSponsoredReward();setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000)});
   task.addEventListener('onBannerNotFound',()=>{const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');if(status)status.textContent=henovaAdsgramLabels().unavailable});
  });
 }
@@ -5051,7 +5071,7 @@ queueMicrotask(henovaLoadPost80Status);
 const claimed=s.daily===new Date().toLocaleDateString('en-CA');
 const name=s.lang==='ar'?'انضم إلينا':s.lang==='tr'?'Bize Katıl':'Join Us';
 const promoWords=s.lang==='ar'?{title:'كود ترويجي',get:'احصل على أكواد',hint:'أكواد حصرية في قناتنا',placeholder:'أدخل الكود',claim:'استلام',daily:'تسجيل الدخول اليومي',today:'تم الاستلام اليوم',day:'يوم'}:s.lang==='tr'?{title:'Promosyon Kodu',get:'Kodları Al',hint:'Kanalımızdaki özel kodlar',placeholder:'Kodu girin',claim:'Al',daily:'Günlük Giriş',today:'Bugün alındı',day:'Gün'}:{title:'Promo Code',get:'Get Codes',hint:'Exclusive codes in our channel',placeholder:'Enter code',claim:'Claim',daily:'Daily Login',today:'Claimed today',day:'Day'};
-const promoCard='<section style="background:linear-gradient(135deg,#9061fa,#4926af);border-radius:24px;padding:20px;color:white;box-shadow:0 7px 0 #37218b;margin-bottom:17px"><div style="display:flex;gap:10px;align-items:center;margin-bottom:15px"><span style="font-size:40px">🎟️</span><div style="flex:1"><strong style="font-size:19px">'+promoWords.title+'</strong><div style="font-size:13px;opacity:.85">'+promoWords.hint+'</div></div><button style="background:white;color:#4b2ba2;border-radius:22px;padding:11px 13px" onclick="henovaOpenPromoCodes()">'+promoWords.get+' ›</button></div><div style="display:flex;gap:8px"><input id="henova-promo-input" maxlength="24" placeholder="'+promoWords.placeholder+'" style="width:100%;min-width:0;flex:1;background:#3d2384;color:white;border:2px dashed #a68ee9;border-radius:16px;padding:15px;direction:ltr;text-transform:uppercase"><button id="henova-promo-reveal" type="button" onclick="henovaRevealPromoSponsoredTask()" style="background:linear-gradient(#93db59,#52a82d);border-radius:17px;padding:12px 16px;color:white;font-weight:800">'+promoWords.claim+'</button></div><div id="henova-promo-sponsored-wrap" aria-hidden="true" style="position:fixed!important;left:-10000px!important;top:0!important;width:1px!important;height:1px!important;max-width:1px!important;max-height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;display:block!important;visibility:visible!important;margin-top:12px"><article class="item hv-sponsored-card hv-sponsored-task-vertical" style="margin:0;background:#fffdf3;color:#315333"><div class="hv-sponsored-copy"><h3 style="color:#315333">🪙 '+henovaAdsgramLabels().name+'</h3><p style="color:#526b4c">'+henovaAdsgramLabels().reward+' · '+henovaAdsgramLabels().interval+'</p><small data-sponsored-status style="color:#526b4c">Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🪙 '+henovaAdsgramLabels().reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+henovaAdsgramLabels().button+'</span><span slot="claim">'+henovaAdsgramLabels().claim+'</span><span slot="done">'+henovaAdsgramLabels().done+'</span></adsgram-task></div></article><button id="henova-promo-redeem" onclick="henovaRedeemPromo()" disabled style="display:block;width:100%;margin-top:10px;background:#9aa39a;border-radius:17px;padding:12px 16px;color:#e8eee8;font-weight:800;opacity:.65;cursor:not-allowed">'+(s.lang==='ar'?'متابعة واستلام الكود':s.lang==='tr'?'Devam Et ve Kodu Al':'Continue & Claim Code')+'</button></div></section>';
+const promoCard='<section style="background:linear-gradient(135deg,#9061fa,#4926af);border-radius:24px;padding:20px;color:white;box-shadow:0 7px 0 #37218b;margin-bottom:17px"><div style="display:flex;gap:10px;align-items:center;margin-bottom:15px"><span style="font-size:40px">🎟️</span><div style="flex:1"><strong style="font-size:19px">'+promoWords.title+'</strong><div style="font-size:13px;opacity:.85">'+promoWords.hint+'</div></div><button style="background:white;color:#4b2ba2;border-radius:22px;padding:11px 13px" onclick="henovaOpenPromoCodes()">'+promoWords.get+' ›</button></div><div style="display:flex;gap:8px"><input id="henova-promo-input" maxlength="24" placeholder="'+promoWords.placeholder+'" style="width:100%;min-width:0;flex:1;background:#3d2384;color:white;border:2px dashed #a68ee9;border-radius:16px;padding:15px;direction:ltr;text-transform:uppercase"><button id="henova-promo-reveal" type="button" onclick="henovaRevealPromoSponsoredTask()" style="background:linear-gradient(#93db59,#52a82d);border-radius:17px;padding:12px 16px;color:white;font-weight:800">'+promoWords.claim+'</button></div><div id="henova-promo-sponsored-wrap" aria-hidden="true" style="position:fixed!important;left:-10000px!important;top:0!important;width:1px!important;height:1px!important;max-width:1px!important;max-height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;display:block!important;visibility:visible!important;margin-top:12px"><article class="item hv-sponsored-card hv-sponsored-task-vertical" style="margin:0;background:#fffdf3;color:#315333"><div class="hv-sponsored-copy"><h3 style="color:#315333">🪙 '+henovaAdsgramLabels().name+'</h3><p style="color:#526b4c">'+henovaAdsgramLabels().reward+' · '+henovaAdsgramLabels().interval+'</p><small data-sponsored-status style="color:#526b4c">Checking server…</small></div><div class="hv-sponsored-action"><adsgram-task id="henova-adsgram-task" data-block-id="'+HENOVA_ADSGRAM_TASK+'" data-debug="false"><span slot="reward">🪙 '+henovaAdsgramLabels().reward+'</span><span slot="button" class="hv-adsgram-yellow-button">'+henovaAdsgramLabels().button+'</span><span slot="claim">'+henovaAdsgramLabels().claim+'</span><span slot="done">'+henovaAdsgramLabels().done+'</span></adsgram-task></div></article><button id="henova-promo-redeem" type="button" disabled style="display:block;width:100%;margin-top:10px;background:#9aa39a;border-radius:17px;padding:12px 16px;color:#e8eee8;font-weight:800;opacity:.65;cursor:not-allowed">Complete the sponsored task to claim code</button></div></section>';
 const dailyRewards=[500,700,900,1200,1500,2000,10000];
 const streak=Number(s.dailyStreak)||0;
 const nextDay=claimed?(streak||1):(streak>=7?1:Math.min(7,streak+1));
