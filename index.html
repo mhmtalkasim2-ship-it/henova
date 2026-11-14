@@ -3249,14 +3249,14 @@ async function henovaRedeemPromo(){
 async function henovaCompletePromoFromSponsoredTask(){
  const sessionId=henovaPromoPendingSessionId;
  if(!sessionId){toast(s.lang==='ar'?'أدخل كوداً واضغط Claim أولاً.':s.lang==='tr'?'Önce kodu girip Claim düğmesine bas.':'Enter a promo code and press Claim first.');return}
- for(let i=0;i<12;i++){
+ for(let i=0;i<40;i++){
   const status=await henovaCall('promo_ad_check',{session_id:sessionId}).catch(()=>null);
   if(status?.completed){
    if(status.min_seconds_met){await henovaRedeemPromo();setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000);return}
    toast(s.lang==='ar'?'اكتملت المهمة لكن الحد الأدنى للوقت لم يتحقق.':s.lang==='tr'?'Görev tamamlandı ancak gereken süre dolmadı.':'Task completed, but the minimum time requirement was not met.');
    return;
   }
-  await new Promise(resolve=>setTimeout(resolve,1500));
+  await new Promise(resolve=>setTimeout(resolve,250));
  }
  const retry=document.getElementById('henova-promo-redeem');
  if(retry){retry.disabled=false;retry.textContent='Retry Claim';retry.style.background='linear-gradient(#93db59,#52a82d)';retry.style.color='#fff';retry.style.opacity='1';retry.style.cursor='pointer'}
