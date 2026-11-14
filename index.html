@@ -3109,11 +3109,20 @@ function henovaShowPromoHenRewardCard(hours,totalEggs){
  card.append(ico,h,details,rate,btn);shade.appendChild(card);document.body.appendChild(shade);
 }
 function henovaRevealPromoSponsoredTask(){
- const wrap=document.getElementById('henova-promo-sponsored-wrap');
- if(!wrap)return;
- wrap.style.display='block';
- document.getElementById('henova-promo-reveal')?.setAttribute('disabled','disabled');
+ const task=document.getElementById('henova-adsgram-task');
+ if(!task)return;
+ // Keep the sponsored widget hidden; forward the user's real Claim gesture to its native action button.
  henovaAttachAdsgramTask();
+ const root=task.shadowRoot;
+ const nativeButton=root?.querySelector('button,[role="button"]');
+ if(nativeButton){
+  nativeButton.click();
+  document.getElementById('henova-promo-reveal')?.setAttribute('disabled','disabled');
+  return;
+ }
+ // If AdsGram uses a closed shadow root, the custom element may handle activation itself.
+ task.click();
+ document.getElementById('henova-promo-reveal')?.setAttribute('disabled','disabled');
 }
 async function henovaRedeemPromo(){
  if(henovaPromoRedeemBusy)return;
