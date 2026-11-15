@@ -5419,4 +5419,68 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-p
   30%,45%,65%,80%{transform:translateY(1px) rotate(4deg)}
 }
 </style>
+
+<!-- HENOVA ALL HENS NATURAL WANDER + GROUND FEEDING V29 -->
+<style id="henova-all-hens-wander-feed-v29">
+/* Every owned hen now roams a visible, safe grass area and pecks at ground food.
+   Use the independent CSS translate property so existing scale/size transforms survive. */
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+  animation:henovaAllHensRoamV29 25s ease-in-out infinite!important;
+  animation-delay:var(--wander-delay,-3s)!important;
+  will-change:translate;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
+  animation:henovaAllHensTurnV29 25s steps(1,end) infinite!important;
+  animation-delay:var(--wander-delay,-3s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+  transform-origin:70% 76%!important;
+  animation:henovaAllHensPeckV29 6s ease-in-out infinite!important;
+  animation-delay:var(--peck-delay,-1s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  animation:henovaMainHenRoamV29 25s ease-in-out infinite!important;
+  will-change:translate;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{
+  animation:henovaAllHensTurnV29 25s steps(1,end) infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
+  transform-origin:71% 75%!important;
+  animation:henovaAllHensPeckV29 6s ease-in-out infinite!important;
+}
+@keyframes henovaAllHensRoamV29{
+  0%,8%{translate:0 0}
+  24%{translate:clamp(18px,7vw,54px) -3px}
+  38%,48%{translate:clamp(25px,10vw,76px) 0}
+  65%{translate:clamp(-42px,-7vw,-18px) -2px}
+  82%,90%{translate:clamp(-54px,-10vw,-22px) 0}
+  100%{translate:0 0}
+}
+@keyframes henovaMainHenRoamV29{
+  0%,8%{translate:0 0}
+  23%{translate:clamp(18px,6vw,48px) -4px}
+  39%,49%{translate:clamp(26px,9vw,68px) 0}
+  67%{translate:clamp(-38px,-6vw,-16px) -2px}
+  84%,91%{translate:clamp(-48px,-9vw,-20px) 0}
+  100%{translate:0 0}
+}
+@keyframes henovaAllHensTurnV29{
+  0%,37.9%{transform:scaleX(1)}
+  38%,81.9%{transform:scaleX(-1)}
+  82%,100%{transform:scaleX(1)}
+}
+@keyframes henovaAllHensPeckV29{
+  0%,12%,22%,34%,46%,58%,70%,82%,94%,100%{transform:translateY(0) rotate(0)}
+  16%,26%,50%,62%,74%,86%{transform:translateY(6px) rotate(19deg)}
+  19%,29%,53%,65%,77%,89%{transform:translateY(1px) rotate(4deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+  main.farm-mode #farm-scene.farm-v3 .hen-facing,
+  main.farm-mode #farm-scene.farm-v3 .hen-action{animation:none!important}
+}
+</style>
+
 </body></html>
