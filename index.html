@@ -5577,99 +5577,65 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
 </style>
 
 
-<!-- HENOVA FULL FARM WANDERING V31 -->
-<style id="henova-full-farm-wandering-v31">
-/* Drive position itself (not only translate) so every bird visibly crosses the farm. */
+
+
+<!-- HENOVA RESTORE HEN VISIBILITY + SAFE ROAMING V32 -->
+<style id="henova-restore-hens-roaming-v32">
+/* Keep each bird's original farm coordinates. Animate only its visual offset. */
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
- position:absolute!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;
- animation:henovaFullFarmA31 34s linear infinite!important;
- animation-play-state:running!important;will-change:left,top;
+ position:absolute!important;left:70%!important;top:auto!important;bottom:18%!important;right:auto!important;
+ animation:henovaSafeRoamA32 31s ease-in-out infinite!important;
+ will-change:translate;
 }
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-b{
- position:absolute!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;
- animation:henovaFullFarmB31 39s linear infinite!important;
- animation-play-state:running!important;will-change:left,top;
+ position:absolute!important;left:61%!important;top:auto!important;bottom:21%!important;right:auto!important;
+ animation:henovaSafeRoamB32 34s ease-in-out infinite!important;
+ will-change:translate;
 }
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-c{
- position:absolute!important;left:0!important;top:0!important;right:auto!important;bottom:auto!important;
- animation:henovaFullFarmC31 36s linear infinite!important;
- animation-play-state:running!important;will-change:left,top;
-}
-html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img,
-html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-b img,
-html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-c img{
- display:block!important;animation:henovaWalkPeck31 4.8s ease-in-out infinite!important;
- transform-origin:65% 78%!important;
+ position:absolute!important;left:55%!important;top:auto!important;bottom:24%!important;right:auto!important;
+ animation:henovaSafeRoamC32 32s ease-in-out infinite!important;
+ will-change:translate;
 }
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
- left:0!important;top:0!important;right:auto!important;bottom:auto!important;
- animation:henovaOwnedFullFarm31 37s linear infinite!important;
- animation-delay:var(--wander-delay,-7s)!important;
- animation-play-state:running!important;will-change:left,top;
+ right:auto!important;bottom:auto!important;
+ animation:henovaSafeRoamOwned32 33s ease-in-out infinite!important;
+ animation-delay:var(--wander-delay,-4s)!important;
+ will-change:translate;
 }
-html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
- animation:henovaOwnedFace31 37s steps(1,end) infinite!important;
- animation-delay:var(--wander-delay,-7s)!important;
-}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action,
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-b img,
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-c img,
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
  transform-origin:68% 78%!important;
- animation:henovaWalkPeck31 5.2s ease-in-out infinite!important;
- animation-delay:var(--peck-delay,-2s)!important;
+ animation:henovaSafePeck32 5.4s ease-in-out infinite!important;
 }
-@keyframes henovaFullFarmA31{
- 0%{left:67%;top:72%;transform:scaleX(-1)}
- 18%{left:45%;top:65%;transform:scaleX(-1)}
- 34%{left:13%;top:72%;transform:scaleX(-1)}
- 49%{left:18%;top:49%;transform:scaleX(1)}
- 65%{left:57%;top:47%;transform:scaleX(1)}
- 82%{left:78%;top:65%;transform:scaleX(1)}
- 100%{left:67%;top:72%;transform:scaleX(-1)}
+@keyframes henovaSafeRoamA32{
+ 0%,10%{translate:0 0}25%{translate:5vw -1vh}45%,58%{translate:9vw 0}
+ 76%{translate:3vw 1vh}100%{translate:0 0}
 }
-@keyframes henovaFullFarmB31{
- 0%{left:16%;top:62%;transform:scaleX(1)}
- 20%{left:38%;top:47%;transform:scaleX(1)}
- 38%{left:72%;top:50%;transform:scaleX(1)}
- 54%{left:83%;top:72%;transform:scaleX(-1)}
- 72%{left:52%;top:79%;transform:scaleX(-1)}
- 88%{left:21%;top:76%;transform:scaleX(-1)}
- 100%{left:16%;top:62%;transform:scaleX(1)}
+@keyframes henovaSafeRoamB32{
+ 0%,8%{translate:0 0}24%{translate:-5vw -1vh}44%,57%{translate:-8vw 0}
+ 78%{translate:-2vw 1vh}100%{translate:0 0}
 }
-@keyframes henovaFullFarmC31{
- 0%{left:45%;top:78%;transform:scaleX(-1)}
- 19%{left:17%;top:70%;transform:scaleX(-1)}
- 37%{left:12%;top:48%;transform:scaleX(1)}
- 55%{left:47%;top:43%;transform:scaleX(1)}
- 73%{left:78%;top:55%;transform:scaleX(1)}
- 90%{left:69%;top:79%;transform:scaleX(-1)}
- 100%{left:45%;top:78%;transform:scaleX(-1)}
+@keyframes henovaSafeRoamC32{
+ 0%,9%{translate:0 0}27%{translate:4vw -1vh}48%,61%{translate:7vw 0}
+ 82%{translate:2vw 1vh}100%{translate:0 0}
 }
-@keyframes henovaOwnedFullFarm31{
- 0%{left:var(--hen-start-left,12%);top:var(--hen-start-top,62%);transform:scaleX(1)}
- 20%{left:22%;top:47%;transform:scaleX(1)}
- 39%{left:67%;top:45%;transform:scaleX(1)}
- 58%{left:83%;top:65%;transform:scaleX(-1)}
- 78%{left:54%;top:80%;transform:scaleX(-1)}
- 92%{left:17%;top:76%;transform:scaleX(-1)}
- 100%{left:var(--hen-start-left,12%);top:var(--hen-start-top,62%);transform:scaleX(1)}
+@keyframes henovaSafeRoamOwned32{
+ 0%,8%{translate:0 0}24%{translate:4vw -1vh}43%,56%{translate:7vw 0}
+ 77%{translate:-2vw 1vh}100%{translate:0 0}
 }
-@keyframes henovaOwnedFace31{
-  0%,57.9%{transform:scaleX(1)}
-  58%,100%{transform:scaleX(-1)}
+@keyframes henovaSafePeck32{
+ 0%,16%,31%,47%,63%,79%,100%{transform:translateY(0) rotate(0)}
+ 21%,52%,84%{transform:translateY(5px) rotate(14deg)}
+ 26%,57%,89%{transform:translateY(1px) rotate(3deg)}
 }
-@keyframes henovaWalkPeck31{
-  0%,16%,32%,48%,64%,80%,100%{transform:translateY(0) rotate(0)}
-  21%,53%,85%{transform:translateY(6px) rotate(17deg)}
-  26%,58%,90%{transform:translateY(1px) rotate(4deg)}
-}
-/* Keep motion enabled even when the device requests reduced motion. */
 @media(prefers-reduced-motion:reduce){
  html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
- html body main.farm-mode #farm-scene.farm-v3 .farm-hen img,
  html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
- html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing,
- html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
-  animation-play-state:running!important;
- }
+ html body main.farm-mode #farm-scene.farm-v3 .farm-hen img,
+ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{animation-play-state:running!important}
 }
 </style>
 
