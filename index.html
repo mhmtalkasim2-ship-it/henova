@@ -4967,7 +4967,6 @@ function henovaAttachAdsgramTask(){
   task.addEventListener('reward',()=>{
    if(henovaPromoPendingSessionId){toast(henovaAdsgramLabels().pending);void henovaCompletePromoFromSponsoredTask();}
    else{toast(s.lang==='ar'?'أدخل كوداً واضغط Claim أولاً.':s.lang==='tr'?'Önce kodu girip Claim düğmesine bas.':'Enter a promo code and press Claim first.');}
-   setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000);
   });
   task.addEventListener('onBannerNotFound',()=>{const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');if(status)status.textContent=henovaAdsgramLabels().unavailable});
  });
