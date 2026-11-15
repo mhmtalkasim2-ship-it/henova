@@ -3267,7 +3267,6 @@ async function henovaCompletePromoFromSponsoredTask(){
     claim.style.cursor='pointer';
    }
    toast(s.lang==='ar'?'✅ تم تأكيد المهمة! اضغط Claim Code لاستلام مكافأة الكود.':s.lang==='tr'?'✅ Görev doğrulandı! Kod ödülünü almak için Claim Code düğmesine bas.':'✅ Sponsored task verified! Press Claim Code to receive your promo reward.');
-   setTimeout(()=>void henovaSponsoredRefreshCooldown(),1000);
    return;
   }
   if(status?.completed&&!status?.min_seconds_met){
@@ -4943,49 +4942,28 @@ function henovaOwnedHensMarkup(){
 const HENOVA_ADSGRAM_TASK='task-56216';
 function henovaAdsgramLabels(){
 return ({
- en:{name:'Complete Sponsored Task',reward:'10M coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
- ar:{name:'أكمل المهمة الممولة',reward:'10M عملة',interval:'كل 5 دقائق',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
- tr:{name:'Sponsorlu Görevi Tamamla',reward:'10M jeton',interval:'Her 5 dakikada bir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
+ en:{name:'Complete Sponsored Task',reward:'10M coins',interval:'Available anytime',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
+ ar:{name:'أكمل المهمة الممولة',reward:'10M عملة',interval:'متاحة في أي وقت',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
+ tr:{name:'Sponsorlu Görevi Tamamla',reward:'10M jeton',interval:'Her zaman kullanılabilir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
 })[s.lang]||({
-name:'Complete Sponsored Task',reward:'10M coins',interval:'Every 5 minutes',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
+name:'Complete Sponsored Task',reward:'10M coins',interval:'Available anytime',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
 });
 }
-let henovaSponsoredExpires=Infinity;
-let henovaSponsoredCheckingStatus=false;
-function henovaSponsoredDrawCooldown(){
- const tasks=[document.getElementById('henova-adsgram-task')].filter(Boolean);
- if(!tasks.length)return;
- const seconds=Math.max(0,Math.ceil((henovaSponsoredExpires-performance.now())/1000));
- const locked=!Number.isFinite(henovaSponsoredExpires)||seconds>0;
- tasks.forEach(task=>{
-  task.style.pointerEvents=locked?'none':'auto';
-  task.style.opacity=locked?'.55':'1';
-  const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');
-  if(status)status.textContent=locked?(Number.isFinite(seconds)?' ⏳ '+Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0'):' ⏳ Checking server…'):' ✅ Available now';
- });
+function henovaSponsoredEnableEntry(){
+ const task=document.getElementById('henova-adsgram-task');
+ if(!task)return;
+ task.style.pointerEvents='auto';
+ task.style.opacity='1';
+ const status=task.closest('.hv-sponsored-task-vertical')?.querySelector('[data-sponsored-status]');
+ if(status)status.textContent='✅ Available now';
 }
-async function henovaSponsoredRefreshCooldown(){
- if(henovaSponsoredCheckingStatus)return;
- henovaSponsoredCheckingStatus=true;
- try{
-  const d=await henovaCall('sponsored_watch_status');
-  henovaSponsoredExpires=performance.now()+Math.max(0,Number(d.retry_after_seconds)||0)*1000;
- }catch(e){henovaSponsoredExpires=Infinity;console.warn('Sponsored timer',e?.message||e)}
- finally{henovaSponsoredCheckingStatus=false;henovaSponsoredDrawCooldown()}
-}
-setInterval(()=>{
- if(document.getElementById('henova-adsgram-task'))henovaSponsoredDrawCooldown();
-},1000);
-// Cooldown is fetched when the task is shown and after an ad reward.
-// The countdown then runs locally; avoid a server request every five minutes.
 function henovaAttachAdsgramTask(){
  const tasks=[document.getElementById('henova-adsgram-task')].filter(Boolean);
  if(!tasks.length)return;
- void henovaSponsoredRefreshCooldown();
+ henovaSponsoredEnableEntry();
  tasks.forEach(task=>{
   if(task.dataset.henovaBound==='1')return;
   task.dataset.henovaBound='1';
-  task.style.pointerEvents='none';
   task.addEventListener('reward',()=>{
    if(henovaPromoPendingSessionId){toast(henovaAdsgramLabels().pending);void henovaCompletePromoFromSponsoredTask();}
    else{toast(s.lang==='ar'?'أدخل كوداً واضغط Claim أولاً.':s.lang==='tr'?'Önce kodu girip Claim düğmesine bas.':'Enter a promo code and press Claim first.');}
