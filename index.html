@@ -5140,8 +5140,10 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 if(tab===2){
  // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
  const firstAdTasks='<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Victors_Company_bot.jpg" alt="Victor\'s Company" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src=\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Victor\'s Company':s.lang==='tr'?'Bize Katıl · Victor\'s Company':'Join Us · Victor\'s Company')+'</h3><p>🪙 +10M · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenVictorsCompany()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-victors-company-claim" onclick="henovaClaimVictorsCompany()" '+(henovaVictorsCompanyClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
+ const watchVideoTask='<article class="item hv-video-task-card"><div class="hv-task-top"><div class="hv-sponsored-icon">📺</div><div class="hv-sponsored-copy"><h3>'+henovaVideoRewardText().title+'</h3><p>'+henovaVideoRewardText().desc+'</p></div></div><div class="hv-video-task-action"><button id="henova-reward-video-btn" type="button" onclick="henovaWatchRewardVideo()">'+henovaVideoRewardText().button+'</button></div></article>';
  const tasksHeading=el.querySelector('h1.title');
- if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks);
+ if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks+watchVideoTask);
+ void henovaVideoCooldownRefresh().catch(error=>console.warn('Watch-ad task status unavailable',error));
 }
 if(tab===3){
 const w=s.lang==='ar'?
