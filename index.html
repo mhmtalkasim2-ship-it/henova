@@ -3014,7 +3014,7 @@ async function henovaAction(action,item){
   }catch(error){
     console.warn('HENOVA action not confirmed',error);
     toast(hvError(error.message));
-    if(['no_eggs','already_claimed','insufficient_coins','invalid_hen','hen_limit_reached','max_boost','invalid_request_id'].includes(error.message)){
+    if(['no_eggs','already_claimed','insufficient_coins','insufficient_eggs','invalid_hen','hen_limit_reached','max_boost','invalid_request_id'].includes(error.message)){
       localStorage.removeItem('henova-pending-action-v1');
     }
     try{const fresh=await henovaCall('state');henovaApplyState(fresh.state);render()}catch{}
@@ -3043,7 +3043,7 @@ async function showLegendaryPurchaseAd(){
  }finally{henovaLegendPurchaseAdBusy=false;}
 }
 function playCollectEggs(hens,q){if(!hens.length)return;const count=Math.min(12,Math.max(3,Math.ceil(q/4)));const layer=document.createElement('div');layer.className='henova-egg-burst';document.body.appendChild(layer);for(let i=0;i<count;i++){let r=hens[i%hens.length],egg=document.createElement('span');egg.className='henova-flying-egg';egg.textContent='🥚';egg.style.left=(r.left+r.width*(.25+.5*Math.random()))+'px';egg.style.top=(r.top+r.height*.7)+'px';egg.style.setProperty('--dx',((Math.random()-.5)*110)+'px');egg.style.setProperty('--rise',(-140-Math.random()*150)+'px');egg.style.animationDelay=(i*85)+'ms';layer.appendChild(egg)}setTimeout(()=>layer.remove(),2200)}
-async function henovaLegendEggBuyButton(){const full=(Number(s.hen.legend)||0)>=100;const label=s.lang==='ar'?'شراء بالبيض':s.lang==='tr'?'Yumurta ile satın al':'Buy with Eggs';const fullText=s.lang==='ar'?'اكتمل الحد الأقصى':s.lang==='tr'?'Maksimum dolu':'Maximum reached';return '<button class="hv-buy-primary hv-buy-eggs" type="button" onclick="purchaseWithEggs()" '+(full?'disabled':'')+'><span class="hv-buy-icon">🥚</span><span>'+(full?fullText:label+'<small>500,000 Eggs</small>')+'</span></button>'}
+function henovaLegendEggBuyButton(){const full=(Number(s.hen.legend)||0)>=100;const label=s.lang==='ar'?'شراء بالبيض':s.lang==='tr'?'Yumurta ile satın al':'Buy with Eggs';const fullText=s.lang==='ar'?'اكتمل الحد الأقصى':s.lang==='tr'?'Maksimum dolu':'Maximum reached';return '<button class="hv-buy-primary hv-buy-eggs" type="button" onclick="purchaseWithEggs()" '+(full?'disabled':'')+'><span class="hv-buy-icon">🥚</span><span>'+(full?fullText:label+'<small>500,000 Eggs</small>')+'</span></button>'}
 async function purchaseWithEggs(){if((Number(s.hen.legend)||0)>=100)return toast(hvError('hen_limit_reached'));if(s.eggs<500000)return toast(hvError('insufficient_eggs'));if(henovaLegendPurchaseAdBusy||henovaBusy)return;await showLegendaryPurchaseAd();if(henovaBusy)return;return henovaAction('purchase','legend_eggs')}
 function purchase(id){let h=H.find(x=>x[0]===id);if(!h||!h[4])return;
 if((Number(s.hen[id])||0)>=100)return toast(hvError('hen_limit_reached'));
