@@ -4579,10 +4579,35 @@ async function henovaMathGate(scope){
   void load();
  });
 }
-async function henovaSubmitSimpleWithdrawal(){
+
+function henovaShowWithdrawalChannelGate(){
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ const shade=document.createElement('div');
+ shade.style.cssText='position:fixed;inset:0;z-index:2147483641;background:#102e1ecc;display:flex;align-items:center;justify-content:center;padding:18px';
+ const panel=document.createElement('section');
+ panel.style.cssText='width:min(390px,100%);background:#fffdf3;color:#28523a;border:2px solid #d9e9c9;border-radius:23px;padding:22px;box-shadow:0 18px 55px #0006;text-align:center';
+ const title=document.createElement('h3');title.textContent=ar?'🔒 الاشتراك مطلوب قبل السحب':tr?'🔒 Çekimden önce abonelik gerekli':'🔒 Subscribe before withdrawing';
+ const info=document.createElement('p');info.style.cssText='font-size:13px;line-height:1.6;color:#66836a';info.textContent=ar?'يرجى الاشتراك في القناتين التاليتين، ثم اضغط على زر التحقق.':tr?'Lütfen aşağıdaki iki kanala katılın, ardından doğrulama düğmesine basın.':'Please join both channels below, then tap Verify & Continue.';
+ const links=document.createElement('div');links.style.cssText='display:grid;gap:10px;margin:17px 0';
+ const makeLink=(label,url)=>{const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.textContent=label;a.style.cssText='display:block;padding:13px;border-radius:13px;background:#eaf5df;color:#287343;text-decoration:none;font-weight:900';return a};
+ links.append(makeLink('📢 HENOVA PROMO CODES','https://t.me/HENOVA_PROMO_CODES'),makeLink('🐔 HENOVA FARM','https://t.me/HENOVA_FARM'));
+ const error=document.createElement('p');error.style.cssText='min-height:18px;font-size:12px;color:#a65a32';
+ const verify=document.createElement('button');verify.type='button';verify.textContent=ar?'تحقق وتابع السحب':tr?'Kontrol et ve devam et':'Verify & Continue';verify.style.cssText='width:100%;padding:14px;border:0;border-radius:14px;background:linear-gradient(#ffe17d,#f0af3e);color:#523d11;font-weight:900';
+ verify.onclick=async()=>{verify.disabled=true;error.textContent=ar?'جارٍ التحقق من الاشتراك…':tr?'Üyelik kontrol ediliyor…':'Checking your subscriptions…';try{const r=await henovaCall('verify_withdrawal_channels');if(r.joined){shade.remove();await henovaSubmitSimpleWithdrawal(true);return;}error.textContent=ar?'لم نتمكن من تأكيد اشتراكك بالقناتين. اشترك ثم أعد المحاولة.':tr?'Her iki kanala üyeliğiniz doğrulanamadı. Katılıp tekrar deneyin.':'We could not confirm both subscriptions. Join both channels and try again.';}catch(e){error.textContent=ar?'تعذر التحقق حالياً. حاول مجدداً.':tr?'Doğrulama şu anda kullanılamıyor. Tekrar deneyin.':'Verification is temporarily unavailable. Please try again.';}finally{verify.disabled=false;}};
+ const close=document.createElement('button');close.type='button';close.textContent=ar?'إغلاق':tr?'Kapat':'Close';close.style.cssText='width:100%;margin-top:8px;padding:11px;border:0;border-radius:12px;background:#edf2e8;color:#55745a;font-weight:800';close.onclick=()=>shade.remove();
+ panel.append(title,info,links,error,verify,close);shade.append(panel);document.body.append(shade);
+}
+
+async function henovaSubmitSimpleWithdrawal(channelsVerified=false){
  const amount=Number(document.getElementById('hv-withdraw-eggs')?.value);
  if(!hvPayoutReady)return toast(s.lang==='ar'?'السحب غير متاح حالياً':'Withdrawals are currently unavailable');
  if(!Number.isSafeInteger(amount)||amount<hvMinEggs||amount>hvMaxEggs||amount>Number(s.eggs))return henovaUpdateSimpleWithdrawal();
+ if(!channelsVerified){
+  try{
+   const membership=await henovaCall('verify_withdrawal_channels');
+   if(!membership.joined){henovaShowWithdrawalChannelGate();return;}
+  }catch(error){toast(s.lang==='ar'?'تعذر التحقق من الاشتراك. حاول لاحقاً':'Channel verification unavailable. Try again later');return;}
+ }
  const button=document.getElementById('hv-withdraw-submit');
  if(button)button.disabled=true;
  try{
