@@ -4987,6 +4987,7 @@ const HENOVA_HEN_SPOTS={
 };
 let henovaPurchasedHenArrival=null;
 function henovaOwnedHensMarkup(){
+ let henOrdinal=0;
  return H.map(h=>{
    const breed=h[0];
    const count=Math.max(0,Math.min(HENOVA_MAX_HENS_PER_BREED,Math.floor(Number(s.hen[breed])||0))-(breed==='starter'?1:0));
@@ -5000,8 +5001,17 @@ function henovaOwnedHensMarkup(){
      const isNewPurchase=henovaPurchasedHenArrival?.breed===breed&&i===count-1;
      const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;':'';
      const arrivalClass=isNewPurchase?' henova-new-purchase-exit':'';
+     const n=henOrdinal++;
+     const dx1=Math.round((2+(n%4)*1.15)*((n%2)?-1:1));
+     const dx2=Math.round((3+((n*3)%5))*((n%3)?1:-1));
+     const dy1=-Math.round(1+(n%3)*.7);
+     const dy2=Math.round(1+(n%2)*1.2);
+     const duration=19+(n%7)*3;
+     const delay=-((n*7)%duration);
+     const face=dx1<0?'-1':'1';
+     const roamStyle='--roam-x1:'+dx1+'vw;--roam-y1:'+dy1+'vh;--roam-x2:'+dx2+'vw;--roam-y2:'+dy2+'vh;--roam-duration:'+duration+'s;--roam-delay:'+delay+'s;--roam-face:'+face+';'+entryStyle;
      if(isNewPurchase)henovaPurchasedHenArrival=null;
-     return '<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+entryStyle+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
+     return '<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+roamStyle+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
  }).join('');
 }
@@ -5751,6 +5761,83 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
 }
 </style>
 
+
+<style id="henova-independent-flock-motion-20261116">
+/* Equal-sized hens; every bird follows its own slow, varied roaming path. */
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  width:clamp(36px,7.8vw,51px)!important;
+  max-width:51px!important;
+  animation:henovaStarterRoam2026 27s ease-in-out infinite!important;
+  animation-delay:-9s!important;
+  will-change:transform;
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  animation:henovaStarterTurn2026 27s steps(1,end) infinite!important;
+  animation-delay:-9s!important;
+}
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  animation:henovaStarterPeck2026 5.8s ease-in-out infinite!important;
+}
+@keyframes henovaStarterRoam2026{
+  0%,8%{transform:translate3d(0,0,0)}
+  22%{transform:translate3d(3vw,-2vh,0)}
+  38%,48%{transform:translate3d(7vw,-4vh,0)}
+  63%{transform:translate3d(4vw,-2vh,0)}
+  78%,100%{transform:translate3d(0,0,0)}
+}
+@keyframes henovaStarterTurn2026{
+  0%,48%{transform:scaleX(-1)}
+  49%,100%{transform:scaleX(1)}
+}
+@keyframes henovaStarterPeck2026{
+  0%,25%,55%,100%{transform:rotate(0) translateY(0)}
+  32%,39%{transform:rotate(11deg) translateY(4px)}
+  44%{transform:rotate(0) translateY(0)}
+}
+body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
+  width:clamp(36px,7.8vw,51px)!important;
+  max-width:51px!important;
+  animation:henovaIndividualRoam2026 var(--roam-duration,23s) ease-in-out infinite!important;
+  animation-delay:var(--roam-delay,-3s)!important;
+  will-change:transform;
+}
+body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
+  animation:henovaIndividualTurn2026 var(--roam-duration,23s) steps(1,end) infinite!important;
+  animation-delay:var(--roam-delay,-3s)!important;
+}
+body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+  animation:henovaIndividualPeck2026 6.2s ease-in-out infinite!important;
+  animation-delay:var(--roam-delay,-3s)!important;
+}
+@keyframes henovaIndividualRoam2026{
+  0%,7%{transform:translate3d(0,0,0)}
+  24%{transform:translate3d(var(--roam-x1,3vw),var(--roam-y1,-2vh),0)}
+  43%,55%{transform:translate3d(var(--roam-x2,5vw),var(--roam-y2,1vh),0)}
+  73%{transform:translate3d(calc(var(--roam-x1,3vw)*.35),calc(var(--roam-y1,-2vh)*.35),0)}
+  91%,100%{transform:translate3d(0,0,0)}
+}
+@keyframes henovaIndividualTurn2026{
+  0%,54%{transform:scaleX(var(--roam-face,1))}
+  55%,100%{transform:scaleX(calc(var(--roam-face,1)*-1))}
+}
+@keyframes henovaIndividualPeck2026{
+  0%,17%,39%,67%,100%{transform:rotate(0deg) translateY(0)}
+  22%,27%{transform:rotate(-3deg) translateY(-2px)}
+  44%,50%{transform:rotate(11deg) translateY(4px)}
+  56%{transform:rotate(0deg) translateY(0)}
+  78%,83%{transform:rotate(8deg) translateY(3px)}
+}
+@media(prefers-reduced-motion:reduce){
+ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a,
+ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing,
+ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action,
+ body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+ body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing,
+ body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+   animation:none!important;transform:none!important
+ }
+}
+</style>
 </body></html>
 
 <!-- HENOVA REAL VISIBLE WALK FIX V34 -->
