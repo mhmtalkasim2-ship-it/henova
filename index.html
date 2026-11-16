@@ -5002,10 +5002,14 @@ function henovaOwnedHensMarkup(){
      const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;':'';
      const arrivalClass=isNewPurchase?' henova-new-purchase-exit':'';
      const n=henOrdinal++;
-     const dx1=Math.round((2+(n%4)*1.15)*((n%2)?-1:1));
-     const dx2=Math.round((3+((n*3)%5))*((n%3)?1:-1));
-     const dy1=-Math.round(1+(n%3)*.7);
-     const dy2=Math.round(1+(n%2)*1.2);
+     const direction=point[0]<25?1:point[0]>75?-1:(n%2?-1:1);
+     const roomForward=direction>0?94-point[0]:point[0]-4;
+     const roomBack=direction>0?point[0]-4:94-point[0];
+     const dx1=Math.round(direction*Math.max(5,Math.min(16,roomForward*.52)));
+     const dx2=Math.round(-direction*Math.max(3,Math.min(10,roomBack*.42)));
+     const verticalDirection=point[1]>76?-1:point[1]<24?1:(n%3===0?1:-1);
+     const dy1=Math.round(verticalDirection*(5+(n%4)*1.7));
+     const dy2=Math.round(-verticalDirection*(3+(n%3)*1.5));
      const duration=19+(n%7)*3;
      const delay=-((n*7)%duration);
      const face=dx1<0?'-1':'1';
@@ -5781,9 +5785,9 @@ body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
 }
 @keyframes henovaStarterRoam2026{
   0%,8%{transform:translate3d(0,0,0)}
-  22%{transform:translate3d(3vw,-2vh,0)}
-  38%,48%{transform:translate3d(7vw,-4vh,0)}
-  63%{transform:translate3d(4vw,-2vh,0)}
+  22%{transform:translate3d(7vw,-4vh,0)}
+  38%,48%{transform:translate3d(14vw,-8vh,0)}
+  63%{transform:translate3d(6vw,-3vh,0)}
   78%,100%{transform:translate3d(0,0,0)}
 }
 @keyframes henovaStarterTurn2026{
