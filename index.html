@@ -5684,4 +5684,71 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
 }
 </style>
 
+
+<!-- HENOVA FINAL NATURAL WALK + GROUND PECK V33 -->
+<style id="henova-natural-walk-ground-peck-v33">
+/* Make the visible starter hen travel a clearly noticeable path over the grass.
+   Keep its click target, artwork, farm scenery and all game logic unchanged. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  display:block!important;
+  position:absolute!important;
+  left:48%!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:20%!important;
+  width:clamp(68px,18vw,102px)!important;
+  height:auto!important;
+  opacity:1!important;
+  visibility:visible!important;
+  z-index:15!important;
+  animation:henovaVisibleFarmWalkV33 24s ease-in-out infinite!important;
+  animation-play-state:running!important;
+  will-change:transform;
+}
+@keyframes henovaVisibleFarmWalkV33{
+  0%,7%{transform:translate3d(0,0,0)}
+  25%{transform:translate3d(12vw,-1.2vh,0)}
+  34%,43%{transform:translate3d(16vw,0,0)}
+  62%{transform:translate3d(-8vw,-.8vh,0)}
+  72%,82%{transform:translate3d(-13vw,0,0)}
+  94%,100%{transform:translate3d(0,0,0)}
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  display:block!important;
+  transform-origin:50% 72%!important;
+  animation:henovaVisibleFarmTurnV33 24s steps(1,end) infinite!important;
+  animation-play-state:running!important;
+}
+@keyframes henovaVisibleFarmTurnV33{
+  0%,33.9%{transform:scaleX(1)}
+  34%,81.9%{transform:scaleX(-1)}
+  82%,100%{transform:scaleX(1)}
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  display:block!important;
+  transform-origin:68% 78%!important;
+  animation:henovaVisibleGroundPeckV33 6s ease-in-out infinite!important;
+  animation-play-state:running!important;
+}
+@keyframes henovaVisibleGroundPeckV33{
+  0%,12%,24%,39%,52%,64%,82%,100%{transform:translateY(0) rotate(0deg)}
+  16%,28%,43%,68%,86%{transform:translateY(6px) rotate(17deg)}
+  20%,32%,47%,72%,90%{transform:translateY(1px) rotate(4deg)}
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  animation:none!important;
+  pointer-events:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a,
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing,
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+    animation-play-state:running!important;
+  }
+}
+</style>
+
 </body></html>
