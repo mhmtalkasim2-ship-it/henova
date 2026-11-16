@@ -5752,3 +5752,93 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
 </style>
 
 </body></html>
+
+<!-- HENOVA REAL VISIBLE WALK FIX V34 -->
+<style id="henova-real-visible-walk-v34">
+/* V33 flipped the birds, but its parent transform conflicted with older
+   doorway/roaming animations. Drive the starter's actual position with left. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  left:42%!important;
+  top:auto!important;
+  bottom:20%!important;
+  right:auto!important;
+  animation:henovaStarterLeftWalkV34 26s ease-in-out infinite!important;
+  animation-play-state:running!important;
+  will-change:left,bottom;
+}
+@keyframes henovaStarterLeftWalkV34{
+  0%,6%{left:42%;bottom:20%}
+  22%{left:57%;bottom:21%}
+  34%,42%{left:66%;bottom:20%}
+  60%{left:49%;bottom:21%}
+  75%,83%{left:32%;bottom:20%}
+  96%,100%{left:42%;bottom:20%}
+}
+/* The two ambient hens also travel instead of merely turning in place. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
+  animation:henovaSecondHenWalkV34 29s ease-in-out infinite!important;
+  animation-play-state:running!important;
+  will-change:left,bottom;
+}
+@keyframes henovaSecondHenWalkV34{
+  0%,8%{left:61%;bottom:21%}
+  27%{left:72%;bottom:22%}
+  43%,52%{left:76%;bottom:21%}
+  72%{left:58%;bottom:22%}
+  91%,100%{left:61%;bottom:21%}
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+  animation:henovaThirdHenWalkV34 31s ease-in-out infinite!important;
+  animation-play-state:running!important;
+  will-change:left,bottom;
+}
+@keyframes henovaThirdHenWalkV34{
+  0%,8%{left:55%;bottom:24%}
+  25%{left:43%;bottom:25%}
+  44%,53%{left:36%;bottom:24%}
+  76%{left:51%;bottom:25%}
+  92%,100%{left:55%;bottom:24%}
+}
+/* Purchased hens walk visibly within their own area while keeping their
+   individual positions and click targets. Combine travel and facing. */
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit) .hen-facing{
+  animation:henovaOwnedFacingWalkV34 18s ease-in-out infinite!important;
+  animation-delay:var(--wander-delay,-3s)!important;
+  animation-play-state:running!important;
+  will-change:transform;
+}
+@keyframes henovaOwnedFacingWalkV34{
+  0%,8%{transform:translateX(0) scaleX(1)}
+  25%{transform:translateX(17px) scaleX(1)}
+  39%,48%{transform:translateX(23px) scaleX(-1)}
+  72%{transform:translateX(-12px) scaleX(-1)}
+  88%,100%{transform:translateX(0) scaleX(1)}
+}
+/* Clear ground-peck movement on every hen body. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+  transform-origin:68% 78%!important;
+  animation:henovaGroundPeckV34 4.8s ease-in-out infinite!important;
+  animation-play-state:running!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img,
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
+  transform-origin:60% 78%!important;
+  animation:henovaGroundPeckV34 4.8s ease-in-out infinite!important;
+  animation-play-state:running!important;
+}
+@keyframes henovaGroundPeckV34{
+  0%,18%,39%,59%,80%,100%{transform:translateY(0) rotate(0deg)}
+  23%,44%,64%,85%{transform:translateY(8px) rotate(19deg)}
+  28%,49%,69%,90%{transform:translateY(1px) rotate(4deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen,
+  html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+  html body main.farm-mode #farm-scene.farm-v3 .hen-facing,
+  html body main.farm-mode #farm-scene.farm-v3 .hen-action,
+  html body main.farm-mode #farm-scene.farm-v3 .farm-hen img{
+    animation-play-state:running!important;
+  }
+}
+</style>
