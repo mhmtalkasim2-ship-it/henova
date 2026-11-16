@@ -5936,3 +5936,85 @@ body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
  }
 }
 </style>
+
+
+<!-- HENOVA HEN BODY SHAPE + CLEAN MOTION FIX 20261116 -->
+<style id="henova-hen-natural-body-motion-fix-20261116">
+/* One motion layer per bird: move the wrapper, keep the artwork unflipped and undistorted. */
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+  width:clamp(36px,7.8vw,51px)!important;
+  max-width:51px!important;
+  height:auto!important;
+  animation:henovaNaturalOwnedRoam20261116 var(--roam-duration,24s) ease-in-out infinite!important;
+  animation-delay:var(--roam-delay,-3s)!important;
+  transform:none!important;
+  will-change:translate;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
+  width:100%!important;
+  height:auto!important;
+  display:block!important;
+  transform:none!important;
+  animation:none!important;
+  backface-visibility:visible!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+  width:100%!important;
+  display:block!important;
+  transform-origin:68% 78%!important;
+  animation:henovaNaturalGroundPeck20261116 7.2s ease-in-out infinite!important;
+  animation-delay:var(--roam-delay,-2s)!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:100%!important;
+  object-fit:contain!important;
+  transform:none!important;
+  filter:none!important;
+}
+@keyframes henovaNaturalOwnedRoam20261116{
+  0%,8%{translate:0 0}
+  22%{translate:var(--roam-x1,5vw) var(--roam-y1,-2vh)}
+  39%,48%{translate:var(--roam-x1,5vw) var(--roam-y1,-2vh)}
+  68%{translate:var(--roam-x2,-4vw) var(--roam-y2,1vh)}
+  84%,100%{translate:0 0}
+}
+@keyframes henovaNaturalGroundPeck20261116{
+  0%,18%,38%,58%,78%,100%{transform:translateY(0) rotate(0deg)}
+  23%,43%,63%,83%{transform:translateY(3px) rotate(7deg)}
+  28%,48%,68%,88%{transform:translateY(0) rotate(0deg)}
+}
+/* Starter hen: same natural movement layer, without horizontal flipping. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  animation:henovaNaturalStarterRoam20261116 29s ease-in-out infinite!important;
+  animation-delay:-8s!important;
+  transform:none!important;
+  will-change:translate;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  transform:none!important;
+  animation:none!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  transform-origin:68% 78%!important;
+  animation:henovaNaturalGroundPeck20261116 7.2s ease-in-out infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a img{
+  transform:none!important;
+  object-fit:contain!important;
+}
+@keyframes henovaNaturalStarterRoam20261116{
+  0%,8%{translate:0 0}
+  23%{translate:7vw -2vh}
+  42%,52%{translate:11vw -3vh}
+  70%{translate:4vw -1vh}
+  88%,100%{translate:0 0}
+}
+/* Decorative hens retain their existing placement and artwork; remove edge-on flips only. */
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen:not(.hen-a) .hen-facing{
+  animation:none!important;
+  transform:none!important;
+}
+</style>
