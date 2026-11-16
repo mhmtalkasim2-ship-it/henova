@@ -3353,7 +3353,10 @@ async function henovaClaimNGMCloud(){
 let henovaVictorsCompanyOpened=false,henovaVictorsCompanyBusy=false,henovaVictorsCompanyClaimed=false;
 function henovaOpenVictorsCompany(){
  henovaVictorsCompanyOpened=true;
- window.Telegram?.WebApp?.openTelegramLink?.('https://t.me/Cyber_MineBot/CYM?startapp=ref_7040084040');
+ const url='https://t.me/Cyber_MineBot/CYM?startapp=ref_7040084040';
+ const webApp=window.Telegram?.WebApp;
+ if(typeof webApp?.openTelegramLink==='function')webApp.openTelegramLink(url);
+ else window.open(url,'_blank','noopener,noreferrer');
 }
 async function henovaClaimVictorsCompany(){
  if(henovaVictorsCompanyBusy||henovaVictorsCompanyClaimed)return;
