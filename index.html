@@ -5009,7 +5009,8 @@ function henovaOwnedHensMarkup(){
      const duration=19+(n%7)*3;
      const delay=-((n*7)%duration);
      const face=dx1<0?'-1':'1';
-     const roamStyle='--roam-x1:'+dx1+'vw;--roam-y1:'+dy1+'vh;--roam-x2:'+dx2+'vw;--roam-y2:'+dy2+'vh;--roam-duration:'+duration+'s;--roam-delay:'+delay+'s;--roam-face:'+face+';'+entryStyle;
+     const backFace=dx1<0?'1':'-1';
+     const roamStyle='--roam-x1:'+dx1+'vw;--roam-y1:'+dy1+'vh;--roam-x2:'+dx2+'vw;--roam-y2:'+dy2+'vh;--roam-duration:'+duration+'s;--roam-delay:'+delay+'s;--roam-face:'+face+';--roam-face-back:'+backFace+';'+entryStyle;
      if(isNewPurchase)henovaPurchasedHenArrival=null;
      return '<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+roamStyle+'" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
@@ -5813,12 +5814,12 @@ body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
   0%,7%{transform:translate3d(0,0,0)}
   24%{transform:translate3d(var(--roam-x1,3vw),var(--roam-y1,-2vh),0)}
   43%,55%{transform:translate3d(var(--roam-x2,5vw),var(--roam-y2,1vh),0)}
-  73%{transform:translate3d(calc(var(--roam-x1,3vw)*.35),calc(var(--roam-y1,-2vh)*.35),0)}
+  73%{transform:translate3d(0,0,0)}
   91%,100%{transform:translate3d(0,0,0)}
 }
 @keyframes henovaIndividualTurn2026{
   0%,54%{transform:scaleX(var(--roam-face,1))}
-  55%,100%{transform:scaleX(calc(var(--roam-face,1)*-1))}
+  55%,100%{transform:scaleX(var(--roam-face-back,-1))}
 }
 @keyframes henovaIndividualPeck2026{
   0%,17%,39%,67%,100%{transform:rotate(0deg) translateY(0)}
