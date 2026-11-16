@@ -4619,6 +4619,33 @@ async function henovaSubmitSimpleWithdrawal(channelsVerified=false){
  }catch(error){toast(String(error?.message||error).slice(0,95));}
  finally{henovaUpdateSimpleWithdrawal();}
 }
+async function henovaCancelSimpleWithdrawal(withdrawalId){
+ if(!Number.isSafeInteger(withdrawalId)||withdrawalId<=0)return;
+ const ar=s.lang==='ar',tr=s.lang==='tr';
+ const prompt=ar?'هل تريد إلغاء طلب السحب وإعادة البيض إلى رصيدك؟':tr?'Çekim talebini iptal edip yumurtaları bakiyene geri almak istiyor musun?':'Cancel this withdrawal and return the eggs to your balance?';
+ if(!confirm(prompt))return;
+ const buttons=[...document.querySelectorAll('[data-hv-cancel-withdrawal="'+withdrawalId+'"]')];
+ buttons.forEach(b=>{b.disabled=true;b.textContent=ar?'جارٍ الإلغاء…':tr?'İptal ediliyor…':'Cancelling…';});
+ try{
+  const result=await henovaCall('cancel_gram_withdrawal',{withdrawalId});
+  if(!result?.ok)throw Error(result?.error||'cancellation_failed');
+  const state=await henovaCall('state_refresh');
+  henovaApplyState(state.state);
+  render();
+  toast(ar?'تم إلغاء السحب وإعادة '+Number(result.eggs_refunded||0).toLocaleString('en-US')+' بيضة إلى رصيدك':tr?'Çekim iptal edildi; '+Number(result.eggs_refunded||0).toLocaleString('en-US')+' yumurta bakiyene iade edildi':'Withdrawal cancelled; '+Number(result.eggs_refunded||0).toLocaleString('en-US')+' eggs returned to your balance');
+ }catch(error){
+  const code=String(error?.message||error);
+  const message=code==='withdrawal_not_cancellable'
+   ?(ar?'لا يمكن إلغاء هذا الطلب بعد الموافقة عليه أو بدء الدفع':tr?'Onaylanan veya ödemesi başlatılan talep iptal edilemez':'This request can no longer be cancelled')
+   :code==='not_found'
+    ?(ar?'طلب السحب غير موجود':tr?'Çekim talebi bulunamadı':'Withdrawal request not found')
+    :(ar?'تعذر إلغاء الطلب. حاول مجدداً':tr?'Talep iptal edilemedi. Tekrar deneyin':'Could not cancel the request. Please try again');
+  toast(message);
+  await henovaRefreshPayoutSetup();
+ }finally{
+  document.querySelectorAll('[data-hv-cancel-withdrawal="'+withdrawalId+'"]').forEach(b=>b.disabled=false);
+ }
+}
 let henovaWalletPageSeq=0;
 async function henovaRefreshPayoutSetup(){
  const request=++henovaWalletPageSeq;
@@ -4647,7 +4674,23 @@ async function henovaRefreshPayoutSetup(){
         :'✅ Withdrawals available from '+hvMinEggs+' eggs';
   }
   henovaUpdateSimpleWithdrawal();
-  if(history&&data.withdrawals?.length)history.textContent=data.withdrawals.map(x=>'#'+x.id+' · '+x.status+' · '+x.eggs_amount+' 🥚').join(' | ');
+  if(history){
+   const labels=s.lang==='ar'
+    ?{pending:'قيد المراجعة',approved:'تمت الموافقة',broadcast:'قيد التحويل',confirmed:'تم الدفع',failed:'تعذّر الدفع',rejected:'مرفوض',cancelled:'ملغي — تمت إعادة البيض'}
+    :s.lang==='tr'
+     ?{pending:'Beklemede',approved:'Onaylandı',broadcast:'Transfer ediliyor',confirmed:'Ödendi',failed:'Ödeme başarısız',rejected:'Reddedildi',cancelled:'İptal edildi — yumurtalar iade edildi'}
+     :{pending:'Pending',approved:'Approved',broadcast:'Transfer in progress',confirmed:'Paid',failed:'Payment failed',rejected:'Rejected',cancelled:'Cancelled — eggs refunded'};
+   const cancelLabel= s.lang==='ar'?'إلغاء السحب':s.lang==='tr'?'Çekimi İptal Et':'Cancel Withdrawal';
+   const rows=(data.withdrawals||[]).map(x=>{
+    const id=Number(x.id),status=String(x.status||'');
+    const date=x.created_at?new Date(x.created_at).toLocaleString():'';
+    const action=status==='pending'&&Number.isSafeInteger(id)&&id>0
+      ?'<button type="button" data-hv-cancel-withdrawal="'+id+'" onclick="henovaCancelSimpleWithdrawal('+id+')" style="margin-top:8px;padding:9px 13px;border:1px solid #dca6a6;border-radius:10px;background:#fff0ef;color:#a52d2d;font-weight:800">'+cancelLabel+'</button>'
+      :'';
+    return '<article class="henova-wallet-history" style="margin:8px 0;padding:10px;border:1px solid #e2eadb;border-radius:12px"><b>#'+id+' · '+Number(x.eggs_amount||0).toLocaleString('en-US')+' 🥚</b><small style="display:block">'+(labels[status]||status)+' · '+date+'</small>'+action+'</article>';
+   }).join('');
+   history.innerHTML=rows||'<p class="henova-wallet-note">'+(s.lang==='ar'?'لا توجد طلبات سحب':s.lang==='tr'?'Çekim talebi yok':'No withdrawal requests')+'</p>';
+  }
  }catch(e){console.warn('Payout setup unavailable',e)}
 }
 async function henovaSaveTonWallet(){
