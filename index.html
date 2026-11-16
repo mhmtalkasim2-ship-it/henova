@@ -3365,7 +3365,7 @@ async function henovaClaimVictorsCompany(){
  henovaVictorsCompanyBusy=true;
  const btn=document.getElementById('henova-victors-company-claim');if(btn)btn.disabled=true;
  try{
-  const result=await henovaCall('claim_victors_company_once');
+  const result=await henovaCall('claim_cyber_mine_once');
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaVictorsCompanyClaimed=true;
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
