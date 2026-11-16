@@ -5213,18 +5213,18 @@ if(tab===2){
 }
 if(tab===3){
 const w=s.lang==='ar'?
-{heading:'دعوة الأصدقاء',sub:'احصل على 500 عملة لكل صديق جديد + 5% من بيضه',reward:'مكافآت الإحالات',rewardSub:'500 عملة لكل صديق جديد + 5% من البيض الذي يجمعه',link:'رابط إحالتك',share:'مشاركة عبر تيليجرام',friends:'إحالاتك',eggs:'بيض الإحالات',joined:'الأصدقاء المسجلون',coins:'عملات الإحالات',signup:'500 عملة لكل صديق جديد',empty:'لا يوجد أصدقاء بعد. شارك رابطك!',foot:'اربح 500 عملة عند تسجيل كل صديق جديد من رابطك، بالإضافة إلى 5% من البيض الذي يجمعه.'}:
+{heading:'دعوة الأصدقاء',sub:'احصل على 8K 🥚 لكل صديق جديد + 5% من البيض الذي يجمعه',reward:'مكافآت الإحالات',rewardSub:'8K 🥚 لكل صديق جديد + 5% من البيض الذي يجمعه',link:'رابط إحالتك',share:'مشاركة عبر تيليجرام',friends:'إحالاتك',eggs:'بيض الإحالات',joined:'الأصدقاء المسجلون',coins:'بيض الإحالات',signup:'8K 🥚 لكل صديق جديد',empty:'لا يوجد أصدقاء بعد. شارك رابطك!',foot:'اربح 8K 🥚 عند تسجيل كل صديق جديد من رابطك، بالإضافة إلى 5% من البيض الذي يجمعه.'}:
 s.lang==='tr'?
-{heading:'Arkadaşlarını Davet Et',sub:'Her yeni arkadaş için 500 jeton + yumurtalarından %5',reward:'Davet Ödülleri',rewardSub:'Her yeni arkadaş için 500 jeton ve topladığı yumurtalardan %5',link:'Davet Bağlantın',share:'Telegram ile Paylaş',friends:'Davetlerin',eggs:'Davet Yumurtaları',joined:'Kayıtlı Arkadaşlar',coins:'Davet Jetonları',signup:'Yeni arkadaş başına 500 jeton',empty:'Henüz arkadaş yok. Bağlantını paylaş!',foot:'Her yeni arkadaş için 500 jeton ve topladıkları yumurtaların %5 kadarını kazan.'}:
-{heading:'Invite Friends',sub:'Earn 500 Coins per new friend + 5% of their eggs',reward:'Referral rewards',rewardSub:'500 coins per new friend + 5% of their collected eggs',link:'Your Referral Link',share:'Share on Telegram',friends:'Your Referrals',eggs:'Referral Eggs',joined:'Registered friends',coins:'Referral Coins',signup:'500 Coins per new friend',empty:'No friends yet. Share your link!',foot:'Earn 500 Coins when a new friend joins through your link, plus 5% of the eggs they collect.'};
+{heading:'Arkadaşlarını Davet Et',sub:'Her yeni arkadaş için 8K 🥚 + topladığı yumurtalardan %5',reward:'Davet Ödülleri',rewardSub:'Her yeni arkadaş için 8K 🥚 ve topladığı yumurtalardan %5',link:'Davet Bağlantın',share:'Telegram ile Paylaş',friends:'Davetlerin',eggs:'Davet Yumurtaları',joined:'Kayıtlı Arkadaşlar',coins:'Davet Yumurtaları',signup:'Her yeni arkadaş için 8K 🥚',empty:'Henüz arkadaş yok. Bağlantını paylaş!',foot:'Bağlantınla katılan her yeni arkadaş için 8K 🥚 ve topladığı yumurtaların %5 kadarını kazan.'}:
+{heading:'Invite Friends',sub:'Earn 8K 🥚 per new friend + 5% of their eggs',reward:'Referral rewards',rewardSub:'8K 🥚 per new friend + 5% of their collected eggs',link:'Your Referral Link',share:'Share on Telegram',friends:'Your Referrals',eggs:'Referral Eggs',joined:'Registered friends',coins:'Referral Eggs',signup:'8K 🥚 per new friend',empty:'No friends yet. Share your link!',foot:'Earn 8K 🥚 when a new friend joins through your link, plus 5% of the eggs they collect.'};
 const url=henovaReferralLink();
 el.innerHTML='<section class="hv-friends-hero"><h1>'+w.heading+'</h1><p>'+w.sub+'</p><div class="hv-friends-icons"><span>🎁</span><span>🐔</span><span>🎁</span></div></section>'+
 '<article class="hv-friends-reward"><span>🧰</span><div><b>'+w.reward+'</b><p>'+w.rewardSub+'</p></div></article>'+
 '<section class="hv-friends-link"><small>'+w.link+'</small><div class="hv-friends-linkrow"><span class="hv-friends-url">'+(url||'Open inside Telegram')+'</span><button onclick="invite()" aria-label="Copy referral link">▢</button></div></section>'+
-'<section class="hv-friends-benefits"><div><strong>🥚 5%</strong><small>'+w.eggs+'</small></div><div><strong>🪙 500 Coins</strong><small>'+w.signup+'</small></div></section>'+
+'<section class="hv-friends-benefits"><div><strong>🥚 5%</strong><small>'+w.eggs+'</small></div><div><strong>8K 🥚</strong><small>'+w.signup+'</small></div></section>'+
 '<button class="hv-friends-share" onclick="shareInvite()">✈ '+w.share+'</button>'+
 '<div class="hv-friends-heading"><strong>'+w.friends+'</strong><span>'+num(henovaReferralCount)+'</span></div>'+
-'<section class="hv-friends-stats"><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.eggs+'</small></div><div><strong>🪙 '+num(henovaReferralCoins)+'</strong><small>'+w.coins+'</small></div></section>'+
+'<section class="hv-friends-stats"><div><strong>🥚 '+num(henovaReferralEggs)+'</strong><small>'+w.eggs+'</small></div><div><strong>👥 '+num(henovaReferralCount)+'</strong><small>'+w.joined+'</small></div></section>+'
 '<section class="hv-friends-empty"><span>🎁</span><strong>'+w.empty+'</strong><p>'+w.foot+'</p></section>';
 }
 if(tab===4){
