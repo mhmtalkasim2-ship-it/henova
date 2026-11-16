@@ -5008,11 +5008,11 @@ function henovaOwnedHensMarkup(){
      const direction=point[0]<25?1:point[0]>75?-1:(n%2?-1:1);
      const roomForward=direction>0?94-point[0]:point[0]-4;
      const roomBack=direction>0?point[0]-4:94-point[0];
-     const dx1=Math.round(direction*Math.max(5,Math.min(16,roomForward*.52)));
-     const dx2=Math.round(-direction*Math.max(3,Math.min(10,roomBack*.42)));
-     const verticalDirection=point[1]>76?-1:point[1]<24?1:(n%3===0?1:-1);
-     const dy1=Math.round(verticalDirection*(5+(n%4)*1.7));
-     const dy2=Math.round(-verticalDirection*(3+(n%3)*1.5));
+     const dx1=Math.round(direction*Math.max(5,Math.min(34,roomForward*.82)));
+     const dx2=Math.round(-direction*Math.max(3,Math.min(27,roomBack*.72)));
+     const verticalDirection=point[1]>78?-1:point[1]<18?1:(n%3===0?1:-1);
+     const dy1=Math.round(verticalDirection*(10+(n%4)*2.2));
+     const dy2=Math.round(-verticalDirection*(7+(n%3)*2));
      const duration=19+(n%7)*3;
      const delay=-((n*7)%duration);
      const face=dx1<0?'-1':'1';
@@ -6015,9 +6015,33 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a img{
   70%{translate:4vw -1vh}
   88%,100%{translate:0 0}
 }
-/* Decorative hens retain their existing placement and artwork; remove edge-on flips only. */
+/* Decorative farm hens also roam independently across the visible grass. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
+  animation:henovaDecorativeRoamB20261116 32s ease-in-out infinite!important;
+  animation-delay:-11s!important;
+  will-change:translate;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+  animation:henovaDecorativeRoamC20261116 35s ease-in-out infinite!important;
+  animation-delay:-19s!important;
+  will-change:translate;
+}
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen:not(.hen-a) .hen-facing{
   animation:none!important;
   transform:none!important;
+}
+@keyframes henovaDecorativeRoamB20261116{
+  0%,7%{translate:0 0}
+  22%{translate:-25vw -10vh}
+  39%,47%{translate:-29vw -13vh}
+  68%{translate:-12vw -4vh}
+  86%,100%{translate:0 0}
+}
+@keyframes henovaDecorativeRoamC20261116{
+  0%,9%{translate:0 0}
+  24%{translate:24vw -8vh}
+  43%,51%{translate:29vw -11vh}
+  72%{translate:13vw -3vh}
+  89%,100%{translate:0 0}
 }
 </style>
