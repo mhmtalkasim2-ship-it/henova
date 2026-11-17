@@ -5827,12 +5827,9 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
 </script>
 
 <style id="henova-deep-green-ground-v1">
-/* Stage 1: dark-green canvas visible immediately while the farm scene is loading. */
-html,body{background:#123b22!important}
-body{background-color:#123b22!important}
-body.hv-maintenance-locked{background:#123b22!important}
-main{background:linear-gradient(180deg,#214e2e 0%,#173f25 55%,#12351f 100%)!important}
-/* Stage 2: tint the real loaded farm artwork's grass/ground, not a legacy scene selector. */
+/* Remove the separate startup background completely; let the app canvas stay transparent until the farm scene appears. */
+html,body,body.hv-maintenance-locked,body>main{background:transparent!important;background-image:none!important}
+/* Keep the loaded farm scene's deep-green ground treatment. */
 html body main.farm-mode #farm-scene.farm-v3{
   background-color:#173f25!important;
 }
