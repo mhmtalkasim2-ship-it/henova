@@ -1,4 +1,2689 @@
-/* The three scene hens also have separate paths and feeding rhythms. */
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123b22"><title>HENOVA • Chicken Farm</title>
+<script src="https://sad.adsgram.ai/js/sad.min.js" defer></script>
+<script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js" defer></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#e6f3df;color:#284a30;font:700 15px system-ui,-apple-system,sans-serif}button{font:inherit;cursor:pointer}main{max-width:520px;margin:auto;min-height:100vh;padding:20px 16px 90px;background:linear-gradient(#ecffe1,#fffdf2)}header,.stats,.between,.item,nav{display:flex;align-items:center;justify-content:space-between;gap:10px}header{margin-bottom:14px}header strong{font-size:27px;color:#267641;letter-spacing:2px}header small{display:block;font-size:10px;letter-spacing:2px;color:#92a287}header button,.small{border:0;border-radius:14px;background:#fff;padding:10px;color:#38763f}.stats>div{flex:1;background:white;border-radius:15px;padding:13px;text-align:center;box-shadow:0 5px 18px #294e2012}.stats b{display:block;font-size:21px}.stats small{font-size:10px;color:#93a38e}.title{margin:23px 0 12px;font-size:22px}.scene{height:265px;border:5px solid white;border-radius:26px;overflow:hidden;position:relative;background:linear-gradient(#83ceee 0 53%,#8ed16a 53% 100%);box-shadow:0 8px 24px #294e2033}.cloud{position:absolute;top:7px;font-size:38px}.house{position:absolute;top:38px;left:50%;transform:translateX(-50%);font-size:110px}.chickens{position:absolute;bottom:26px;left:0;right:0;display:flex;justify-content:space-evenly;font-size:42px}.flowers{position:absolute;bottom:3px;width:100%;text-align:center}.panel,.item{border-radius:19px;background:#fff;border:1px solid #d9e9cf;padding:17px;margin:13px 0;box-shadow:0 3px 12px #314d2110}.bar{height:15px;background:#e7f3e1;border-radius:20px;overflow:hidden;margin:13px 0}.bar>div{background:linear-gradient(90deg,#93ce63,#ffcc52);height:100%;transition:width .3s}.muted{color:#829b80;font-size:12px}.primary{width:100%;padding:14px;border:0;border-radius:14px;background:linear-gradient(#ffe17d,#f0af3e);box-shadow:0 4px #c48a32;color:#523d11;font-weight:900;margin-top:10px}.primary:disabled{opacity:.5}.item .face{font-size:39px;background:#e6f4d8;border-radius:13px;padding:10px}.item .grow{flex:1}.item h3{font-size:15px;margin:0}.item p{margin:5px 0;font-size:12px;color:#6b9c67}.item button{border:0;background:#f5c253;padding:10px;border-radius:12px;font-size:12px;font-weight:900}nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);height:78px;padding-bottom:env(safe-area-inset-bottom);max-width:520px;width:100%;background:white;box-shadow:0 -3px 18px #38632d19;border-radius:18px 18px 0 0}nav button{flex:1;background:none;border:0;color:#9eae99;font-size:10px;padding:8px 0}nav button span{display:block;font-size:23px}nav button.active{color:#368950;font-weight:900}.badge{font-size:11px;background:#fff3cb;border-radius:9px;padding:6px}.cover{background:#266a4a;color:white;border-radius:22px;padding:26px;text-align:center}.cover strong{font-size:35px}.cover p{color:#d0edcf}select,input[type=number]{width:100%;padding:12px;border-radius:12px;border:1px solid #c6dfc3;background:white;font:inherit}.overlay{position:fixed;inset:0;background:#102e1e99;display:grid;place-items:center;padding:18px;z-index:10}.modal{width:min(420px,100%);background:white;border-radius:20px;padding:22px}.hidden{display:none!important}.notice{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#24593e;color:white;padding:13px 20px;border-radius:14px;z-index:12;white-space:nowrap;max-width:95vw;overflow:hidden}.warning{font-size:12px;color:#9b662c;margin:10px 0}
+
+/* HENOVA v1.1 illustrated farm + power fan upgrades */
+:root{--leaf:#267b4a;--gold:#ffc657}
+body{background:#d9e9d2}
+main{background:linear-gradient(180deg,#def5ed 0%,#f5f9e6 45%,#fff9e8 100%)}
+.title{color:#285b3e;text-shadow:0 2px 0 #fff}
+.stats>div{border:1px solid #ffffffcc;background:linear-gradient(145deg,#fffefa,#ecf7e7);box-shadow:0 8px 17px #1d642023}
+.scene{height:340px;background:linear-gradient(#69bce8 0%,#a3dcf8 47%,#bdeca0 48%,#74bd59 100%);border:6px solid #fff8e7;box-shadow:0 12px 0 #bcd7a1,0 20px 30px #316b3233}
+.scene:before{content:"";position:absolute;width:130%;height:90px;left:-15%;bottom:-12px;border-radius:50% 50% 0 0;background:repeating-linear-gradient(110deg,#7fca60 0 24px,#78c356 25px 53px);opacity:.6}
+.scene .cloud{color:#fff;filter:drop-shadow(0 5px 2px #ffffff66);animation:floaty 6s ease-in-out infinite}
+.farm-path{position:absolute;bottom:-40px;left:38%;height:155px;width:105px;background:#e7c794;transform:perspective(110px) rotateX(25deg);border:3px solid #c99e67;border-radius:55% 55% 0 0}
+.hen-barn{position:absolute;bottom:93px;left:18%;height:125px;width:142px;background:repeating-linear-gradient(90deg,#c85b3d 0 26px,#d96c46 27px 31px);border:6px solid #fff1ce;border-radius:7px;box-shadow:8px 10px 0 #578e4c59}
+.hen-barn:before{content:"";position:absolute;left:-13px;top:-56px;border-left:78px solid transparent;border-right:78px solid transparent;border-bottom:63px solid #7b4937;filter:drop-shadow(0 -6px 0 #b27a4e)}
+.hen-barn:after{content:"";position:absolute;width:51px;height:71px;background:#543c31;left:39px;bottom:-6px;border:6px solid #eedcb8;border-radius:28px 28px 0 0;box-shadow:inset 0 0 0 7px #735343}
+.windmill{position:absolute;right:12%;bottom:93px;height:125px;width:87px;filter:drop-shadow(4px 5px 1px #31653a55)}
+.tower{position:absolute;bottom:0;left:21px;width:45px;height:105px;background:linear-gradient(90deg,#eee6d9,#fff,#cfc5b4);border:4px solid #b38d6b;clip-path:polygon(28% 0,72% 0,100% 100%,0 100%)}
+.rotor{position:absolute;top:-14px;left:42px;width:10px;height:10px;transform-origin:center;animation:windspin 5s linear infinite;z-index:2}
+.blade{position:absolute;left:-8px;top:-54px;height:55px;width:25px;background:linear-gradient(90deg,#f7f6e4,#cfecd1);border:3px solid #538c78;border-radius:70% 15% 30% 15%;transform-origin:50% 59px}
+.blade:nth-child(2){transform:rotate(120deg)}.blade:nth-child(3){transform:rotate(240deg)}
+.rotor-cap{position:absolute;left:-8px;top:-7px;background:#ffc55b;width:26px;height:26px;border:5px solid #cf8e30;border-radius:50%}
+.scene .flowers{z-index:4;letter-spacing:9px;font-size:19px;bottom:12px}
+.hen-characters{position:absolute;z-index:5;bottom:28px;left:7%;right:7%;display:flex;justify-content:space-between;font-size:46px;animation:chickenwalk 2.7s ease-in-out infinite;filter:drop-shadow(1px 6px 2px #4b8f3c5e)}
+.farm-basket{position:absolute;z-index:5;bottom:75px;left:48%;font-size:37px;transform:rotate(-8deg);filter:drop-shadow(0 4px 2px #568d40)}
+.power-panel{border:1px solid #f4e1a4;background:linear-gradient(135deg,#fff9db,#f0f8e8);border-radius:20px;padding:16px;margin:18px 0;box-shadow:0 6px 17px #6f883625}
+.power-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.power-icon{font-size:31px}.power-stats{font-size:12px;color:#7d8464;margin-top:7px}.power-boost{font-size:24px;font-weight:900;color:#358b59}
+.power-btn{border:0;border-radius:11px;background:#4fb96e;color:white;padding:10px 13px;font-weight:900;margin-top:11px;width:100%;box-shadow:0 4px #2c7f45}
+.power-btn:disabled{background:#b5c3a3;box-shadow:none}
+@keyframes windspin{to{transform:rotate(360deg)}}@keyframes floaty{50%{transform:translateY(-8px)}}@keyframes chickenwalk{50%{transform:translateY(-7px)}}
+@media(prefers-reduced-motion:reduce){.rotor,.hen-characters,.scene .cloud{animation:none}}
+
+/* HENOVA spacious mobile layout: edge-to-edge farm, compact controls */
+html,body{width:100%;overflow-x:hidden}
+main{width:100%;max-width:760px;padding:12px 10px 98px}
+header{padding:3px 6px;margin-bottom:10px}
+.stats{gap:8px}.stats>div{padding:10px 8px;min-width:0;border-radius:14px}.stats b{font-size:20px}
+.title{font-size:24px;margin:16px 5px 12px}
+.scene{width:calc(100% + 20px);margin-left:-10px;margin-right:-10px;border:0;border-radius:0;height:clamp(355px,74vh,690px);box-shadow:0 8px 20px #316b3230}
+.scene .hen-barn{left:15%;bottom:27%;transform:scale(1.20);transform-origin:center bottom}
+.scene .windmill{right:13%;bottom:29%;transform:scale(1.23);transform-origin:center bottom}
+.scene .farm-path{height:38%;left:37%;bottom:-10%}
+.scene .hen-characters{bottom:10%;font-size:clamp(49px,12vw,72px)}
+.scene .farm-basket{bottom:22%;left:50%;font-size:43px}
+.panel,.power-panel,.item{border-radius:17px;padding:15px;margin:13px 2px}
+.bottom-nav,nav{max-width:760px;border-radius:17px 17px 0 0}
+@media(min-width:600px){main{padding-left:18px;padding-right:18px}.scene{width:100%;margin:0;border-radius:24px}.scene .hen-barn{left:22%}}
+
+/* Realistic farm artwork v2.0: image layer with graceful fallback */
+.scene{background-image:linear-gradient(180deg,#152a1c05,#152a1c13),url('./assets/farm-realistic.jpg');background-size:cover;background-position:center center;background-repeat:no-repeat;min-height:400px;height:clamp(440px,69svh,680px);position:relative}
+.scene:has(.realistic-layer){border:0}
+.scene .farm-path,.scene .hen-barn,.scene .windmill,.scene .farm-basket,.scene .hen-characters,.scene .flowers,.scene .cloud{transition:opacity .2s ease}
+.scene.realistic-ready .farm-path,.scene.realistic-ready .hen-barn,.scene.realistic-ready .windmill,.scene.realistic-ready .farm-basket,.scene.realistic-ready .hen-characters,.scene.realistic-ready .flowers,.scene.realistic-ready .cloud{opacity:0;pointer-events:none}
+.scene .farm-photo-shade{pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,#101f170e,transparent 25%,transparent 75%,#08291235)}
+@media(max-width:450px){.scene{height:clamp(420px,67svh,610px)}}
+
+/* HENOVA immersive farm — full-screen reference-inspired composition */
+body:has(main.farm-mode){background:#6aa34b}
+main.farm-mode{height:100dvh;min-height:640px;max-width:100%;overflow:hidden;padding:0;background:#7ebf54;position:relative;isolation:isolate}
+main.farm-mode>header{position:absolute;top:calc(env(safe-area-inset-top) + 13px);left:14px;right:14px;z-index:11;margin:0;padding:7px 12px;border-radius:24px;background:#f3f6e6e8;backdrop-filter:blur(10px);box-shadow:0 7px 17px #24431c22}
+main.farm-mode header strong{font-size:22px;color:#37622d}
+main.farm-mode .stats{position:absolute;z-index:12;top:calc(env(safe-area-inset-top) + 85px);left:12px;right:12px;gap:9px}
+main.farm-mode .stats>div{background:#f8ffeedb;border:2px solid #fff9db;box-shadow:0 5px 12px #183e1c38;border-radius:23px;padding:7px 13px;text-align:left;display:flex;align-items:center;gap:8px}
+main.farm-mode .stats b{font-size:25px;color:#42592c}
+main.farm-mode .stats small{font-size:10px;margin-left:auto}
+main.farm-mode #view{position:absolute;inset:0}
+main.farm-mode #view>.title{display:none}
+main.farm-mode .scene{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-height:none!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;background-color:#78b855;background-size:cover;background-position:center center}
+main.farm-mode .scene:before{display:none}
+main.farm-mode .scene .hen-barn{bottom:41%;left:9%;transform:scale(1.34)}
+main.farm-mode .scene .windmill{bottom:42%;right:13%;transform:scale(1.45)}
+main.farm-mode .scene .farm-path{bottom:6%;height:46%;left:36%}
+main.farm-mode .scene .hen-characters{bottom:22%;font-size:56px}
+main.farm-mode .scene .farm-basket{bottom:41%;left:43%}
+main.farm-mode .scene .flowers{bottom:20%;font-size:22px}
+main.farm-mode .scene .cloud{top:25%;opacity:.65}
+.orchard{position:absolute;inset:0;pointer-events:none;z-index:1}
+.orchard .tree-art{position:absolute;line-height:1;font-size:clamp(72px,19vw,155px);filter:drop-shadow(0 10px 4px #254d2688)}
+.orchard .tree-art:nth-child(1){top:1%;left:-6%}.orchard .tree-art:nth-child(2){top:2%;right:-8%}.orchard .tree-art:nth-child(3){top:21%;left:-10%}.orchard .tree-art:nth-child(4){top:30%;right:-11%}.orchard .tree-art:nth-child(5){bottom:18%;left:-13%}.orchard .tree-art:nth-child(6){bottom:20%;right:-12%}
+main.farm-mode #view>.panel{position:absolute;z-index:15;bottom:calc(env(safe-area-inset-bottom) + 96px);left:12px;right:12px;margin:0;padding:12px 15px;background:#f4f5dded;border:2px solid #fff8e2;border-radius:23px;box-shadow:0 8px 18px #31441e66;backdrop-filter:blur(9px)}
+main.farm-mode .panel .bar{margin:6px 0}
+main.farm-mode .panel .harvest-stats,main.farm-mode .panel .between.muted{margin:3px 0 0}
+main.farm-mode .panel .primary{padding:12px;margin-top:6px}
+main.farm-mode .power-panel{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 259px);left:12px;right:12px;z-index:13;padding:9px 12px;margin:0;background:#f6efc9e8;backdrop-filter:blur(7px);border-radius:16px}
+main.farm-mode .power-panel .power-stats{font-size:10px;margin:0}
+main.farm-mode .power-panel .power-boost{font-size:16px}
+main.farm-mode .power-panel .power-btn{padding:5px 7px;font-size:11px;margin-top:4px}
+main.farm-mode #view>.panel.between{display:none}
+main.farm-mode nav{z-index:20}
+@media(max-height:720px){main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 245px)}main.farm-mode .scene .hen-characters{bottom:31%}}
+
+/* HENOVA mobile legibility pass: smaller structures, uncluttered viewport */
+main.farm-mode .scene .hen-barn{left:12%;bottom:44%;transform:scale(.87);transform-origin:left bottom}
+main.farm-mode .scene .windmill{right:12%;bottom:45%;transform:scale(.94);transform-origin:right bottom}
+main.farm-mode .scene .farm-path{left:39%;width:76px;bottom:4%;height:37%}
+main.farm-mode .scene .hen-characters{bottom:30%;font-size:clamp(36px,9vw,53px);left:6%;right:6%}
+main.farm-mode .scene .farm-basket{left:48%;bottom:46%;font-size:34px}
+main.farm-mode .scene .flowers{bottom:27%}
+main.farm-mode .scene .orchard .tree-art{font-size:clamp(58px,15vw,115px)}
+main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 273px);left:14px;right:14px}
+main.farm-mode #view>.panel{bottom:calc(env(safe-area-inset-bottom) + 92px);left:14px;right:14px}
+main.farm-mode .scene .farm-photo-shade{background:linear-gradient(180deg,#09190b25 0%,transparent 26%,transparent 72%,#153f1010)}
+main.farm-mode .stats b{direction:ltr;unicode-bidi:isolate}
+main.farm-mode .panel .between{direction:ltr}
+main.farm-mode .panel .bar{direction:ltr}
+@media(max-height:760px){
+ main.farm-mode .scene .hen-barn{bottom:43%;transform:scale(.75)}
+ main.farm-mode .scene .windmill{bottom:43%;transform:scale(.8)}
+ main.farm-mode .power-panel{bottom:calc(env(safe-area-inset-bottom) + 252px)}
+}
+
+/* Farm composition v2.2 — keep middle of screen open for the animals */
+main.farm-mode .power-panel{position:absolute;top:calc(env(safe-area-inset-top) + 172px);bottom:auto;right:14px;left:auto;width:187px;padding:9px 11px;z-index:13;background:#faf5d8ed;border:1px solid #fff7d3;border-radius:14px}
+main.farm-mode .power-panel .power-head{align-items:center}.power-panel .power-head b{font-size:12px}.power-panel .power-stats{font-size:9px;line-height:1.3}.power-panel .power-boost{font-size:17px}
+main.farm-mode .power-panel .power-btn{font-size:10px;padding:7px 4px;margin-top:6px}
+main.farm-mode .scene .hen-barn{left:11%;bottom:32%;transform:scale(.72)}
+main.farm-mode .scene .windmill{right:12%;bottom:35%;transform:scale(.68)}
+main.farm-mode .scene .hen-characters{bottom:24%;left:9%;right:9%;font-size:48px;z-index:8}
+main.farm-mode .scene .farm-basket{bottom:35%;left:45%}
+main.farm-mode .scene .flowers{bottom:20%}
+main.farm-mode #view>.panel{bottom:calc(env(safe-area-inset-bottom) + 93px);padding:9px 13px 11px}
+main.farm-mode #view>.panel .primary{padding:11px}
+main.farm-mode .scene .orchard .tree-art{font-size:clamp(54px,13vw,90px)}
+main.farm-mode .scene .orchard .tree-art:nth-child(3),main.farm-mode .scene .orchard .tree-art:nth-child(4){top:38%}
+@media(max-height:720px){main.farm-mode .power-panel{top:calc(env(safe-area-inset-top) + 158px)}main.farm-mode .scene .hen-characters{bottom:26%;font-size:42px}}
+
+/* HENOVA living farm details — animated pond, grain trough, eggs and wandering hens */
+main.farm-mode .scene{background:radial-gradient(ellipse at 50% 75%,#92cf69 0%,#7ec05c 62%,#5ca44c 100%)!important}
+main.farm-mode .scene .orchard .tree-art{opacity:.95;font-size:clamp(67px,16vw,120px)}
+main.farm-mode .scene .hen-barn{bottom:54%;left:9%;transform:scale(.84)}
+main.farm-mode .scene .windmill{bottom:55%;right:11%;transform:scale(.74)}
+main.farm-mode .scene .farm-path{bottom:0%;height:57%;left:39%;transform:perspective(130px) rotateX(14deg)}
+main.farm-mode .scene .farm-basket,main.farm-mode .scene .hen-characters,main.farm-mode .scene .flowers{display:none}
+.farm-decor{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden}
+.pond{position:absolute;right:3%;bottom:27%;width:36%;max-width:220px;filter:drop-shadow(0 7px 2px #417a3866)}
+.pond svg{width:100%;display:block}.pond .ripple{transform-origin:50% 50%;animation:pondPulse 4s ease-in-out infinite}
+.pond .ripple.two{animation-delay:-2s}.pond .lily{animation:lilyDrift 4s ease-in-out infinite}
+.hay-stack{position:absolute;left:3%;bottom:30%;font-size:clamp(40px,10vw,62px);filter:drop-shadow(0 5px 2px #5d743a77)}
+.egg-nest{position:absolute;left:4%;bottom:48%;font-size:clamp(32px,8vw,51px);filter:drop-shadow(0 5px 2px #5d743a77)}
+.grain-trough{position:absolute;left:42%;bottom:52%;width:25%;height:27px;transform:rotate(-5deg);border:5px solid #744827;border-top:0;border-radius:3px 3px 12px 12px;background:repeating-radial-gradient(circle at 7px 4px,#f2c251 0 4px,#cd992b 5px 7px);box-shadow:0 5px 1px #4b71336e}
+.grain-trough:before{content:"";position:absolute;top:-9px;left:-4px;right:-4px;border:4px solid #99622e;border-radius:8px}
+.farm-hen{position:absolute;font-size:clamp(42px,11vw,69px);will-change:transform;filter:drop-shadow(0 6px 2px #335f2d88)}
+.farm-hen.hen-a{left:13%;bottom:37%;animation:henPaceA 12s ease-in-out infinite}
+.farm-hen.hen-b{left:52%;bottom:36%;animation:henPaceB 15s ease-in-out infinite}
+.farm-hen.hen-c{left:34%;bottom:31%;font-size:clamp(31px,8vw,47px);animation:henPeck 2.7s ease-in-out infinite}
+.power-panel{z-index:14}
+@keyframes henPaceA{0%,100%{transform:translateX(0) scaleX(1)}25%{transform:translateX(20px) translateY(-3px)}49%{transform:translateX(45px) scaleX(1)}50%{transform:translateX(45px) scaleX(-1)}75%{transform:translateX(15px) scaleX(-1)}99%{transform:translateX(0) scaleX(-1)}}
+@keyframes henPaceB{0%,100%{transform:translateX(0)}35%{transform:translateX(-33px) translateY(-5px)}65%{transform:translateX(-25px) scaleX(-1)}}
+@keyframes henPeck{0%,100%{transform:rotate(0)}50%{transform:rotate(13deg) translateY(4px)}}
+@keyframes pondPulse{0%,100%{opacity:.25;transform:scale(.89)}50%{opacity:.85;transform:scale(1.06)}}
+@keyframes lilyDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+@media(prefers-reduced-motion:reduce){.farm-hen,.pond .ripple,.pond .lily{animation:none}}
+@media(max-height:740px){main.farm-mode .scene .hen-barn{bottom:50%}main.farm-mode .scene .windmill{bottom:51%}.pond{bottom:29%}.farm-hen.hen-a,.farm-hen.hen-b{bottom:39%}}
+
+/* Hide only the two overlay cards in Farm view; gameplay remains unchanged. */
+main.farm-mode #view > .power-panel,
+main.farm-mode #view > .panel:not(.between) {display:none!important}
+
+/* HENOVA v2.3 — open full-screen farm and narrow collection dock */
+main.farm-mode .scene{background:radial-gradient(ellipse at 47% 56%,#9ad36f 0%,#7ebe53 72%,#63a348 100%)!important}
+main.farm-mode .scene .orchard .tree-art{font-size:clamp(65px,16vw,120px);filter:drop-shadow(1px 8px 3px #3865317c)}
+main.farm-mode .scene .hen-barn{left:9%;bottom:53%;transform:scale(.85);transform-origin:left bottom}
+main.farm-mode .scene .windmill{right:9%;bottom:54%;transform:scale(.82);transform-origin:right bottom}
+main.farm-mode .scene .farm-path{height:59%;bottom:-9%;left:37%;width:26%;background:#dec08a;border-color:#c39760}
+main.farm-mode .scene .grain-trough{bottom:51%;left:44%}
+main.farm-mode .scene .pond{bottom:30%;right:3%}
+main.farm-mode .scene .farm-hen.hen-a{bottom:27%;left:16%}
+main.farm-mode .scene .farm-hen.hen-b{bottom:36%;left:49%}
+main.farm-mode .scene .farm-hen.hen-c{bottom:30%;left:40%}
+main.farm-mode .scene .hay-stack{bottom:35%}
+main.farm-mode .scene .egg-nest{bottom:47%}
+main.farm-mode .power-panel{display:none!important}
+main.farm-mode #view>.panel:not(.between){display:none!important}
+main.farm-mode .collect-dock{position:absolute;display:flex;align-items:center;gap:10px;z-index:19;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 83px);min-height:77px;padding:8px;border:2px solid #fff9e8;background:#edf3dbec;backdrop-filter:blur(8px);border-radius:20px;box-shadow:0 5px 13px #34572b55;direction:ltr}
+.collect-info{flex:0 0 37%;min-width:0;text-align:center;color:#427736;font-size:13px}.collect-info strong{display:block;font-size:16px;white-space:nowrap}.collect-info small{color:#8c772d;font-size:11px}.collect-action{flex:1;min-width:0}
+.collect-action button{font-size:20px;font-weight:900;color:#684116;border:0;border-radius:15px;background:linear-gradient(#ffdf72,#f3af28);width:100%;padding:11px 6px;box-shadow:0 4px #c98925}.collect-action button:disabled{opacity:.65}
+.collect-meter{height:5px;border-radius:8px;background:#d9d9b8;margin-top:7px;overflow:hidden}.collect-meter div{height:100%;background:#fff1a0;transition:width .4s}
+@media(max-height:720px){main.farm-mode .scene .hen-barn{bottom:51%;transform:scale(.77)}main.farm-mode .scene .windmill{bottom:51%;transform:scale(.70)}main.farm-mode .collect-dock{bottom:calc(env(safe-area-inset-bottom) + 78px)}}
+
+/* Fullscreen Telegram Mini App safe positioning */
+:root{--henova-top-safe:env(safe-area-inset-top,0px);--henova-bottom-safe:env(safe-area-inset-bottom,0px)}
+@supports(height:100dvh){main.farm-mode{height:100dvh}}
+main.farm-mode>header{top:calc(max(16px,var(--henova-top-safe)) + 33px)}
+main.farm-mode .stats{top:calc(max(16px,var(--henova-top-safe)) + 112px)}
+main.farm-mode .collect-dock{bottom:calc(max(0px,var(--henova-bottom-safe)) + 85px)}
+main.farm-mode nav{padding-bottom:max(0px,var(--henova-bottom-safe))}
+
+/* Telegram fullscreen request diagnosis & layout */
+header #fullscreen-toggle{background:#ffffffda;color:#366347;border:0;border-radius:13px;padding:10px 12px;font-size:21px}
+main.farm-mode>header{display:flex;justify-content:space-between;gap:6px}
+main.farm-mode>header #fullscreen-toggle{margin-left:auto}
+.fullscreen-status{position:fixed;bottom:0;left:0;max-width:1px;max-height:1px;opacity:0;overflow:hidden;pointer-events:none}
+html.telegram-fullscreen main.farm-mode{height:100dvh}
+
+/* Approved HENOVA farm: layered artwork and live interactive HUD */
+main.farm-mode .scene.realistic-ready{
+ background-image:linear-gradient(#1b421411,#1b421405),url('./assets/henova-farm-scene.jpg')!important;
+ background-size:cover!important;background-position:center center!important;
+}
+main.farm-mode .scene.realistic-ready .farm-decor,
+main.farm-mode .scene.realistic-ready .orchard,
+main.farm-mode .scene.realistic-ready .cloud,
+main.farm-mode .scene.realistic-ready .farm-path,
+main.farm-mode .scene.realistic-ready .hen-barn,
+main.farm-mode .scene.realistic-ready .windmill,
+main.farm-mode .scene.realistic-ready .farm-basket,
+main.farm-mode .scene.realistic-ready .hen-characters,
+main.farm-mode .scene.realistic-ready .flowers {display:none!important}
+main.farm-mode > header{top:calc(max(env(safe-area-inset-top),22px) + 53px)!important;left:12px;right:12px;padding:7px 9px;border-radius:19px}
+main.farm-mode > header strong{font-size:19px!important;letter-spacing:1px}
+main.farm-mode > header small{font-size:9px}
+main.farm-mode > header button{padding:6px 9px!important;font-size:16px!important;border-radius:12px!important}
+main.farm-mode .stats{top:calc(max(env(safe-area-inset-top),22px) + 123px)!important}
+main.farm-mode .stats>div{padding:6px 9px!important;border-radius:16px!important}
+main.farm-mode .stats b{font-size:21px!important}
+main.farm-mode .collect-dock{min-height:67px;padding:7px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 81px)!important;border-radius:17px}
+main.farm-mode .collect-info strong{font-size:14px}
+main.farm-mode .collect-action button{font-size:17px;padding:10px 5px}
+@media(max-height:700px){main.farm-mode>header{top:calc(env(safe-area-inset-top) + 40px)!important}main.farm-mode .stats{top:calc(env(safe-area-inset-top) + 109px)!important}}
+
+/* Real hen animations with original SVG asset */
+.farm-hen{width:clamp(66px,20vw,108px);height:auto;font-size:initial!important;transform-origin:50% 80%;pointer-events:none}
+.farm-hen img{display:block;width:100%;height:auto;filter:drop-shadow(2px 7px 3px #304e2e60)}
+.farm-hen.hen-a{left:9%;bottom:29%;animation:henPaceA 13s ease-in-out infinite}
+.farm-hen.hen-b{left:51%;bottom:34%;animation:henPaceB 16s ease-in-out infinite}
+.farm-hen.hen-b img{filter:sepia(.25) saturate(1.3) drop-shadow(2px 7px 3px #304e2e60)}
+.farm-hen.hen-c{left:40%;bottom:43%;width:clamp(58px,17vw,91px);animation:none}
+.farm-hen.hen-c img{transform-origin:35% 75%;animation:henFeeding 3.8s ease-in-out infinite}
+@keyframes henFeeding{0%,32%,75%,100%{transform:translateY(0) rotate(0)}43%,53%,63%{transform:translateY(7px) rotate(18deg)}48%,58%,68%{transform:translateY(3px) rotate(9deg)}}
+main.farm-mode .scene .farm-hen.hen-a{bottom:29%;left:11%}
+main.farm-mode .scene .farm-hen.hen-b{bottom:32%;left:55%}
+main.farm-mode .scene .farm-hen.hen-c{bottom:43%;left:43%}
+@media(prefers-reduced-motion:reduce){.farm-hen,.farm-hen img{animation:none!important}}
+
+/* HENOVA illustrated farm refinement — original scene inspired by approved composition */
+main.farm-mode .scene:not(.realistic-ready){background:#78bc56 url('./assets/farm-landscape.svg') center center / cover no-repeat!important}
+main.farm-mode .scene:not(.realistic-ready) .orchard,
+main.farm-mode .scene:not(.realistic-ready) .cloud,
+main.farm-mode .scene:not(.realistic-ready) .farm-path,
+main.farm-mode .scene:not(.realistic-ready) .flowers{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+left:9%;bottom:53%;width:clamp(175px,40vw,285px);height:clamp(155px,24vh,240px);
+border:9px solid #fff0c9;border-bottom:12px solid #e6d7ad;
+background:repeating-linear-gradient(90deg,#c85338 0 18px,#bc482f 18px 21px,#db6945 21px 35px,#b74531 35px 38px);
+border-radius:3px 3px 10px 10px;box-shadow:12px 13px 0 #2e582c40,inset 7px 0 9px #ffffff31;
+transform:none;z-index:4
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn:before{
+top:-67px;left:-18px;border-left:calc(clamp(175px,40vw,285px) / 2) solid transparent;
+border-right:calc(clamp(175px,40vw,285px) / 2) solid transparent;
+border-bottom:72px solid #673c29;
+filter:drop-shadow(0 -6px 0 #ac7648) drop-shadow(0 6px 2px #57381d55)
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn:after{
+width:32%;height:51%;left:32%;bottom:-12px;background:linear-gradient(90deg,#402c23,#644633);
+border:9px solid #f6e5c2;border-radius:44% 44% 0 0;box-shadow:inset 0 0 0 6px #72503b
+}
+main.farm-mode .scene:not(.realistic-ready) .windmill{right:12%;bottom:53%;transform:scale(1.16);z-index:5}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{left:7%;bottom:46%;font-size:clamp(37px,9vw,63px)}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{
+left:55%;bottom:47%;width:24%;height:38px;background:repeating-radial-gradient(ellipse at 10px 8px,#f3ce67 0 3px,#be8230 4px 6px,#e3ad46 7px 9px);
+border:7px solid #8e522c;border-top:3px solid #a36636;box-shadow:0 7px 3px #385b2860;z-index:7
+}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{left:5%;bottom:27%;font-size:0;width:92px;height:73px;background:repeating-linear-gradient(8deg,#d9a43f 0 5px,#f3c65c 5px 8px,#bc862f 9px 12px);border:5px solid #bd853c;border-radius:18px 22px 13px 9px;transform:rotate(-7deg);box-shadow:5px 7px 4px #3b662d55}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack:after{content:'🌾';position:absolute;left:-28px;bottom:10px;font-size:55px;transform:rotate(-18deg)}
+main.farm-mode .scene:not(.realistic-ready) .pond{right:0%;bottom:24%;width:39%;max-width:300px;filter:drop-shadow(0 9px 3px #2a612960)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{left:25%;bottom:23%;width:clamp(75px,21vw,128px)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{left:45%;bottom:31%;width:clamp(83px,23vw,135px)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{left:34%;bottom:20%;width:clamp(69px,19vw,110px)}
+main.farm-mode .collect-dock{background:#f2f7e6f2;border:2px solid #fffdf0;box-shadow:0 7px 22px #28491f4f}
+main.farm-mode nav{background:#fffffff7}
+@media(max-width:370px){main.farm-mode .scene:not(.realistic-ready) .hen-barn{width:165px;height:150px;left:6%}main.farm-mode .scene:not(.realistic-ready) .windmill{right:5%;transform:scale(.95)}}
+
+/* Actual approved scene photo, not the substitute vector landscape */
+main.farm-mode .scene.realistic-ready{background-image:linear-gradient(#0c210411,#0c210414),url('./assets/henova-farm-scene.jpg')!important;background-size:100% 100%!important;background-position:center!important}
+main.farm-mode .scene.realistic-ready .farm-decor{display:block!important;z-index:9}
+main.farm-mode .scene.realistic-ready .farm-decor>*:not(.farm-hen){display:none!important}
+main.farm-mode .scene.realistic-ready .farm-hen{display:block!important;opacity:1!important;z-index:9}
+main.farm-mode .scene.realistic-ready .farm-hen.hen-a{left:30%;bottom:23%;width:clamp(63px,17vw,90px)}
+main.farm-mode .scene.realistic-ready .farm-hen.hen-b{left:52%;bottom:28%;width:clamp(66px,18vw,94px)}
+main.farm-mode .scene.realistic-ready .farm-hen.hen-c{left:43%;bottom:17%;width:clamp(55px,15vw,80px)}
+
+/* 2026-10-25: preserve original image proportions (never stretch). */
+main.farm-mode .scene.realistic-ready{
+ background-image:linear-gradient(#102a0a08,#102a0a08),url('./assets/henova-farm-scene.jpg')!important;
+ background-size:cover!important;
+ background-position:50% 50%!important;
+ image-rendering:auto;
+}
+main.farm-mode .scene.realistic-ready .farm-hen{opacity:.84;filter:drop-shadow(0 5px 3px #224b2455)}
+
+/* HENOVA naturalistic farm — replace photographic screenshot & flat cartoon look */
+main.farm-mode .scene,main.farm-mode .scene:not(.realistic-ready){
+ background:radial-gradient(ellipse at 52% 62%,#b7a16b28 0 11%,transparent 54%),linear-gradient(180deg,#afcfb8 0%,#93bca5 30%,#79985b 31%,#426b32 100%)!important;
+}
+main.farm-mode .scene::after{content:"";position:absolute;inset:28% 0 0;pointer-events:none;z-index:0;background:repeating-linear-gradient(103deg,transparent 0 21px,#d9d2990a 23px 25px),radial-gradient(ellipse at 25% 60%,#2c532d44,transparent 45%),radial-gradient(ellipse at 85% 70%,#284f2d48,transparent 47%)}
+main.farm-mode .scene:not(.realistic-ready) .orchard{display:block!important;z-index:2}
+main.farm-mode .scene .orchard .tree-art{font-size:0!important;filter:none!important;opacity:1}
+main.farm-mode .scene .orchard .tree-art::before{content:"";display:block;width:clamp(105px,29vw,190px);height:clamp(140px,35vw,240px);background:radial-gradient(ellipse at 35% 20%,#9cb36b88,transparent 41%),radial-gradient(ellipse at 65% 38%,#6f9349 0 22%,transparent 35%),radial-gradient(ellipse at 37% 36%,#476e37 0 32%,transparent 58%),radial-gradient(ellipse at 55% 68%,#2e5a34 0 28%,transparent 56%);border-radius:46% 53% 43% 49%;filter:drop-shadow(4px 12px 5px #1d3c264c)}
+main.farm-mode .scene .orchard .tree-art::after{content:"";display:block;position:absolute;width:16px;height:65px;background:linear-gradient(90deg,#553b2b,#99704a 53%,#473426);left:44%;top:73%;z-index:-1}
+main.farm-mode .scene:not(.realistic-ready) .farm-path{display:block!important;z-index:1;left:34%;width:35%;height:59%;bottom:-15%;border:0;border-radius:60% 42% 0 0;background:repeating-linear-gradient(167deg,transparent 0 11px,#86613e15 13px 15px),linear-gradient(90deg,#806844,#bbaa81 18%,#d5c29c 52%,#a48b63 89%,#765b3d);transform:perspective(160px) rotateX(13deg);box-shadow:0 0 12px #213c1c40}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{background:repeating-linear-gradient(90deg,#613725 0 6px,#885336 7px 18px,#aa7650 19px 22px,#70432f 23px 27px)!important;border:7px solid #b5936e!important;box-shadow:inset 10px 0 16px #1d140e55,12px 16px 18px #172f2066!important;filter:saturate(.78);border-radius:3px!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before{border-bottom-color:#533d32!important;filter:drop-shadow(0 -8px 0 #73564a) drop-shadow(2px 8px 3px #21190f88)!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::after{background:linear-gradient(90deg,#241a16,#53372a 45%,#1f1714)!important;border-color:#b39470!important}
+main.farm-mode .scene:not(.realistic-ready) .tower{background:linear-gradient(90deg,#716958,#d7ccb5 44%,#8d826f);border-color:#756a55}
+main.farm-mode .scene:not(.realistic-ready) .blade{background:linear-gradient(90deg,#a5a08b,#e0d5b6 50%,#776f60);border-color:#807c65}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{filter:saturate(.68) drop-shadow(5px 8px 5px #263c2288);opacity:.95}
+main.farm-mode .scene:not(.realistic-ready) .pond{filter:saturate(.65) drop-shadow(0 8px 5px #294d3277)}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{filter:saturate(.75) drop-shadow(3px 5px 5px #243f2960)}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen img{filter:saturate(.7) contrast(1.07) drop-shadow(4px 8px 6px #192d2388)}
+main.farm-mode .scene:not(.realistic-ready) .cloud{display:none!important}
+
+/* Compact harvest controls and realistic feathered birds */
+main.farm-mode .collect-dock{min-height:53px!important;padding:5px 8px!important;gap:7px!important;border-radius:15px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 83px)!important}
+main.farm-mode .collect-info{flex-basis:38%;font-size:11px!important}
+main.farm-mode .collect-info strong{font-size:12px!important}
+main.farm-mode .collect-info small{font-size:10px!important}
+main.farm-mode .collect-action button{font-size:14px!important;padding:7px 4px!important;border-radius:11px!important;box-shadow:0 3px #b97a20!important}
+main.farm-mode .collect-meter{height:3px!important;margin-top:5px!important}
+main.farm-mode .scene .farm-hen img{filter:saturate(.8) contrast(1.09) drop-shadow(2px 5px 3px #1b342388)!important}
+main.farm-mode .scene .farm-hen.hen-b img{filter:sepia(.38) saturate(.9) contrast(1.13) drop-shadow(2px 5px 3px #1b342388)!important}
+
+/* Reference composition: fully interactive HENOVA orchard farm */
+main.farm-mode .farm-toolbar{background:transparent!important;box-shadow:none!important;backdrop-filter:none!important;border:0!important;top:calc(max(env(safe-area-inset-top),16px) + 60px)!important;padding:0!important;display:flex;align-items:center}
+.farm-toolbar .farm-user{display:flex;align-items:center;gap:8px;padding:5px 13px 5px 5px;background:#eff4d9e8;border:1px solid #fff9e5;box-shadow:0 2px 5px #263d1b4d;border-radius:50px;min-width:0;max-width:48%;height:53px}
+.farm-avatar{display:grid;place-items:center;border-radius:50%;height:43px;width:43px;min-width:43px;background:linear-gradient(145deg,#7597f8,#4d61be);color:white;font-size:19px;border:2px solid #f8fbff;box-shadow:0 1px 4px #5559}
+.farm-user-copy{min-width:0;overflow:hidden;white-space:nowrap}.farm-user-copy strong{display:block!important;font-size:15px!important;letter-spacing:0!important;overflow:hidden;text-overflow:ellipsis;font-weight:700!important;color:#263b24!important}.farm-user-copy small{font-size:11px!important;letter-spacing:0!important;color:#78866a!important;overflow:hidden;text-overflow:ellipsis}
+.farm-tools{display:flex;gap:5px;margin-left:auto;align-items:center}
+main.farm-mode .farm-tools button{min-width:42px;height:47px;font-size:20px!important;padding:4px!important;background:#e2edceec;border:1px solid #ffffeadf;border-radius:14px!important;box-shadow:0 3px 5px #2848213f}
+main.farm-mode .farm-tools #fullscreen-toggle{font-size:15px!important;min-width:32px;height:35px;background:#f6f7e8a3}
+main.farm-mode .stats{top:calc(max(env(safe-area-inset-top),16px) + 119px)!important;gap:8px}
+main.farm-mode .stats>div{background:#e6f1d2e5!important;border:2px solid #f6f8df!important;border-radius:35px!important;box-shadow:0 5px 7px #28482130!important;min-height:54px;padding:5px 9px!important}
+main.farm-mode .stats b{font-size:24px!important;color:#374c29}
+main.farm-mode .stats small{font-size:10px!important}
+main.farm-mode .scene:not(.realistic-ready){background-color:#86b956!important;background-image:
+ radial-gradient(circle at 8% 30%,#648c3860 0 3px,transparent 4px),
+ radial-gradient(circle at 69% 78%,#b3db6670 0 3px,transparent 4px),
+ repeating-radial-gradient(ellipse at 42% 35%,#9ecb60a0 0 2px,#84b856a0 3px 6px,#74a747a0 7px 10px)!important;
+ background-size:43px 37px,55px 62px,95px 80px!important}
+main.farm-mode .scene:not(.realistic-ready) .orchard{display:block!important;z-index:3}
+main.farm-mode .scene .orchard .tree-art{width:clamp(125px,34vw,225px);height:clamp(130px,34vw,225px);background:radial-gradient(circle at 33% 27%,#e8d18b 0 2px,transparent 4px),radial-gradient(circle at 70% 35%,#bd3822 0 7px,#f35d34 8px 10px,transparent 11px),radial-gradient(circle at 34% 61%,#bd3822 0 7px,#f35d34 8px 10px,transparent 11px),radial-gradient(circle at 41% 19%,#ca3f29 0 6px,#f8753d 7px 10px,transparent 11px),radial-gradient(circle at 18% 42%,#b73322 0 6px,#e75c37 7px 10px,transparent 11px),radial-gradient(circle at 78% 66%,#c13e2b 0 7px,#ed7045 8px 10px,transparent 11px),radial-gradient(ellipse at 49% 44%,#9dd060 0 15%,#75b245 37%,#477c33 64%,transparent 68%);filter:drop-shadow(0 4px 3px #324d2688)!important;z-index:2}
+main.farm-mode .scene .orchard .tree-art::before{content:'';position:absolute;inset:12%;background:repeating-radial-gradient(circle at 32% 32%,#c6e68d66 0 3px,transparent 4px 13px);border-radius:50%;width:auto;height:auto;filter:none!important}
+main.farm-mode .scene .orchard .tree-art::after{top:65%;left:43%;height:41%;width:18px;background:linear-gradient(90deg,#65452c,#b07a4b 50%,#543a23);z-index:-2}
+main.farm-mode .scene .orchard .tree-art:nth-child(1){left:-17%;top:-5%}main.farm-mode .scene .orchard .tree-art:nth-child(2){right:-14%;top:-7%}main.farm-mode .scene .orchard .tree-art:nth-child(3){left:-21%;top:25%}main.farm-mode .scene .orchard .tree-art:nth-child(4){right:-20%;top:27%}main.farm-mode .scene .orchard .tree-art:nth-child(5){left:-20%;bottom:11%;top:auto}main.farm-mode .scene .orchard .tree-art:nth-child(6){right:-20%;bottom:4%;top:auto}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{left:9%;bottom:58%;width:clamp(155px,39vw,244px);height:clamp(140px,23vh,210px);border:7px solid #eee0bf!important;background:repeating-linear-gradient(90deg,#b13f29 0 22px,#d15b3a 23px 26px,#b94a30 27px 34px)!important;box-shadow:inset 7px 0 #f2c6a040,7px 11px 5px #34552267!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before{border-bottom-color:#674634!important;filter:drop-shadow(0 -7px 0 #95714b) drop-shadow(0 4px 2px #2b271a77)!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill{right:7%;bottom:58%;transform:scale(.90);filter:drop-shadow(4px 6px 2px #304d265b)}
+main.farm-mode .scene:not(.realistic-ready) .farm-path{left:24%;width:20%;height:64%;bottom:-12%;transform:skewX(6deg);border-radius:36% 24% 0 0;background:repeating-radial-gradient(circle at 34% 30%,#8e7b5a70 0 2px,transparent 3px 45px),linear-gradient(90deg,#b7985d,#e0c285 13%,#e7d09a 77%,#af8a54)!important}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{left:4%;bottom:55%;font-size:clamp(40px,12vw,67px)}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{left:43%;bottom:57%;width:25%;transform:rotate(-2deg)}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{left:2%;bottom:36%;font-size:0}
+main.farm-mode .scene:not(.realistic-ready) .pond{right:0%;bottom:35%;width:36%}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{left:65%;bottom:20%;width:clamp(75px,19vw,104px);z-index:10}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{left:58%;bottom:20%;width:clamp(66px,17vw,94px);z-index:9}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{left:53%;bottom:21%;width:clamp(54px,15vw,77px);z-index:10}
+main.farm-mode .collect-dock{bottom:calc(max(env(safe-area-inset-bottom),0px) + 78px)!important;border-radius:22px!important;background:#e3ebc9ee!important;padding:5px!important;min-height:64px!important}
+main.farm-mode .collect-info{flex-basis:39%}
+main.farm-mode .collect-action button{background:linear-gradient(#ffe678,#f4b526);border-radius:16px!important}
+main.farm-mode nav{height:85px;background:linear-gradient(#eef5d7,#ddeabd)!important;box-shadow:0 -3px 8px #334c2155!important;border-radius:0!important}
+main.farm-mode nav button span{font-size:25px}
+@media(max-width:390px){main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 57px)!important}.farm-tools{gap:3px}main.farm-mode .farm-tools button{min-width:36px;height:43px;font-size:17px!important}.farm-toolbar .farm-user{max-width:44%}}
+
+/* Farm correction: no concentric textures, clear HUD, believable top-down orchard */
+main.farm-mode .scene:not(.realistic-ready){
+ background-color:#88b95d!important;
+ background-image:
+ radial-gradient(ellipse at 40% 37%,#a6cd77 0%,transparent 49%),
+ radial-gradient(ellipse at 65% 78%,#5b9448aa 0%,transparent 52%),
+ repeating-linear-gradient(113deg,#ffffff06 0 2px,transparent 2px 31px)!important;
+ background-size:100% 100%!important;
+}
+main.farm-mode .scene:not(.realistic-ready)::after{
+ background:radial-gradient(circle at 23% 55%,#d7dc8a19 0 1px,transparent 2px),radial-gradient(circle at 65% 65%,#466b3450 0 1px,transparent 2px)!important;
+ background-size:33px 39px,51px 47px!important;
+ inset:22% 0 0!important;opacity:.65
+}
+main.farm-mode .scene .orchard .tree-art{background:none!important}
+main.farm-mode .scene .orchard .tree-art::before{
+ inset:0!important;width:100%!important;height:78%!important;border-radius:49%!important;
+ background:radial-gradient(circle at 24% 31%,#df5541 0 6px,transparent 7px),radial-gradient(circle at 68% 41%,#cd3d31 0 7px,transparent 8px),radial-gradient(circle at 48% 68%,#df5541 0 6px,transparent 7px),radial-gradient(circle at 62% 16%,#e66045 0 6px,transparent 7px),radial-gradient(circle at 35% 21%,#90bd58 0 21px,transparent 34px),radial-gradient(circle at 67% 54%,#619947 0 27px,transparent 46px),radial-gradient(circle at 42% 50%,#467d39 0 36px,transparent 62px),radial-gradient(circle at 50% 46%,#477e35 0 53%,transparent 69%)!important;
+ filter:drop-shadow(4px 6px 3px #344b2766)!important
+}
+main.farm-mode .scene .orchard .tree-art::after{top:67%!important;height:37%!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+ top:28%!important;bottom:auto!important;left:9%!important;width:clamp(139px,37vw,240px)!important;height:clamp(115px,18vh,190px)!important;
+ transform:none!important;z-index:5
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before{top:-54px!important;border-bottom-width:56px!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill{top:29%!important;bottom:auto!important;right:12%!important;transform:scale(.82)!important;z-index:5}
+main.farm-mode .scene:not(.realistic-ready) .farm-path{
+ top:49%!important;bottom:-10%!important;left:26%!important;width:22%!important;height:65%!important;
+ background:linear-gradient(90deg,#bfa16d,#dcc28f 18%,#e5cf9e 53%,#d3ae73 86%,#a98555)!important;
+ box-shadow:inset 3px 0 #977b5050,inset -3px 0 #977b5050!important;transform:skewX(-1deg)!important;border-radius:35% 31% 0 0!important;
+}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{top:48%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{top:47%!important;bottom:auto!important;left:46%!important;width:24%!important}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{top:61%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .pond{top:60%!important;bottom:auto!important;right:2%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{bottom:21%!important;left:69%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{bottom:22%!important;left:57%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{bottom:25%!important;left:65%!important}
+main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 58px)!important}
+main.farm-mode .stats{top:calc(max(env(safe-area-inset-top),16px) + 120px)!important}
+main.farm-mode .collect-dock{min-height:56px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 83px)!important}
+
+/* V2 scene rebuild: standalone detailed orchard background, with interactive layers */
+main.farm-mode .scene:not(.realistic-ready) {
+ background:#7cab54 url('./assets/farm-v2-orchard.svg') center center / cover no-repeat!important;
+}
+main.farm-mode .scene:not(.realistic-ready)::after{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .orchard,
+main.farm-mode .scene:not(.realistic-ready) .cloud,
+main.farm-mode .scene:not(.realistic-ready) .farm-path{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+ top:29%!important;bottom:auto!important;left:10%!important;width:clamp(148px,37vw,260px)!important;height:clamp(135px,21vh,220px)!important;
+ border:7px solid #dbc09b!important;
+ background:repeating-linear-gradient(90deg,#9d3f2d 0 13px,#c65538 14px 18px,#aa422e 19px 33px)!important;
+ box-shadow:inset -11px 0 12px #43211938,7px 11px 7px #25422266!important;z-index:6
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before{border-bottom-color:#604030!important;filter:drop-shadow(0 -7px 0 #947251) drop-shadow(0 5px 4px #221c1377)!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill{top:30%!important;bottom:auto!important;right:11%!important;transform:scale(.80)!important}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{top:53%!important;left:4%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{top:51%!important;left:43%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{top:65%!important;left:3%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .pond{top:65%!important;right:2%!important;bottom:auto!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{left:68%!important;bottom:20%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{left:60%!important;bottom:22%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{left:63%!important;bottom:22%!important}
+main.farm-mode .collect-dock{min-height:56px!important}
+
+/* Detailed external artwork replaces geometric farm objects */
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+ top:29%!important;bottom:auto!important;left:7%!important;width:clamp(185px,45vw,290px)!important;
+ height:clamp(205px,29vh,285px)!important;z-index:6!important;
+ border:0!important;box-shadow:none!important;background:transparent url('./assets/henova-barn-detailed.svg') center / contain no-repeat!important;
+ filter:drop-shadow(3px 7px 3px #21392266)!important
+}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before,
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::after{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill{
+ top:33%!important;bottom:auto!important;right:9%!important;
+ width:clamp(110px,27vw,165px)!important;height:clamp(190px,28vh,270px)!important;
+ transform:none!important;filter:drop-shadow(3px 6px 3px #21392255)!important;
+ background:transparent url('./assets/henova-windmill-detailed.svg') center / contain no-repeat!important
+}
+main.farm-mode .scene:not(.realistic-ready) .windmill .tower,
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor{display:none!important}
+@media(max-width:370px){
+ main.farm-mode .scene:not(.realistic-ready) .hen-barn{width:178px!important;height:215px!important;left:5%!important}
+ main.farm-mode .scene:not(.realistic-ready) .windmill{right:6%!important;width:112px!important;height:205px!important}
+}
+
+/* Independently spinning four-blade windmill rotor */
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor{display:block!important;position:absolute!important;top:29%!important;left:50%!important;width:12px;height:12px;z-index:3;animation:windspin 7s linear infinite!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor .blade{display:block!important;position:absolute;width:17px;height:52px;top:-53px;left:-7px;transform-origin:50% 59px;background:linear-gradient(90deg,#866342,#dbc196 44%,#a87e55);border:2px solid #755138;border-radius:7px 7px 3px 3px}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor .blade:nth-child(1){transform:rotate(0deg)}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor .blade:nth-child(2){transform:rotate(90deg)}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor .blade:nth-child(3){transform:rotate(180deg)}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor .blade:nth-child(4){transform:rotate(270deg)}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor-cap{z-index:5;background:#a98150;border:3px solid #644731;width:20px;height:20px}
+@media(prefers-reduced-motion:reduce){main.farm-mode .scene .windmill .rotor{animation:none!important}}
+
+/* Wider camera framing: zoom out farm objects without shrinking interactive HUD */
+main.farm-mode .scene:not(.realistic-ready){background-size:100% 100%!important;background-position:center!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{
+ width:clamp(132px,34vw,205px)!important;height:clamp(145px,22vh,202px)!important;
+ top:35%!important;left:12%!important
+}
+main.farm-mode .scene:not(.realistic-ready) .windmill{
+ width:clamp(89px,22vw,135px)!important;height:clamp(145px,22vh,204px)!important;
+ top:35%!important;right:15%!important
+}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{top:56%!important;left:8%!important;font-size:clamp(31px,8vw,48px)!important}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{top:55%!important;left:47%!important;width:21%!important;transform:scale(.85) rotate(-2deg)!important}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{top:69%!important;left:7%!important;transform:scale(.74) rotate(-7deg)!important;transform-origin:top left!important}
+main.farm-mode .scene:not(.realistic-ready) .pond{top:69%!important;right:7%!important;width:29%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{width:clamp(51px,14vw,76px)!important;left:66%!important;bottom:19%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{width:clamp(52px,14vw,78px)!important;left:56%!important;bottom:21%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{width:clamp(42px,12vw,64px)!important;left:61%!important;bottom:21%!important}
+main.farm-mode .collect-dock,main.farm-mode .stats,main.farm-mode .farm-toolbar{transform:none!important}
+
+/* HENOVA FARM RESET — new scene composition; gameplay markup stays intact */
+main.farm-mode .scene:not(.realistic-ready){background:#81b45a url('./assets/farm-v2-orchard.svg') center 43%/cover no-repeat!important}
+main.farm-mode .scene:not(.realistic-ready) .orchard,
+main.farm-mode .scene:not(.realistic-ready) .farm-path,
+main.farm-mode .scene:not(.realistic-ready) .cloud,
+main.farm-mode .scene:not(.realistic-ready) .flowers{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn{top:30%!important;left:7%!important;width:42%!important;height:24%!important;bottom:auto!important;transform:none!important;background:transparent url('./assets/henova-barn-detailed.svg') center/contain no-repeat!important;border:0!important;box-shadow:none!important;filter:drop-shadow(0 11px 9px #2c452f66)!important}
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::before,
+main.farm-mode .scene:not(.realistic-ready) .hen-barn::after{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill{top:32%!important;right:11%!important;left:auto!important;bottom:auto!important;width:27%!important;height:23%!important;background:transparent url('./assets/henova-windmill-detailed.svg') center/contain no-repeat!important;transform:none!important;filter:drop-shadow(0 9px 5px #32452466)!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill .tower{display:none!important}
+main.farm-mode .scene:not(.realistic-ready) .windmill .rotor{display:block!important;top:29%!important;left:50%!important}
+main.farm-mode .scene:not(.realistic-ready) .egg-nest{top:55%!important;left:8%!important;bottom:auto!important;font-size:clamp(29px,7vw,52px)!important}
+main.farm-mode .scene:not(.realistic-ready) .grain-trough{top:54%!important;left:48%!important;bottom:auto!important;width:25%!important;height:30px!important;transform:rotate(-3deg)!important}
+main.farm-mode .scene:not(.realistic-ready) .hay-stack{top:70%!important;left:4%!important;bottom:auto!important;transform:scale(.69)!important;transform-origin:top left!important}
+main.farm-mode .scene:not(.realistic-ready) .pond{top:67%!important;right:3%!important;bottom:auto!important;width:32%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a{left:42%!important;bottom:22%!important;width:15%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-b{left:66%!important;bottom:22%!important;width:16%!important}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c{left:54%!important;bottom:21%!important;width:13%!important}
+main.farm-mode .scene:not(.realistic-ready)::after{display:none!important}
+main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 54px)!important}
+main.farm-mode .stats{top:calc(max(env(safe-area-inset-top),16px) + 116px)!important}
+main.farm-mode .collect-dock{min-height:57px!important;padding:5px 8px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 85px)!important;border-radius:20px!important}
+main.farm-mode .collect-action button{font-size:15px!important;padding:7px 5px!important}
+
+/* Lively grain feeding: each hen bends to peck scattered kernels */
+main.farm-mode .scene:not(.realistic-ready) .farm-decor::after{
+ content:"";position:absolute;left:51%;bottom:18%;width:32%;height:10%;
+ background-image:radial-gradient(ellipse,#e2b052 0 3px,transparent 4px),radial-gradient(ellipse,#c99540 0 2px,transparent 3px),radial-gradient(ellipse,#e7ca75 0 2px,transparent 3px);
+ background-size:24px 18px,19px 25px,29px 21px;background-position:0 3px,8px 12px,14px 5px;
+ opacity:.9;transform:rotate(-8deg);pointer-events:none;z-index:1
+}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-c img{animation:henovaEat 2.5s ease-in-out infinite!important;transform-origin:65% 72%}
+main.farm-mode .scene:not(.realistic-ready) .farm-hen.hen-a img{animation:henovaEat 3.6s ease-in-out infinite!important;animation-delay:-1s;transform-origin:65% 75%}
+@keyframes henovaEat{0%,25%,70%,100%{transform:rotate(0deg) translateY(0)}35%,44%,54%{transform:rotate(22deg) translateY(8px)}39%,49%,59%{transform:rotate(12deg) translateY(3px)}}
+.henova-egg-burst{position:fixed;inset:0;z-index:100;pointer-events:none;overflow:hidden}
+.henova-flying-egg{position:absolute;font-size:clamp(23px,6vw,36px);animation:eggFlyUp 1.5s ease-out both;filter:drop-shadow(0 3px 2px #32322244);will-change:transform,opacity}
+@keyframes eggFlyUp{0%{opacity:0;transform:translate3d(0,10px,0) scale(.45) rotate(-20deg)}16%{opacity:1;transform:translate3d(0,-16px,0) scale(1) rotate(0)}72%{opacity:1}100%{opacity:0;transform:translate3d(var(--dx),var(--rise),0) scale(.72) rotate(18deg)}}
+@media(prefers-reduced-motion:reduce){.henova-flying-egg{animation-duration:.25s!important}main.farm-mode .farm-hen img{animation:none!important}}
+
+/* HENOVA FARM V3 — fresh isolated design and artwork, no legacy farm CSS */
+main.farm-mode #farm-scene.farm-v3{position:absolute!important;inset:0!important;overflow:hidden!important;background:linear-gradient(180deg,#b5e7f0 0%,#d7ebc4 31%,#8fbe64 32%,#619447 100%)!important;background-image:linear-gradient(180deg,#b5e7f0 0%,#d7ebc4 31%,#8fbe64 32%,#619447 100%)!important;background-size:100% 100%!important;border:0!important;border-radius:0!important}
+.farm-v3>div{position:absolute;pointer-events:none}
+.farm-v3 .v3-sun{width:170px;height:170px;right:-44px;top:14%;background:radial-gradient(circle,#fff9c6 0%,#fff5ac70 38%,transparent 72%)}
+.farm-v3 .v3-hills{inset:29% -10% auto;height:17%;background:radial-gradient(ellipse at 25% 90%,#6b9d54 0 52%,transparent 53%),radial-gradient(ellipse at 73% 101%,#82ad58 0 58%,transparent 59%)}
+.farm-v3 .v3-field{inset:35% 0 0;background:repeating-linear-gradient(103deg,transparent 0 21px,#194b2410 22px 24px),radial-gradient(ellipse at 50% 44%,#b4d47a 0%,transparent 64%),linear-gradient(145deg,#7daf53,#629541 60%,#4f833c)}
+.farm-v3 .v3-fence{left:0;right:0;top:43%;height:10%;background:repeating-linear-gradient(90deg,transparent 0 38px,#8e633d 39px 49px,transparent 50px 104px),linear-gradient(to bottom,transparent 0 23%,#986c45 24% 33%,transparent 34% 66%,#88603f 67% 76%,transparent 77%);opacity:.88;filter:drop-shadow(1px 3px 1px #385c3250)}
+.farm-v3 .v3-lane{left:24%;width:30%;top:52%;bottom:-10%;background:repeating-radial-gradient(circle at 28% 32%,#99704e50 0 1px,transparent 2px 34px),linear-gradient(90deg,#aa865a,#e1c697 20%,#edd9aa 60%,#b88f5a);border-radius:30% 35% 0 0;transform:perspective(220px) rotateX(9deg);box-shadow:0 0 9px #35623133}
+.farm-v3 .v3-tree{width:clamp(120px,38vw,235px);height:clamp(135px,37vw,225px);border-radius:52% 48% 50% 48%;background:radial-gradient(circle at 35% 29%,#b7dc7a 0 12%,transparent 30%),radial-gradient(circle at 64% 25%,#79ab4a 0 27%,transparent 45%),radial-gradient(circle at 30% 60%,#437939 0 38%,transparent 58%),radial-gradient(ellipse,#487b38 0 61%,transparent 70%);filter:drop-shadow(3px 8px 3px #294d3366);z-index:2}
+.farm-v3 .v3-tree:before{content:"";position:absolute;left:46%;width:15px;height:58px;top:78%;background:linear-gradient(90deg,#533c25,#a27548,#49311d);z-index:-1}
+.farm-v3 .v3-tree span{font-size:22px;position:absolute;top:34%;left:35%;filter:drop-shadow(22px -21px 0 #bb4f2c) drop-shadow(-22px 32px 0 #c34c28)}
+.farm-v3 .v3-tree.t1{top:19%;left:-21%}.farm-v3 .v3-tree.t2{top:18%;right:-22%}.farm-v3 .v3-tree.t3{bottom:13%;left:-28%;transform:scale(.8)}
+.farm-v3 .v3-barn{top:43%;left:8%;width:43%;height:23%;background:url('./assets/henova-barn-detailed.svg') center/contain no-repeat;z-index:4;filter:drop-shadow(3px 8px 4px #23442255)}
+.farm-v3 .v3-windmill{top:43%;right:7%;width:30%;height:22%;background:url('./assets/henova-windmill-detailed.svg') center/contain no-repeat;z-index:4}
+.farm-v3 .v3-rotor{position:absolute;left:50%;top:28%;width:12px;height:12px;animation:windspin 7s linear infinite}
+.farm-v3 .v3-rotor i{position:absolute;width:15px;height:47px;top:-46px;left:-3px;background:linear-gradient(90deg,#795338,#d1ae77,#8a623f);border:2px solid #7c5837;border-radius:7px 7px 2px 2px;transform-origin:50% 52px}
+.farm-v3 .v3-rotor i:nth-child(2){transform:rotate(90deg)}.farm-v3 .v3-rotor i:nth-child(3){transform:rotate(180deg)}.farm-v3 .v3-rotor i:nth-child(4){transform:rotate(270deg)}.farm-v3 .v3-rotor b{position:absolute;left:-7px;top:-7px;width:22px;height:22px;border-radius:50%;background:#a87942;border:3px solid #765332}
+.farm-v3 .v3-nest{top:64%;left:7%;font-size:clamp(33px,9vw,54px);z-index:5;filter:drop-shadow(2px 5px 3px #2b4c3055)}
+.farm-v3 .v3-feeder{top:63%;left:46%;width:25%;height:25px;background:repeating-radial-gradient(ellipse at 7px 5px,#e2bd69 0 4px,#b88938 5px 8px);border:6px solid #88603c;border-top:3px solid #a77649;box-shadow:1px 6px 2px #31533255;border-radius:3px 3px 12px 12px;transform:rotate(-5deg);z-index:5}
+.farm-v3 .v3-hay{bottom:28%;left:4%;font-size:64px;filter:drop-shadow(2px 5px 2px #2b4c3055)}
+.farm-v3 .v3-pond{right:3%;bottom:26%;width:35%;height:12%;border-radius:45% 55% 51% 49%;background:#91a67c;border:9px solid #a3b77c;box-shadow:0 6px 4px #2b4c3050;transform:rotate(-8deg);z-index:3}
+.farm-v3 .v3-water{inset:3px;position:absolute;border-radius:inherit;background:linear-gradient(150deg,#91cfe1,#408aaa);border:3px solid #bbdee3}
+.farm-v3 .v3-pond i{position:absolute;width:27%;height:21%;border-radius:50%;border:2px solid #d4eef0;top:35%;left:19%;animation:pondPulse 4s infinite}.farm-v3 .v3-pond i:last-child{left:53%;top:55%;animation-delay:-2s}
+.farm-v3 .v3-grain{bottom:20%;left:49%;width:34%;height:12%;background:radial-gradient(circle,#eac366 0 2px,transparent 3px) 0 0/17px 19px,radial-gradient(circle,#c49345 0 2px,transparent 3px) 8px 7px/24px 22px;z-index:4}
+main.farm-mode .farm-v3 .farm-hen{z-index:7!important;top:auto!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:38%!important;bottom:18%!important;width:17%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-b{left:65%!important;bottom:19%!important;width:16%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-c{left:51%!important;bottom:23%!important;width:14%!important}
+.farm-v3 .farm-hen.hen-c img{animation:henovaEat 2.7s ease-in-out infinite;transform-origin:60% 74%}
+main.farm-mode .farm-v3 .farm-hen.hen-a img{animation:henovaEat 3.2s ease-in-out infinite;transform-origin:60% 74%}
+@media(prefers-reduced-motion:reduce){.farm-v3 .farm-hen img,.farm-v3 .v3-rotor,.farm-v3 .v3-pond i{animation:none!important}}
+
+/* HENOVA orchard match: layout in live app, not a static screenshot */
+main.farm-mode #farm-scene.farm-v3{background:#80bb51!important;background-image:radial-gradient(circle at 20% 53%,#9ccb67 0,transparent 33%),radial-gradient(circle at 85% 77%,#67a646 0,transparent 35%),linear-gradient(#83bf54,#75b34a)!important}
+.farm-v3 .v3-sun,.farm-v3 .v3-hills{display:none!important}
+.farm-v3 .v3-field{inset:0!important;background:radial-gradient(circle at 24% 21%,#a2d57055 0 2px,transparent 3px) 0 0/29px 31px,radial-gradient(circle at 62% 71%,#477a3760 0 2px,transparent 3px) 0 0/35px 41px!important}
+.farm-v3 .v3-tree{width:clamp(118px,31vw,195px)!important;height:clamp(120px,31vw,195px)!important;filter:drop-shadow(2px 7px 2px #29492377)!important}
+.farm-v3 .v3-tree.t1{top:1%!important;left:-10%!important}.farm-v3 .v3-tree.t2{top:0%!important;right:-10%!important}.farm-v3 .v3-tree.t3{bottom:9%!important;left:-21%!important}
+.farm-v3 .v3-fence{top:34%!important;height:10%!important}
+.farm-v3 .v3-barn{top:36%!important;left:8%!important;width:45%!important;height:23%!important}
+.farm-v3 .v3-windmill{top:36%!important;right:8%!important;width:31%!important;height:23%!important}
+.farm-v3 .v3-lane{top:55%!important;left:27%!important;width:23%!important;bottom:-8%!important;transform:skewX(5deg)!important}
+.farm-v3 .v3-nest{top:60%!important;left:5%!important}
+.farm-v3 .v3-feeder{top:58%!important;left:47%!important;width:26%!important}
+.farm-v3 .v3-hay{bottom:29%!important;left:5%!important}
+.farm-v3 .v3-pond{right:2%!important;bottom:30%!important;width:34%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:70%!important;bottom:18%!important;width:13%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-b{left:61%!important;bottom:21%!important;width:12%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-c{left:55%!important;bottom:24%!important;width:11%!important}
+main.farm-mode .stats{flex-direction:row-reverse!important}
+main.farm-mode .stats>div{min-height:49px!important}
+main.farm-mode .collect-dock{min-height:54px!important;padding:5px!important}
+main.farm-mode .farm-toolbar{top:calc(max(env(safe-area-inset-top),16px) + 56px)!important}
+
+/* HENOVA v4 — unified farm composition; override older competing layouts */
+main.farm-mode #farm-scene.farm-v3{
+ background:linear-gradient(180deg,#bdd9b6 0%,#9dca7c 18%,#8cbc63 47%,#71a44b 100%)!important;
+ background-image:radial-gradient(ellipse at 52% 12%,#e6ebbd9e 0%,transparent 58%),linear-gradient(180deg,#b9d8b0 0%,#94c176 43%,#6e9d49 100%)!important;
+ isolation:isolate;
+}
+.farm-v3 .v3-field{inset:0!important;background:
+ radial-gradient(ellipse at 60% 71%,#b0c67a75,transparent 58%),
+ repeating-linear-gradient(93deg,transparent 0 53px,#3c6f2510 55px 57px),
+ linear-gradient(180deg,transparent,#537c3030)!important;z-index:0}
+.farm-v3 .v3-tree.t1{top:14%!important;left:-27%!important;transform:scale(.86)!important}
+.farm-v3 .v3-tree.t2{top:12%!important;right:-29%!important;transform:scale(.83)!important}
+.farm-v3 .v3-tree.t3{bottom:15%!important;left:-39%!important;transform:scale(.7)!important}
+.farm-v3 .v3-fence{top:37%!important;height:8%!important;opacity:.74!important;z-index:1!important;filter:blur(.35px) drop-shadow(0 3px 2px #314c2c55)!important}
+.farm-v3 .v3-barn{top:30%!important;left:7%!important;width:39%!important;height:21%!important;z-index:2!important;filter:drop-shadow(1px 8px 6px #22472b45)}
+.farm-v3 .v3-windmill{top:29%!important;right:7%!important;width:26%!important;height:20%!important;z-index:2!important;filter:drop-shadow(1px 7px 5px #24472d44)}
+.farm-v3 .v3-lane{top:49%!important;left:28%!important;width:28%!important;bottom:-12%!important;background:linear-gradient(90deg,#a77e516b,#e0bb8288 27%,#e6c89595 66%,#a77e516b)!important;border-radius:45% 45% 0 0!important;opacity:.75}
+.farm-v3 .v3-nest{top:59%!important;left:9%!important;font-size:clamp(30px,8vw,45px)!important}
+.farm-v3 .v3-feeder{top:62%!important;left:49%!important;width:25%!important;z-index:5!important}
+.farm-v3 .v3-hay{bottom:27%!important;left:3%!important;font-size:clamp(34px,9vw,58px)!important;opacity:.85}
+.farm-v3 .v3-pond{bottom:24%!important;right:-7%!important;width:29%!important;opacity:.74!important}
+.farm-v3 .v3-grain{bottom:19%!important;left:38%!important;width:47%!important;z-index:6!important}
+main.farm-mode .farm-v3 .farm-hen{z-index:8!important;filter:drop-shadow(1px 6px 3px #28432878)!important;transition:left .4s ease}
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:36%!important;bottom:19%!important;width:clamp(68px,18vw,112px)!important}
+main.farm-mode .farm-v3 .farm-hen.hen-b{left:62%!important;bottom:18%!important;width:clamp(67px,17vw,105px)!important}
+main.farm-mode .farm-v3 .farm-hen.hen-c{left:49%!important;bottom:25%!important;width:clamp(56px,15vw,91px)!important}
+.farm-v3 .farm-hen.hen-a img{animation:henovaPeck 3.1s ease-in-out infinite -1.1s!important;transform-origin:68% 77%!important}
+.farm-v3 .farm-hen.hen-b img{animation:henovaPeck 3.7s ease-in-out infinite -.3s!important;transform-origin:68% 77%!important}
+.farm-v3 .farm-hen.hen-c img{animation:henovaPeck 2.4s ease-in-out infinite -1.7s!important;transform-origin:68% 77%!important}
+@keyframes henovaPeck{0%,17%,67%,100%{transform:rotate(0) translateY(0)}26%,39%,52%{transform:rotate(14deg) translateY(6px)}33%,46%{transform:rotate(4deg) translateY(2px)}}
+main.farm-mode .collect-dock{min-height:56px!important;bottom:calc(max(env(safe-area-inset-bottom),0px) + 81px)!important;z-index:20!important}
+main.farm-mode .collect-action button{font-size:14px!important;padding:8px 10px!important}
+@media(max-width:390px){main.farm-mode .farm-v3 .farm-hen.hen-a{left:34%!important}main.farm-mode .farm-v3 .farm-hen.hen-b{left:64%!important}}
+@media(prefers-reduced-motion:reduce){.farm-v3 .farm-hen img{animation:none!important}}
+
+
+/* HENOVA V5 — reference-style orchard scene, retained working game state */
+main.farm-mode #farm-scene.farm-v3{background:#83b650 url('./assets/henova-orchard-v4.svg') center 43%/100% 100% no-repeat!important}
+.farm-v3 .v3-field,.farm-v3 .v3-tree,.farm-v3 .v3-lane,.farm-v3 .v3-sun,.farm-v3 .v3-hills{display:none!important}
+.farm-v3 .v3-fence{top:31%!important;height:6.7%!important;z-index:2!important;opacity:1!important;background:repeating-linear-gradient(90deg,transparent 0 65px,#704327 66px 77px,#a96e3d 78px 90px,transparent 91px 144px),linear-gradient(180deg,transparent 0 23%,#986039 24% 44%,transparent 45% 65%,#8b542f 66% 83%,transparent 84%)!important;filter:drop-shadow(1px 3px 1px #30451e55)!important}
+.farm-v3 .v3-barn{top:28%!important;left:5%!important;width:47%!important;height:25%!important;z-index:4!important;filter:drop-shadow(4px 9px 4px #263b2459)!important}
+.farm-v3 .v3-windmill{top:27%!important;right:5%!important;width:32%!important;height:26%!important;z-index:4!important;filter:drop-shadow(3px 7px 4px #2d442951)!important}
+.farm-v3 .v3-nest{top:48%!important;left:3%!important;font-size:clamp(38px,9vw,66px)!important;z-index:5!important}
+.farm-v3 .v3-feeder{top:46%!important;left:41%!important;width:28%!important;height:24px!important;z-index:6!important;transform:rotate(-7deg)!important}
+.farm-v3 .v3-hay{top:64%!important;bottom:auto!important;left:1%!important;font-size:clamp(56px,13vw,90px)!important;z-index:5!important}
+.farm-v3 .v3-pond{top:65%!important;bottom:auto!important;right:-5%!important;width:39%!important;height:15%!important;opacity:1!important;z-index:5!important}
+.farm-v3 .v3-grain{top:75%!important;bottom:auto!important;left:63%!important;width:20%!important;height:7%!important;z-index:6!important}
+.farm-v3 .v3-lantern{top:45%;left:49%;font-size:clamp(19px,5vw,32px);z-index:6;filter:drop-shadow(1px 3px 2px #273e28a0)}
+.farm-v3 .v3-hay-bales{position:absolute;top:63%;left:0;width:27%;height:11%;z-index:6;filter:drop-shadow(2px 5px 2px #384c264f);background:repeating-linear-gradient(7deg,#e4b64e 0 7px,#ca8c32 8px 12px,#f2d36d 13px 18px);border:6px solid #9c652b;border-radius:13px;box-shadow:inset 0 0 0 4px #f2d47b}
+.farm-v3 .v3-hay{display:none!important}
+.farm-v3 .v3-rock{position:absolute;top:78%;left:61%;width:9%;height:3%;z-index:6;background:linear-gradient(120deg,#d6d6c5,#898f81);border:2px solid #6b7568;border-radius:58% 48% 36% 35%;transform:rotate(-12deg)}
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:69%!important;bottom:17%!important;width:clamp(72px,18vw,112px)!important;z-index:9!important}
+main.farm-mode .farm-v3 .farm-hen.hen-b,main.farm-mode .farm-v3 .farm-hen.hen-c{display:none!important}
+.farm-v3 .farm-hen.hen-a img{animation:henovaPeck 3.2s ease-in-out infinite!important;transform-origin:65% 76%!important}
+main.farm-mode .collect-dock{bottom:calc(max(env(safe-area-inset-bottom),0px) + 83px)!important;border-radius:26px!important;padding:7px!important;min-height:70px!important;background:#eaf2d6ec!important;box-shadow:0 3px 10px #24371955!important}
+main.farm-mode .collect-info{flex:0 0 39%!important;min-width:0!important;background:#ebf1d7!important;border:1px solid #c3d5a5!important;border-radius:20px!important;padding:9px 7px!important}
+main.farm-mode .collect-action{flex:1!important;min-width:0!important}
+main.farm-mode .collect-action button{width:100%!important;min-height:57px!important;border-radius:20px!important;background:linear-gradient(#ffe477,#fbc73e)!important;box-shadow:0 5px #bc8530!important;color:#663e17!important;font-size:clamp(17px,5vw,24px)!important;font-weight:900!important}
+main.farm-mode .collect-meter{height:3px!important;margin-top:7px!important}
+main.farm-mode .stats>div{background:#eff5e6df!important;border:2px solid #f8fbe9!important;border-radius:26px!important}
+main.farm-mode .farm-toolbar{background:transparent!important;box-shadow:none!important;backdrop-filter:none!important}
+main.farm-mode .farm-user{background:#eef4e1e8!important;border-radius:36px!important;padding:5px 12px!important}
+main.farm-mode .farm-tools button{background:#e9f1dddb!important;border-radius:19px!important}
+@media(max-height:710px){.farm-v3 .v3-barn{top:30%!important}.farm-v3 .v3-windmill{top:30%!important}}
+
+
+/* HENOVA VIDEO MOTION: roaming hen across the grass like the reference */
+main.farm-mode .farm-v3 .farm-hen.hen-a{left:0!important;bottom:auto!important;top:0!important;width:clamp(63px,15vw,94px)!important;transform:translate(0,0);transition:none!important;animation:henovaRoam 19s linear infinite!important;will-change:transform}
+main.farm-mode .farm-v3 .farm-hen.hen-a img{width:100%;animation:henovaStepPeck 2.3s ease-in-out infinite!important;transform-origin:53% 78%!important}
+@keyframes henovaRoam{
+0%{transform:translate(46vw,67vh) scaleX(1)}
+17%{transform:translate(53vw,64vh) scaleX(1)}
+30%{transform:translate(61vw,68vh) scaleX(1)}
+46%{transform:translate(67vw,72vh) scaleX(1)}
+48%{transform:translate(67vw,72vh) scaleX(-1)}
+69%{transform:translate(47vw,72vh) scaleX(-1)}
+83%{transform:translate(34vw,66vh) scaleX(-1)}
+85%{transform:translate(34vw,66vh) scaleX(1)}
+100%{transform:translate(46vw,67vh) scaleX(1)}
+}
+@keyframes henovaStepPeck{0%,70%,100%{transform:translateY(0) rotate(0)}12%,35%{transform:translateY(-3px) rotate(-3deg)}22%,43%{transform:translateY(1px) rotate(2deg)}77%,84%{transform:translateY(5px) rotate(12deg)}90%{transform:translateY(0) rotate(0)}}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a,main.farm-mode .farm-v3 .farm-hen.hen-a img{animation:none!important;transform:translate(48vw,69vh)!important}}
+
+/* HENOVA VIDEO STEP 2: richer illustrated details & depth */
+.farm-v3 .v3-barn{filter:drop-shadow(7px 13px 4px #203d214d)!important}
+.farm-v3 .v3-windmill{filter:drop-shadow(5px 10px 4px #28432655)!important}
+.farm-v3 .v3-pond{border:7px solid #648e45!important;outline:5px solid #a7b56f;box-shadow:0 8px 2px #365c3666,inset 0 0 0 5px #d0d58e!important;border-radius:49% 51% 45% 55%!important}
+.farm-v3 .v3-water{background:linear-gradient(145deg,#b7e8e6,#57a9c5 56%,#388bb0)!important}
+.farm-v3 .v3-water::after{content:"";position:absolute;inset:20% 20%;background:radial-gradient(ellipse at 28% 36%,#70aa4a 0 12%,transparent 13%),radial-gradient(ellipse at 67% 61%,#79ae50 0 13%,transparent 14%);opacity:.9}
+.farm-v3 .v3-feeder{border:5px solid #946039!important;border-top:4px solid #c68c4b!important;border-radius:7px 7px 16px 16px!important;box-shadow:0 6px 2px #3b4f2e70,inset 0 3px 6px #714719!important}
+.farm-v3 .v3-nest{filter:drop-shadow(3px 7px 2px #35533188)!important}
+.farm-v3 .v3-lantern{animation:henovaLantern 3.5s ease-in-out infinite}
+@keyframes henovaLantern{50%{filter:drop-shadow(0 1px 9px #ffc365cc)}}
+.farm-v3 .v3-windmill .v3-rotor{animation:windspin 9s linear infinite!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{animation-duration:22s!important}
+@media(prefers-reduced-motion:reduce){.farm-v3 .v3-lantern,.farm-v3 .v3-windmill .v3-rotor{animation:none!important}}
+
+/* HENOVA V6: fix screenshot cropping and keep moving character inside gameplay area */
+main.farm-mode #farm-scene.farm-v3{background-position:center center!important;background-size:100% 100%!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{top:0!important;bottom:auto!important;left:0!important;width:clamp(65px,16vw,100px)!important;animation:henovaSafeRoam 18s linear infinite!important}
+@keyframes henovaSafeRoam{
+0%{transform:translate(57vw,65dvh) scaleX(-1)}
+20%{transform:translate(69vw,67dvh) scaleX(-1)}
+33%{transform:translate(69vw,67dvh) scaleX(1)}
+52%{transform:translate(48vw,70dvh) scaleX(1)}
+70%{transform:translate(38vw,66dvh) scaleX(1)}
+77%{transform:translate(38vw,66dvh) scaleX(-1)}
+100%{transform:translate(57vw,65dvh) scaleX(-1)}
+}
+.farm-v3 .v3-hay-bales{top:65%!important;left:2%!important;width:21%!important;height:8%!important;border:4px solid #a56b2a!important;border-radius:30% 27% 24% 22%!important;background:repeating-linear-gradient(12deg,#c78e31 0 3px,#e2b958 4px 9px,#f5d87d 10px 14px)!important;box-shadow:8px 8px 0 #c7953b,13px 10px 0 #8c642e!important;transform:rotate(-7deg)}
+.farm-v3 .v3-feeder{top:45%!important;left:43%!important;width:26%!important;height:19px!important}
+.farm-v3 .v3-nest{top:49%!important;left:4%!important}
+.farm-v3 .v3-pond{right:2%!important;width:34%!important;top:66%!important;height:11%!important}
+.farm-v3 .v3-barn{top:29%!important;left:6%!important;width:41%!important;height:22%!important}
+.farm-v3 .v3-windmill{top:28%!important;right:6%!important;width:28%!important;height:23%!important}
+main.farm-mode .farm-user{max-width:42%!important;min-width:0!important}
+main.farm-mode .farm-user-copy{min-width:0!important}
+main.farm-mode #farm-user-name{font-size:clamp(12px,3.5vw,17px)!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+main.farm-mode .farm-tools{gap:4px!important}
+main.farm-mode .farm-tools button{width:clamp(35px,10vw,48px)!important;min-width:0!important;padding:7px!important}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important;transform:translate(58vw,67dvh)!important}}
+
+/* HENOVA ART REBUILD 1: independent illustrated game assets */
+main.farm-mode .farm-v3 .v3-nest{font-size:0!important;width:21%!important;height:12%!important;top:49%!important;left:5%!important;background:url('./assets/henova-nest-v1.svg') center/contain no-repeat!important;filter:drop-shadow(1px 6px 2px #33532668)!important}
+main.farm-mode .farm-v3 .v3-hay-bales{top:63%!important;left:1%!important;width:30%!important;height:13%!important;background:transparent url('./assets/henova-hay-v1.svg') center/contain no-repeat!important;border:0!important;box-shadow:none!important;transform:none!important;filter:drop-shadow(2px 6px 2px #34492a70)!important}
+main.farm-mode .farm-v3 .farm-hen.hen-a{width:clamp(62px,16vw,90px)!important;animation:henovaSafeRoam 18s linear infinite!important}
+main.farm-mode .farm-v3 .v3-lantern{font-size:25px!important}
+main.farm-mode .farm-v3 .v3-fence{opacity:.92!important}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important}}
+
+/* HENOVA V7: visible hen, separated props, natural ground detailing */
+main.farm-mode .farm-v3 .farm-hen.hen-a{
+  position:absolute!important;top:73%!important;left:67%!important;right:auto!important;bottom:auto!important;
+  width:clamp(76px,18vw,112px)!important;height:auto!important;
+  display:block!important;visibility:visible!important;opacity:1!important;z-index:25!important;
+  transform:none!important;animation:henovaHenWalkV7 15s ease-in-out infinite!important;
+  filter:drop-shadow(2px 7px 3px #223f2666)!important;
+}
+main.farm-mode .farm-v3 .farm-hen.hen-a img{display:block!important;width:100%!important;height:auto!important;opacity:1!important;animation:henovaStepPeck 2.3s ease-in-out infinite!important}
+@keyframes henovaHenWalkV7{
+  0%,8%{left:67%;top:73%;transform:scaleX(-1)}
+  30%{left:53%;top:75%;transform:scaleX(-1)}
+  43%{left:48%;top:72%;transform:scaleX(-1)}
+  48%{left:48%;top:72%;transform:scaleX(1)}
+  70%{left:65%;top:75%;transform:scaleX(1)}
+  86%{left:70%;top:72%;transform:scaleX(1)}
+  91%,100%{left:67%;top:73%;transform:scaleX(-1)}
+}
+.farm-v3 .v3-feeder{top:46%!important;left:44%!important;width:25%!important;transform:rotate(-5deg)!important}
+.farm-v3 .v3-lantern{top:42%!important;left:74%!important;font-size:clamp(22px,5vw,30px)!important}
+.farm-v3 .v3-ground-details{position:absolute;inset:42% 0 14%;pointer-events:none;z-index:3;
+background-image:radial-gradient(circle at 12% 17%,#f9d981 0 3px,transparent 4px),
+radial-gradient(circle at 83% 58%,#f4e28e 0 3px,transparent 4px),
+radial-gradient(ellipse at 34% 84%,#d4cf9c 0 4px,transparent 5px),
+radial-gradient(ellipse at 74% 19%,#557d43 0 3px,transparent 4px);
+background-size:135px 125px,170px 145px,215px 170px,90px 100px;opacity:.8}
+.farm-v3 .v3-stones{position:absolute;left:56%;top:66%;width:10%;height:4%;z-index:5;background:linear-gradient(120deg,#d4d7c9,#788b7b);border:3px solid #596d5a;border-radius:56% 48% 40% 45%;box-shadow:18px 8px 0 -7px #b9bfaf}
+@media(prefers-reduced-motion:reduce){main.farm-mode .farm-v3 .farm-hen.hen-a{animation:none!important;left:67%!important;top:73%!important;transform:none!important}}
+main.farm-mode .farm-v3 .v3-feeder{background:transparent url('./assets/henova-feeder-v2.svg') center/contain no-repeat!important;border:0!important;box-shadow:none!important;top:45%!important;left:40%!important;width:31%!important;height:10%!important}main.farm-mode .farm-v3 .v3-feeder span{display:none!important}main.farm-mode .farm-v3 .v3-lantern{left:75%!important;top:40%!important}
+/* HENOVA 2026 REFERENCE REBUILD: one cohesive illustrated scene + independent animated gameplay */
+main.farm-mode #farm-scene.farm-v3{
+ background:#7fba51 url('./assets/henova-game-scene-no-old-pond-20261101.svg?v=1') center center/100% 100% no-repeat!important;
+ isolation:isolate;overflow:hidden!important;
+}
+main.farm-mode #farm-scene.farm-v3::before,
+main.farm-mode #farm-scene.farm-v3::after{content:none!important;display:none!important}
+main.farm-mode .farm-v3 .v3-sun,
+main.farm-mode .farm-v3 .v3-hills,
+main.farm-mode .farm-v3 .v3-field,
+main.farm-mode .farm-v3 .v3-fence,
+main.farm-mode .farm-v3 .v3-lane,
+main.farm-mode .farm-v3 .v3-tree,
+main.farm-mode .farm-v3 .v3-barn,
+main.farm-mode .farm-v3 .v3-nest,
+main.farm-mode .farm-v3 .v3-feeder,
+main.farm-mode .farm-v3 .v3-hay,
+main.farm-mode .farm-v3 .v3-pond,
+main.farm-mode .farm-v3 .v3-grain,
+main.farm-mode .farm-v3 .v3-lantern,
+main.farm-mode .farm-v3 .v3-hay-bales,
+main.farm-mode .farm-v3 .v3-rock,
+main.farm-mode .farm-v3 .v3-ground-details,
+main.farm-mode .farm-v3 .v3-stones{display:none!important}
+main.farm-mode .farm-v3 .v3-windmill{
+ display:block!important;position:absolute!important;left:69%!important;top:24.1%!important;
+ width:31%!important;height:16.7%!important;right:auto!important;bottom:auto!important;
+ background:transparent url('./assets/henova-rotor-v1.svg') center/contain no-repeat!important;
+ transform-origin:50% 50%!important;transform:none!important;
+ animation:henovaWindmillReference 8s linear infinite!important;
+ box-shadow:none!important;filter:drop-shadow(2px 3px 1px #46382644)!important;z-index:4!important;
+}
+main.farm-mode .farm-v3 .v3-windmill *{display:none!important}
+@keyframes henovaWindmillReference{to{transform:rotate(360deg)}}
+main.farm-mode .farm-v3 .farm-hen.hen-a{
+ display:block!important;position:absolute!important;top:72%!important;left:69%!important;
+ width:clamp(68px,15.5vw,110px)!important;right:auto!important;bottom:auto!important;
+ height:auto!important;opacity:1!important;visibility:visible!important;
+ z-index:12!important;animation:henovaHenReference 18s ease-in-out infinite!important;
+ filter:drop-shadow(1px 7px 2px #38562c66)!important;
+}
+main.farm-mode .farm-v3 .farm-hen.hen-a img{
+ width:100%!important;height:auto!important;display:block!important;
+ animation:henovaReferencePeck 3.4s ease-in-out infinite!important;
+ transform-origin:66% 77%!important
+}
+@keyframes henovaHenReference{
+ 0%,12%{left:69%;top:72%;transform:scaleX(-1)}
+ 25%{left:60%;top:71%;transform:scaleX(-1)}
+ 43%{left:48%;top:74%;transform:scaleX(-1)}
+ 49%{left:48%;top:74%;transform:scaleX(1)}
+ 70%{left:59%;top:73%;transform:scaleX(1)}
+ 86%{left:71%;top:72%;transform:scaleX(1)}
+ 91%,100%{left:69%;top:72%;transform:scaleX(-1)}
+}
+@keyframes henovaReferencePeck{
+ 0%,18%,67%,100%{transform:rotate(0) translateY(0)}
+ 26%,38%{transform:rotate(11deg) translateY(4px)}
+ 32%,44%{transform:rotate(4deg) translateY(1px)}
+}
+main.farm-mode .farm-v3 .farm-hen.hen-b,
+main.farm-mode .farm-v3 .farm-hen.hen-c{display:none!important}
+main.farm-mode .collect-dock{
+ background:linear-gradient(115deg,#eaf4d4f0,#ecf4d2ee)!important;
+ border:3px solid #fff8df!important;border-radius:28px!important;
+ box-shadow:0 5px 0 #87a85566,0 8px 18px #33562a44!important;
+ padding:7px!important;min-height:72px!important
+}
+main.farm-mode .collect-action button{
+ background:linear-gradient(#ffe67a,#ffd04c 67%,#f0a92a)!important;
+ color:#5e3d18!important;border:2px solid #fff2b6!important;
+ box-shadow:0 5px 0 #ad7c24!important;border-radius:23px!important;
+ font-size:clamp(17px,5.4vw,25px)!important;min-height:59px!important
+}
+main.farm-mode .stats>div{background:#ecf4dceb!important;border:2px solid #fffbec!important}
+main.farm-mode .farm-user{background:#eef4dfea!important}
+main.farm-mode nav,nav{background:linear-gradient(#edf4df,#dbe9ca)!important}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode .farm-v3 .v3-windmill,
+ main.farm-mode .farm-v3 .farm-hen.hen-a,
+ main.farm-mode .farm-v3 .farm-hen.hen-a img{animation:none!important}
+ main.farm-mode .farm-v3 .farm-hen.hen-a{left:69%!important;top:72%!important;transform:none!important}
+}
+
+/* HENOVA REFERENCE RTL DOCK: keep production left and gold collect button right */
+main.farm-mode .collect-dock{direction:ltr!important}
+main.farm-mode .collect-info{direction:rtl}
+
+/* HENOVA UI COMPACT V9 — reference proportions and isolated rotating rotor */
+body:has(main.farm-mode)>nav{
+ height:70px!important;min-height:70px!important;
+ padding:4px 6px calc(5px + env(safe-area-inset-bottom))!important;
+ background:linear-gradient(#eef5de,#dfeaca)!important;
+ box-shadow:0 -2px 8px #324d2530!important;
+ display:flex!important;align-items:center!important;
+ border-radius:0!important;z-index:28!important;
+}
+body:has(main.farm-mode)>nav button{
+ min-width:0!important;min-height:0!important;
+ font-size:10px!important;line-height:1.15!important;
+ padding:3px 1px!important;
+}
+body:has(main.farm-mode)>nav button span{
+ font-size:19px!important;line-height:1.1!important;
+ margin-bottom:4px!important;
+}
+main.farm-mode .collect-dock{
+ left:12px!important;right:12px!important;
+ bottom:calc(73px + env(safe-area-inset-bottom))!important;
+ min-height:58px!important;max-height:65px!important;
+ border:2px solid #fff9e8!important;border-radius:20px!important;
+ padding:5px!important;gap:5px!important;
+ box-shadow:0 2px 6px #3353273d!important;
+}
+main.farm-mode .collect-info{
+ flex:0 0 37%!important;max-width:37%!important;
+ padding:5px 3px!important;border-radius:15px!important;
+ font-size:11px!important;line-height:1.1!important;
+}
+main.farm-mode .collect-info strong{font-size:12px!important;line-height:1.2!important}
+main.farm-mode .collect-info small{font-size:10px!important;line-height:1.1!important}
+main.farm-mode .collect-action{min-width:0!important;flex:1!important}
+main.farm-mode .collect-action button{
+ font-size:clamp(14px,4vw,19px)!important;
+ min-height:44px!important;height:44px!important;
+ padding:5px 6px!important;border-radius:16px!important;
+ box-shadow:0 3px #ad7c24!important;
+}
+main.farm-mode .collect-meter{height:2px!important;margin-top:3px!important}
+main.farm-mode .farm-v3 .v3-windmill{
+ background:none!important;
+ animation:none!important;transform:none!important;
+ filter:none!important;
+ display:block!important;
+ overflow:visible!important;
+}
+main.farm-mode .farm-v3 .v3-windmill .v3-rotor{
+ display:block!important;
+ position:absolute!important;inset:0!important;
+ left:0!important;right:0!important;top:0!important;bottom:0!important;
+ width:100%!important;height:100%!important;
+ background:transparent url('./assets/henova-rotor-v1.svg') center/contain no-repeat!important;
+ opacity:1!important;z-index:6!important;
+ transform-origin:50% 50%!important;
+ animation:henovaWindRotorV9 5.5s linear infinite!important;
+ will-change:transform!important;
+}
+main.farm-mode .farm-v3 .v3-windmill .v3-rotor>*{display:none!important}
+@keyframes henovaWindRotorV9{
+ from{transform:rotate(0deg)}
+ to{transform:rotate(360deg)}
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode .farm-v3 .v3-windmill .v3-rotor{animation:none!important}
+}
+
+
+/* HENOVA SEMI-REALISTIC THEME — natural surfaces, quiet controls, preserved gameplay */
+body:has(main.farm-mode){background:#689d3e!important}
+main.farm-mode #farm-scene.farm-v3{
+ background:#73ad43 url('./assets/henova-game-scene-v1.svg?v=6') center/100% 100% no-repeat!important;
+}
+main.farm-mode .farm-toolbar{box-shadow:none!important;background:transparent!important}
+main.farm-mode .farm-user{
+ background:linear-gradient(125deg,#f8f7ebdb,#e1ecdacb)!important;
+ border:1px solid #fff8e4e6!important;
+ box-shadow:0 3px 13px #28452b35!important;
+ backdrop-filter:blur(6px)!important;
+}
+main.farm-mode .farm-tools button{
+ background:linear-gradient(135deg,#f4f3e7e8,#dbe4d7d9)!important;
+ border:1px solid #faf7e9dd!important;
+ box-shadow:0 3px 10px #25482c24!important;
+ color:#4e654a!important;
+}
+main.farm-mode .stats>div{
+ background:linear-gradient(135deg,#f1f4e5e0,#dce9d6d4)!important;
+ border:1px solid #fffdf1e5!important;
+ box-shadow:0 3px 12px #314c2e34!important;
+ color:#405640!important;
+}
+main.farm-mode .stats b{color:#3c523b!important}
+main.farm-mode .collect-dock{
+ background:linear-gradient(110deg,#f2f3e4ed,#e7eee0e8)!important;
+ border:2px solid #fffdf2ee!important;
+ border-radius:19px!important;
+ box-shadow:0 4px 15px #2d4e334a!important;
+}
+main.farm-mode .collect-info{
+ background:#f3f3e9dd!important;
+ border:1px solid #d8dfc8!important;
+ color:#486845!important;
+}
+main.farm-mode .collect-action button{
+ background:linear-gradient(180deg,#f9db8b,#dfb660)!important;
+ border:1px solid #fff1be!important;
+ color:#5f4827!important;
+ box-shadow:0 3px #ae8c4e!important;
+ text-shadow:none!important;
+}
+main.farm-mode .collect-action button:disabled{filter:saturate(.55)!important;opacity:.72!important}
+body:has(main.farm-mode)>nav{
+ background:linear-gradient(180deg,#f5f6eafa,#e5edddf7)!important;
+ border-top:1px solid #fafbef!important;
+ box-shadow:0 -3px 16px #24472b29!important;
+}
+body:has(main.farm-mode)>nav button{color:#839282!important}
+body:has(main.farm-mode)>nav button.active{color:#557a54!important}
+body:has(main.farm-mode)>nav button span{filter:saturate(.65) brightness(.96)}
+main.farm-mode .farm-v3 .farm-hen.hen-a{
+ filter:drop-shadow(0 6px 4px #28422a48)!important;
+}
+main.farm-mode .farm-v3 .v3-windmill .v3-rotor{
+ background:transparent url('./assets/henova-rotor-v1.svg?v=2') center/contain no-repeat!important;
+ animation-duration:7.5s!important;
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode .farm-v3 .v3-windmill .v3-rotor{animation:none!important}
+}
+
+
+/* HENOVA PHOTOREAL PROPS V1: real transparent cutouts, not SVG illustrations */
+main.farm-mode #farm-scene.farm-v3{
+ background-color:#73ad43!important;
+ background-image:
+   url('./assets/henova-real-basket-and-hay-v1.svg?v=2'),
+   url('./assets/henova-game-scene-v1.svg?v=7')!important;
+ background-size:100% 100%,100% 100%!important;
+ background-position:center center,center center!important;
+ background-repeat:no-repeat,no-repeat!important;
+}
+
+/* HENOVA V11 — unified natural orchard lighting and properly grounded real props.
+   Only artwork presentation changes: balances, timers, collect, menu and tasks are unchanged. */
+main.farm-mode #farm-scene.farm-v3{
+ background-color:#608e3d!important;
+ background-image:
+   url('./assets/henova-real-basket-and-hay-v2.svg?v=1'),
+   url('./assets/henova-game-scene-v2.svg?v=1')!important;
+ background-size:100% 100%,100% 100%!important;
+ background-position:center center,center center!important;
+ background-repeat:no-repeat,no-repeat!important;
+ filter:none!important; /* avoid heavy GPU filtering and stray pixel artifacts */
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ filter:drop-shadow(2px 7px 4px #23412172)!important;
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img,
+ main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
+   animation:none!important;
+ }
+}
+
+/* HENOVA V12 — clean natural composition and readable, correctly scaled bird. */
+main.farm-mode #farm-scene.farm-v3{
+  background-color:#5f8f43!important;
+  image-rendering:auto!important;
+  transform:none!important;
+  backface-visibility:visible!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  width:clamp(80px,20vw,122px)!important;
+  z-index:12!important;
+  will-change:auto!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+  image-rendering:auto!important;
+  filter:drop-shadow(1px 4px 2px rgba(32,55,27,.25))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
+  will-change:auto!important;
+}
+@media(max-width:380px){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{width:clamp(78px,22vw,100px)!important}
+}
+
+/* HENOVA V6 ORIGINAL UNIFIED FARM.
+   Replaces mixed photographic props and oversized competing scenes.
+   No mining, claim, balance, navigation or reward logic is changed. */
+main.farm-mode #farm-scene.farm-v3,
+main.farm-mode #farm-scene.farm-v3:not(.realistic-ready){
+ background:#88bf56 url('./assets/henova-orchard-v6.svg?v=20261025-mill-clean-v22') center center/100% 100% no-repeat!important;
+ image-rendering:auto!important;
+ filter:none!important;
+ opacity:1!important;
+ transform:none!important;
+ backface-visibility:visible!important;
+ isolation:isolate!important;
+}
+main.farm-mode #farm-scene.farm-v3::before,
+main.farm-mode #farm-scene.farm-v3::after{display:none!important;content:none!important}
+main.farm-mode #farm-scene.farm-v3 .v3-windmill{
+ position:absolute!important;
+ display:block!important;
+ left:69%!important;
+ top:24.1%!important;
+ width:31%!important;
+ height:16.7%!important;
+ right:auto!important;
+ bottom:auto!important;
+ background:none!important;
+ border:0!important;
+ box-shadow:none!important;
+ filter:none!important;
+ transform:none!important;
+ animation:none!important;
+ z-index:4!important;
+ pointer-events:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{
+ display:block!important;
+ position:absolute!important;
+ inset:0!important;
+ width:100%!important;
+ height:100%!important;
+ background:transparent url('./assets/henova-rotor-v6.svg?v=20261025f') center/contain no-repeat!important;
+ transform-origin:50% 50%!important;
+ transform:rotate(0deg);
+ filter:drop-shadow(1px 3px 1px rgba(61,46,31,.3))!important;
+ animation:henovaRotorV6 9s linear infinite!important;
+ will-change:transform!important;
+ z-index:5!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor>*{display:none!important}
+@keyframes henovaRotorV6{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ display:block!important;
+ position:absolute!important;
+ width:clamp(66px,17.5vw,96px)!important;
+ left:49%!important;top:63%!important;
+ right:auto!important;bottom:auto!important;
+ height:auto!important;
+ opacity:1!important;
+ visibility:visible!important;
+ z-index:12!important;
+ filter:drop-shadow(2px 5px 2px #38593255)!important;
+ transition:none!important;
+ animation:henovaRoamV6 21s ease-in-out infinite!important;
+ will-change:auto!important;
+ pointer-events:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+ display:block!important;
+ width:100%!important;
+ height:auto!important;
+ opacity:1!important;
+ filter:none!important;
+ animation:henovaPeckV6 3.5s ease-in-out infinite!important;
+ transform-origin:79% 72%!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-b,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-c{display:none!important}
+@keyframes henovaRoamV6{
+ 0%,10%{left:49%;top:63%;transform:scaleX(-1)}
+ 26%{left:56%;top:64%;transform:scaleX(-1)}
+ 39%{left:60%;top:66%;transform:scaleX(-1)}
+ 47%{left:60%;top:66%;transform:scaleX(1)}
+ 68%{left:48%;top:64%;transform:scaleX(1)}
+ 84%{left:45%;top:62%;transform:scaleX(1)}
+ 91%,100%{left:49%;top:63%;transform:scaleX(-1)}
+}
+@keyframes henovaPeckV6{
+ 0%,20%,65%,100%{transform:rotate(0deg) translateY(0)}
+ 31%,42%{transform:rotate(9deg) translateY(4px)}
+ 36%,48%{transform:rotate(3deg) translateY(1px)}
+}
+/* Layout uses consistent bright surfaces instead of tinted glass + dark filters. */
+main.farm-mode>.farm-toolbar,
+main.farm-mode>header.farm-toolbar{
+ direction:ltr!important;
+ flex-direction:row!important;
+ top:calc(max(env(safe-area-inset-top),16px) + 57px)!important;
+ left:11px!important;right:11px!important;
+ z-index:21!important;
+ gap:7px!important;
+}
+main.farm-mode .farm-user{
+ flex:0 1 auto!important;
+ max-width:43%!important;
+ min-width:0!important;
+ padding:5px 9px 5px 5px!important;
+ height:49px!important;
+ border:2px solid #faf4d9!important;
+ border-radius:28px!important;
+ background:#f1f4e1ee!important;
+ box-shadow:0 3px 0 #67874388!important;
+ backdrop-filter:none!important;
+ direction:ltr!important;
+}
+main.farm-mode .farm-avatar{
+ width:41px!important;height:41px!important;min-width:41px!important;
+ border:2px solid #fffdf6!important;
+ box-shadow:0 2px 1px #51645366!important;
+}
+main.farm-mode .farm-user-copy strong{font-size:14px!important;line-height:1.2!important}
+main.farm-mode .farm-tools{gap:5px!important;margin-left:auto!important;flex:0 0 auto!important}
+main.farm-mode .farm-tools button{
+ width:39px!important;min-width:39px!important;
+ height:43px!important;
+ padding:3px!important;
+ border:2px solid #edf2d5!important;
+ border-radius:16px!important;
+ background:linear-gradient(#f5f9e2,#d2e8bb)!important;
+ box-shadow:0 3px 0 #6f9b52aa!important;
+ font-size:19px!important;
+}
+main.farm-mode .farm-tools #fullscreen-toggle{width:34px!important;min-width:34px!important;height:37px!important}
+main.farm-mode .stats{
+ direction:ltr!important;
+ flex-direction:row-reverse!important;
+ gap:8px!important;
+ top:calc(max(env(safe-area-inset-top),16px) + 116px)!important;
+ left:11px!important;right:11px!important;
+ z-index:20!important;
+}
+main.farm-mode .stats>div{
+ direction:ltr!important;
+ min-height:51px!important;
+ border-radius:24px!important;
+ border:2px solid #faf8da!important;
+ padding:6px 10px!important;
+ background:#f2f5ddec!important;
+ box-shadow:0 3px 0 #658d3f88!important;
+}
+main.farm-mode .stats b{font-size:23px!important;color:#473e25!important}
+main.farm-mode .stats small{font-size:10px!important;color:#6e6846!important}
+main.farm-mode .collect-dock{
+ direction:ltr!important;
+ left:10px!important;right:10px!important;
+ bottom:calc(73px + env(safe-area-inset-bottom))!important;
+ padding:6px!important;
+ gap:7px!important;
+ min-height:64px!important;
+ max-height:72px!important;
+ border:3px solid #fffce8!important;
+ border-radius:25px!important;
+ background:linear-gradient(#eff7d8f5,#dceabcf5)!important;
+ box-shadow:0 4px 0 #7e9b55bb!important;
+ backdrop-filter:none!important;
+}
+main.farm-mode .collect-info{
+ flex:0 0 38%!important;max-width:38%!important;
+ background:#f3f7e0f3!important;
+ border:1px solid #c6d9a2!important;
+ border-radius:18px!important;
+ padding:6px 4px!important;
+ color:#4e772e!important;
+}
+main.farm-mode .collect-info strong{font-size:clamp(11px,3vw,15px)!important}
+main.farm-mode .collect-info small{font-size:10px!important}
+main.farm-mode .collect-action button{
+ border-radius:19px!important;
+ min-height:48px!important;height:48px!important;
+ border:2px solid #fff0ba!important;
+ background:linear-gradient(#f7e3a8,#d8ad62)!important;
+ box-shadow:0 4px 0 #a57735!important;
+ color:#54402a!important;
+ font-size:clamp(15px,4vw,21px)!important;
+ font-weight:900!important;
+}
+main.farm-mode .collect-action button:disabled{opacity:.7!important;filter:none!important}
+body:has(main.farm-mode)>nav{
+ background:linear-gradient(#eef4df,#deebcd)!important;
+ border-top:2px solid #f8fae9!important;
+ height:70px!important;
+ box-shadow:0 -4px 10px #315a2844!important;
+}
+body:has(main.farm-mode)>nav button{color:#657f59!important;font-weight:750!important}
+body:has(main.farm-mode)>nav button.active{color:#2f692a!important}
+body:has(main.farm-mode)>nav button span{filter:none!important;font-size:20px!important}
+@media(max-width:380px){
+ main.farm-mode .farm-user{max-width:40%!important}
+ main.farm-mode .farm-tools button{width:35px!important;min-width:35px!important;height:40px!important}
+ main.farm-mode .farm-tools #fullscreen-toggle{width:29px!important;min-width:29px!important}
+ main.farm-mode .farm-user-copy strong{font-size:12px!important}
+ main.farm-mode .stats b{font-size:20px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .v3-windmill .v3-rotor{animation:none!important}
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;left:49%!important;top:63%!important;transform:none!important}
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{animation:none!important}
+}
+
+/* HENOVA V6.1 refinements: reference scale and scene balance. */
+main.farm-mode #farm-scene.farm-v3 .v3-windmill{
+ left:69%!important;
+ top:21.9%!important;
+ width:31%!important;
+ height:16.7%!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ top:52%!important;
+ left:48%!important;
+ width:clamp(75px,18vw,104px)!important;
+}
+@keyframes henovaRoamV6{
+ 0%,10%{left:48%;top:52%;transform:scaleX(-1)}
+ 26%{left:54%;top:53%;transform:scaleX(-1)}
+ 39%{left:58%;top:54%;transform:scaleX(-1)}
+ 47%{left:58%;top:54%;transform:scaleX(1)}
+ 68%{left:47%;top:52.5%;transform:scaleX(1)}
+ 84%{left:43%;top:51.5%;transform:scaleX(1)}
+ 91%,100%{left:48%;top:52%;transform:scaleX(-1)}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+ filter:drop-shadow(1px 3px 1px #355c304d)!important;
+}
+/* Preserve the original real game actions rather than painting fake buttons. */
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  top:52%!important;left:48%!important;
+ }
+}
+
+/* HENOVA V7 — walk to real illustrated feed trough, peck several times, return, repeat.
+   The older top/left !important properties remain anchors: transform animates
+   the entire bird so the movement is no longer cancelled by the CSS cascade. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  top:52%!important;
+  left:48%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:clamp(75px,18vw,104px)!important;
+  transform-origin:50% 85%!important;
+  animation:henovaHenFeederTripV7 18s linear infinite!important;
+  z-index:12!important;
+  pointer-events:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  transform-origin:76% 78%!important;
+  animation:henovaHenPeckV7 18s linear infinite!important;
+}
+@keyframes henovaHenFeederTripV7{
+  0%,8%{transform:translate3d(0,0,0) scaleX(1)}
+  12%{transform:translate3d(-.5vw,-2vh,0) scaleX(-1)}
+  18%{transform:translate3d(-1vw,-5vh,0) scaleX(-1)}
+  26%{transform:translate3d(-2vw,-10vh,0) scaleX(-1)}
+  36%,57%{transform:translate3d(-3vw,-14vh,0) scaleX(-1)}
+  62%{transform:translate3d(-3vw,-14vh,0) scaleX(1)}
+  71%{transform:translate3d(-2vw,-9vh,0) scaleX(1)}
+  80%{transform:translate3d(-1vw,-4vh,0) scaleX(1)}
+  88%,100%{transform:translate3d(0,0,0) scaleX(1)}
+}
+@keyframes henovaHenPeckV7{
+  0%,12%,18%,26%,34%,37%,55%,62%,71%,80%,88%,100%{transform:translateY(0) rotate(0deg)}
+  14%,21%,29%,76%,84%{transform:translateY(-3px) rotate(-2deg)}
+  39%,45%,51%{transform:translateY(7px) rotate(13deg)}
+  42%,48%,54%{transform:translateY(1px) rotate(2deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+    animation:none!important;
+    transform:translate3d(0,0,0)!important;
+  }
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+    animation:none!important;
+    transform:none!important;
+  }
+}
+
+/* HENOVA V8: move on independent CSS translate/scale properties.
+   Legacy !important transform:none had suppressed transform keyframe travel.
+   This cycle walks from the pond to the visible trough, pecks, and walks home. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  position:absolute!important;
+  top:58%!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:clamp(76px,18vw,103px)!important;
+  transform:none!important;
+  transform-origin:50% 88%!important;
+  animation:henovaFeederJourneyV8 18s linear infinite!important;
+  pointer-events:none!important;
+  z-index:14!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  transform:none!important;
+  transform-origin:78% 78%!important;
+  animation:henovaActualPeckV8 18s linear infinite!important;
+}
+@keyframes henovaFeederJourneyV8{
+  0%,7%   {translate:0 0;scale:1 1}
+  12%     {translate:-2vw -2vh;scale:-1 1}
+  21%     {translate:-5.5vw -6vh;scale:-1 1}
+  30%     {translate:-8vw -11vh;scale:-1 1}
+  37%     {translate:-11vw -14vh;scale:-1 1}
+  37.2%,59%{translate:-11vw -14vh;scale:1 1}
+  68%     {translate:-8vw -11vh;scale:1 1}
+  78%     {translate:-4vw -5vh;scale:1 1}
+  88%,100%{translate:0 0;scale:1 1}
+}
+@keyframes henovaActualPeckV8{
+  0%,10%,21%,30%,37%,38%,58%,59%,68%,78%,88%,100%{rotate:0deg;translate:0 0}
+  13%,25%,74%{rotate:-2deg;translate:0 -2px}
+  40%,46%,52%{rotate:14deg;translate:0 7px}
+  43%,49%,55%{rotate:2deg;translate:0 1px}
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+    animation:none!important;
+    translate:0 0!important;
+    scale:1!important;
+  }
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img{
+    animation:none!important;
+    rotate:0deg!important;
+    translate:0 0!important;
+  }
+}
+
+/* HENOVA V11: independent translation, discrete full-silhouette facing,
+   and one-shot tap bounce. No old transform:scaleX transition can squash the bird. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  display:block!important;
+  position:absolute!important;
+  left:54%!important;
+  top:58%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:clamp(78px,19vw,108px)!important;
+  height:auto!important;
+  overflow:visible!important;
+  transform:none!important;
+  scale:1 1!important;
+  translate:0 0;
+  animation:henovaHenJourneyV11 18s linear infinite!important;
+  cursor:pointer!important;
+  touch-action:manipulation!important;
+  pointer-events:auto!important;
+  z-index:30!important;
+  user-select:none!important;
+  -webkit-user-select:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  overflow:visible!important;
+  transform-origin:center center!important;
+  animation:henovaHenFacingV11 18s steps(1,end) infinite!important;
+  backface-visibility:visible!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
+  display:block!important;
+  transform-origin:71% 75%!important;
+  animation:henovaHenFeedV11 18s linear infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:none!important;
+  opacity:1!important;
+  transform:none!important;
+  scale:1!important;
+  animation:none!important;
+  pointer-events:none!important;
+  filter:drop-shadow(2px 5px 2px rgba(42,68,35,.3))!important;
+}
+@keyframes henovaHenJourneyV11{
+  0%,8%{translate:0 0}
+  16%{translate:-2.5vw -3vh}
+  26%{translate:-6vw -7vh}
+  37%,59%{translate:-10vw -12vh}
+  70%{translate:-7vw -8vh}
+  82%{translate:-3vw -3vh}
+  91%,100%{translate:0 0}
+}
+/* Discrete direction swap: never show a half-width chicken during its turn. */
+@keyframes henovaHenFacingV11{
+  0%,59.9%{transform:scaleX(-1)}
+  60%,100%{transform:scaleX(1)}
+}
+@keyframes henovaHenFeedV11{
+  0%,13%,20%,26%,36%,38%,58%,60%,70%,82%,91%,100%{transform:rotate(0deg) translateY(0)}
+  16%,23%,76%{transform:rotate(-2deg) translateY(-3px)}
+  40%,46%,52%{transform:rotate(13deg) translateY(6px)}
+  43%,49%,55%{transform:rotate(1deg) translateY(1px)}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action.hen-tap-v11{
+  animation:henovaHenTapV11 .48s ease-out 1!important;
+}
+@keyframes henovaHenTapV11{
+  0%,100%{transform:translateY(0) rotate(0deg)}
+  29%{transform:translateY(-9px) rotate(-6deg)}
+  62%{transform:translateY(2px) rotate(5deg)}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a:focus-visible{
+  outline:3px solid #ffe092!important;
+  outline-offset:4px!important;
+  border-radius:35px!important;
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+    animation:none!important;translate:0 0!important;
+  }
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{
+    animation:none!important;transform:scaleX(1)!important;
+  }
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
+    animation:none!important;
+  }
+}
+
+/* HENOVA V16 — unified illustrated art direction.
+   The illustrated timber feeder is already built into henova-game-scene-v1.svg
+   at the hen's feeding stop. Do not paint or load a second feeder on top. */
+main.farm-mode #farm-scene.farm-v3 .v3-feeder,
+main.farm-mode #farm-scene.farm-v3 .v3-hay,
+main.farm-mode #farm-scene.farm-v3 .v3-hay-bales{
+  display:none!important;
+}
+/* Only the hay was removed from the base illustration: restore the matching
+   local illustrated hay asset, positioned on the grass beside the path. */
+main.farm-mode #farm-scene.farm-v3 .henova-cartoon-hay{
+  display:block!important;
+  position:absolute!important;
+  top:68%!important;
+  left:2%!important;
+  width:27%!important;
+  height:11%!important;
+  z-index:6!important;
+  background:transparent url('./assets/henova-hay-v1.svg?v=20261025-tidy') center center/contain no-repeat!important;
+  pointer-events:none!important;
+  filter:drop-shadow(2px 5px 2px rgba(40,72,30,.26))!important;
+}
+@media(max-width:380px){
+  main.farm-mode #farm-scene.farm-v3 .henova-cartoon-hay{
+    left:1%!important;
+    width:29%!important;
+  }
+}
+
+/* HENOVA V18 — remove the turquoise Android/Telegram touch selection rectangle
+   around the interactive hen without disabling the cluck, animation or keyboard access. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *::before,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *::after {
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  -webkit-user-select:none!important;
+  user-select:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a img {
+  -webkit-user-drag:none!important;
+  user-drag:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a::selection,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *::selection {
+  background:transparent!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a:focus:not(:focus-visible) {
+  outline:none!important;
+}
+/* Do not suppress :focus-visible: keyboard users keep the gold focus ring. */
+
+/* HENOVA V19: make the existing illustrated wooden trough visible.
+   The current orchard background has no feeder; previous CSS hid the DOM prop.
+   Preserve chicken movement, egg basket, pond and hay positions. */
+main.farm-mode #farm-scene.farm-v3 .v3-feeder{
+  display:block!important;
+  position:absolute!important;
+  left:40%!important;
+  top:46.5%!important;
+  width:22%!important;
+  height:9%!important;
+  background:transparent url('./assets/henova-feeder-v2.svg?v=19') center center/contain no-repeat!important;
+  border:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+  filter:drop-shadow(1px 4px 2px rgba(45,74,35,.24))!important;
+  z-index:7!important;
+  pointer-events:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .v3-feeder>span{display:none!important}
+
+/* HENOVA V21: dry-land route. The hen starts LEFT of the pond, walks uphill
+   first on the grass, then across to the trough, pecks, and returns on the same
+   safe path. All coordinates derive from the currently rendered feeder. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+  left:42%!important;
+  top:58%!important;
+  animation:henovaHenDryLandRouteV21 18s linear infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{
+  animation:henovaHenFacingFeederV20 18s steps(1,end) infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
+  transform-origin:71% 75%!important;
+  animation:henovaHenEatFromFeederV20 18s linear infinite!important;
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action.hen-tap-v11{
+  animation:henovaHenTapV11 .48s ease-out 1!important;
+}
+@keyframes henovaHenDryLandRouteV21{
+  0%,8%{translate:0 0}
+  17%{translate:var(--hen-safe-x,0px) var(--hen-safe-y,-70px)}
+  28%{translate:var(--hen-approach-x,8px) var(--hen-approach-y,-120px)}
+  36%,62%{translate:var(--hen-feed-x,60px) var(--hen-feed-y,-140px)}
+  74%{translate:var(--hen-approach-x,8px) var(--hen-approach-y,-120px)}
+  85%{translate:var(--hen-safe-x,0px) var(--hen-safe-y,-70px)}
+  93%,100%{translate:0 0}
+}
+/* Swap direction instantly so the hen's silhouette never becomes squashed. */
+@keyframes henovaHenFacingFeederV20{
+  0%,62.9%{transform:scaleX(-1)}
+  63%,92.9%{transform:scaleX(1)}
+  93%,100%{transform:scaleX(-1)}
+}
+@keyframes henovaHenEatFromFeederV20{
+  0%,8%,27%,36%,42%,48%,54%,60%,62%,73%,84%,93%,100%{
+    transform:translateY(0) rotate(0deg)
+  }
+  17%,25%,76%,87%{transform:translateY(-2px) rotate(-2deg)}
+  39%,45%,51%,57%{transform:translateY(8px) rotate(25deg)}
+}
+/* No floating grain or food particles during the pecking animation. */
+main.farm-mode #farm-scene.farm-v3 .v3-feeder::after{
+  content:none!important;
+  display:none!important;
+  animation:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing,
+  main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{
+    animation:none!important;
+  }
+}
+
+/* HENOVA V23 — restore permanent five-button bottom navigation.
+   The collect bar has no outer background, but stays ABOVE the bottom buttons. */
+body:has(main.farm-mode)>nav#nav{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-around!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:28!important;
+}
+main.farm-mode .collect-dock{
+  position:absolute!important;
+  left:clamp(10px,3vw,20px)!important;
+  right:clamp(10px,3vw,20px)!important;
+  bottom:calc(max(env(safe-area-inset-bottom),0px) + 85px)!important;
+  z-index:24!important;
+  display:flex!important;
+  align-items:stretch!important;
+  gap:10px!important;
+  min-height:0!important;
+  max-height:none!important;
+  height:auto!important;
+  margin:0!important;
+  padding:0!important;
+  background:transparent!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+main.farm-mode .collect-dock::before,
+main.farm-mode .collect-dock::after{display:none!important;content:none!important}
+main.farm-mode .collect-info{
+  display:flex!important;
+  flex:0 0 38%!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:0!important;
+  min-height:65px!important;
+  padding:7px 5px!important;
+  margin:0!important;
+  border-radius:20px!important;
+  border:2px solid #c6d7a6!important;
+  background:#edf4dcef!important;
+  box-shadow:0 3px 6px rgba(38,65,30,.20)!important;
+  text-align:center!important;
+}
+main.farm-mode .collect-info strong{
+  font-size:clamp(11px,3.5vw,16px)!important;
+  line-height:1.3!important;
+  white-space:normal!important;
+}
+main.farm-mode .collect-info small{
+  font-size:clamp(9px,2.9vw,12px)!important;
+  line-height:1.25!important;
+}
+main.farm-mode .collect-action{
+  display:flex!important;
+  flex:1 1 0!important;
+  min-width:0!important;
+  align-items:stretch!important;
+}
+main.farm-mode .collect-action button{
+  display:block!important;
+  width:100%!important;
+  height:65px!important;
+  min-height:65px!important;
+  padding:8px!important;
+  margin:0!important;
+  border-radius:21px!important;
+  border:2px solid #ffecc0!important;
+  background:linear-gradient(#ffe69b,#edb955)!important;
+  color:#65451f!important;
+  box-shadow:0 4px #b17b36,0 6px 9px rgba(53,70,30,.2)!important;
+  font-size:clamp(16px,4.6vw,22px)!important;
+}
+main.farm-mode .collect-meter{display:none!important}
+@media(max-height:680px){
+  main.farm-mode .collect-dock{
+    bottom:calc(max(env(safe-area-inset-bottom),0px) + 78px)!important;
+  }
+  main.farm-mode .collect-action button,
+  main.farm-mode .collect-info{
+    min-height:57px!important;
+    height:57px!important;
+  }
+}
+
+/* Friends-only styles: match the bright invite design; no farm/navigation changes. */
+.hv-friends-hero{text-align:center;background:linear-gradient(180deg,#4ab1f3,#92d5f8 63%,#fff8e5);border-radius:24px 24px 12px 12px;padding:18px 8px 0;margin:12px 0 10px;overflow:hidden}
+.hv-friends-hero h1{color:#fff;text-shadow:1px 3px #27506b;font-size:26px;line-height:1.25;margin:0}
+.hv-friends-hero p{font-size:12px;color:#244857;margin:3px 0 0}
+.hv-friends-icons{display:flex;justify-content:space-around;align-items:center;font-size:68px;height:152px;line-height:1}
+.hv-friends-icons span:nth-child(2){font-size:83px}
+.hv-friends-reward{display:flex;align-items:center;gap:13px;margin-top:-3px;padding:17px 16px;background:#fffef5;border:1px solid #e2e9ce;border-radius:25px}
+.hv-friends-reward>span{font-size:43px}.hv-friends-reward b{font-size:17px;color:#506646}
+.hv-friends-reward p{font-size:12px;color:#647853;line-height:1.4;margin:5px 0}
+.hv-friends-link{background:linear-gradient(135deg,#e9f5df,#e1eed4);border-radius:24px;margin-top:13px;padding:18px 17px}
+.hv-friends-link>small{color:#80957c;font-size:13px}.hv-friends-linkrow{display:flex;align-items:center;gap:10px;margin-top:12px}
+.hv-friends-url{min-width:0;flex:1;overflow-wrap:anywhere;font-size:12px;color:#2f472b}
+.hv-friends-linkrow button{min-width:52px;height:52px;border:0;border-radius:16px;background:linear-gradient(#9cdc65,#55ad35);color:white;font-size:26px}
+.hv-friends-benefits,.hv-friends-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:13px}
+.hv-friends-benefits>div,.hv-friends-stats>div{min-width:0;background:linear-gradient(150deg,#e7f4df,#f9f9e9);border:1px solid white;border-radius:21px;padding:15px 11px;display:flex;flex-direction:column;gap:5px}
+.hv-friends-benefits strong,.hv-friends-stats strong{font-size:19px;color:#253e23}
+.hv-friends-benefits small,.hv-friends-stats small{font-size:11px;color:#7b8c74;line-height:1.35}
+.hv-friends-share{width:100%;margin-top:17px;border:0;border-radius:17px;background:linear-gradient(#ffdb56,#fbb226);color:#513918;font-size:18px;font-weight:900;padding:16px 9px;box-shadow:0 5px #d99720}
+.hv-friends-heading{display:flex;align-items:center;justify-content:space-between;margin:24px 4px 3px;font-size:21px}
+.hv-friends-heading span{background:#6cc449;color:white;border-radius:20px;padding:5px 17px;font-size:13px}
+.hv-friends-empty{text-align:center;padding:32px 10px 20px;color:#627956}
+.hv-friends-empty>span{display:block;font-size:85px;margin-bottom:10px}
+.hv-friends-empty strong{display:block;font-size:17px}
+.hv-friends-empty p{font-size:12px;line-height:1.5;color:#84917d}
+
+/* HENOVA V16: truly roaming colored hens; separate the travelling body, facing,
+   and peck so the bird never shrinks while turning. Prevent mobile WebView highlights. */
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
+ position:absolute!important;
+ width:clamp(36px,7.8vw,51px)!important;
+ height:auto!important;
+ display:block!important;
+ overflow:visible!important;
+ z-index:11!important;
+ pointer-events:auto!important;
+ cursor:pointer!important;
+ touch-action:manipulation!important;
+ user-select:none!important;
+ -webkit-user-select:none!important;
+ -webkit-touch-callout:none!important;
+ -webkit-tap-highlight-color:transparent!important;
+ outline:none!important;
+ background:none!important;
+ box-shadow:none!important;
+ transform-origin:center bottom!important;
+ animation:henovaOwnedWalkV16 var(--wander-duration,16s) linear infinite!important;
+ animation-delay:var(--wander-delay,-2s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *,
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *::before,
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *::after{
+ -webkit-tap-highlight-color:transparent!important;
+ -webkit-touch-callout:none!important;
+ user-select:none!important;
+ -webkit-user-select:none!important;
+ -webkit-user-drag:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen::selection,
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *::selection{
+ background:transparent!important;
+ color:inherit!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
+ width:100%!important;
+ display:block!important;
+ transform-origin:50% 60%!important;
+ animation:henovaOwnedFacingV16 var(--wander-duration,16s) steps(1,end) infinite!important;
+ animation-delay:var(--wander-delay,-2s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+ display:block!important;
+ width:100%!important;
+ transform-origin:70% 75%!important;
+ animation:henovaOwnedPeckV16 var(--wander-duration,16s) ease-in-out infinite!important;
+ animation-delay:var(--wander-delay,-2s)!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
+ width:100%!important;
+ height:auto!important;
+ display:block!important;
+ -webkit-user-drag:none!important;
+ pointer-events:none!important;
+ filter:drop-shadow(1px 3px 2px rgba(37,62,29,.3))!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action.hen-tap-v11{
+ animation:henovaHenTapV11 .48s ease-out 1!important;
+ animation-delay:0s!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:focus:not(:focus-visible){
+ outline:none!important;
+ box-shadow:none!important;
+ background:transparent!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:focus-visible{
+ outline:2px solid #ffe092!important;
+ outline-offset:3px!important;
+ border-radius:26px;
+}
+/* Pause, walk across the nearby grass, stop to feed, then walk home. */
+@keyframes henovaOwnedWalkV16{
+ 0%,8%{transform:translate(0,0)}
+ 19%{transform:translate(var(--wander-mid-x,10px),var(--wander-mid-y,-2px))}
+ 35%,60%{transform:translate(var(--wander-x,24px),var(--wander-y,-5px))}
+ 76%{transform:translate(var(--wander-mid-x,10px),var(--wander-mid-y,-2px))}
+ 89%,100%{transform:translate(0,0)}
+}
+/* Steps(1,end) switches the entire full silhouette instantly, with no thin frame. */
+@keyframes henovaOwnedFacingV16{
+ 0%,59.9%{transform:scaleX(var(--wander-facing,1))}
+ 60%,100%{transform:scaleX(var(--wander-home-facing,-1))}
+}
+@keyframes henovaOwnedPeckV16{
+ 0%,9%,19%,35%,37%,60%,62%,76%,89%,100%{transform:rotate(0deg) translateY(0)}
+ 12%,25%,81%{transform:rotate(-2deg) translateY(-2px)}
+ 41%,48%,55%{transform:rotate(12deg) translateY(5px)}
+ 44%,51%,58%{transform:rotate(1deg) translateY(0)}
+}
+.hv-breed-face img{width:62px;height:57px;object-fit:contain;max-width:100%;}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing,
+ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+   animation:none!important;
+   transform:none!important;
+ }
+}
+/* Keep a harmless touch response on the main hen as well. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a *{
+ -webkit-tap-highlight-color:transparent!important;
+ -webkit-touch-callout:none!important;
+ -webkit-user-select:none!important;
+ user-select:none!important;
+}
+
+/* HENOVA ranked miners: no coins from admin tests influence leaderboard. */
+.hv-leaderboard-overlay{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(12,30,17,.70);padding:22px 12px;padding-top:calc(22px + env(safe-area-inset-top));padding-bottom:calc(22px + env(safe-area-inset-bottom));backdrop-filter:blur(5px)}
+.hv-leaderboard-overlay.hidden{display:none!important}
+.hv-leaderboard-sheet{width:min(100%,460px);max-height:88vh;overflow-y:auto;overscroll-behavior:contain;border-radius:26px;border:3px solid #f7e9b5;background:linear-gradient(165deg,#f7fbe9,#e3edce 80%);box-shadow:0 15px 44px #0d251a85;padding:15px 13px 18px;color:#2c3c23}
+.hv-leaderboard-top{display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #cbdaaa;padding:4px 5px 12px}
+.hv-rank-overline{font-size:11px;font-weight:800;color:#7a904e;letter-spacing:2px}
+.hv-leaderboard-top h2{margin:3px 0 0;font-size:22px;color:#47572d}
+.hv-leaderboard-close{border:0;background:#d9e6c8;color:#40522f;border-radius:15px;width:40px;height:40px;flex-shrink:0;font-weight:900;font-size:18px;cursor:pointer}
+.hv-rank-description{font-size:12px;color:#778760;text-align:center;padding:11px 5px 7px}
+.hv-rank-list{display:flex;flex-direction:column;gap:7px;padding:0 2px;margin-top:3px}
+.hv-rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:9px;padding:10px 11px;background:#fffdf1;border:1px solid #d7e5bf;border-radius:16px;box-shadow:0 2px 0 #acc88d55}
+.hv-rank-row.hv-rank-me{border:2px solid #dba43d;background:#fff7da}
+.hv-rank-position{text-align:center;font-weight:900;font-size:18px;color:#778d52}
+.hv-rank-row:nth-child(1) .hv-rank-position{color:#d9a22c;font-size:23px}
+.hv-rank-row:nth-child(2) .hv-rank-position{color:#889495;font-size:21px}
+.hv-rank-row:nth-child(3) .hv-rank-position{color:#ae794b;font-size:21px}
+.hv-rank-name{font-weight:850;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hv-rank-meta{font-size:11px;color:#8a9a79;margin-top:2px}
+.hv-rank-score{font-variant-numeric:tabular-nums;color:#587038;font-size:14px;font-weight:900;white-space:nowrap}
+.hv-rank-self-title{margin:14px 3px 7px;color:#5c7342;font-size:13px;font-weight:850}
+.hv-rank-empty,.hv-rank-error{text-align:center;padding:25px 10px;color:#7c8d68;font-weight:700}
+@media(max-width:365px){.hv-rank-row{grid-template-columns:32px minmax(0,1fr) auto;gap:5px;padding:9px 7px}.hv-rank-score{font-size:12px}}
+
+
+/* HENOVA wallet: mobile-first, balanced with the farm cards */
+.henova-wallet-page{width:100%;max-width:100%;min-width:0;direction:inherit}
+.henova-wallet-page .henova-wallet-heading{font-size:23px;margin:16px 0 18px;display:flex;align-items:center;gap:9px}
+.henova-wallet-page .henova-wallet-balance{background:linear-gradient(145deg,#28744e,#175c42);border-radius:26px;color:#fff;padding:24px 16px;text-align:center;box-shadow:0 9px 22px #245c3d23}
+.henova-wallet-page .henova-wallet-balance small{color:#e2f2de;font-size:13px}
+.henova-wallet-page .henova-wallet-balance strong{display:block;font-size:38px;margin:9px 0;letter-spacing:.5px}
+.henova-wallet-page .henova-wallet-balance p{margin:0;color:#c5e8cd;font-size:12px}
+.henova-wallet-page .henova-wallet-card{background:#fff;border:1px solid #dbe9d5;border-radius:23px;padding:20px 16px;margin:16px 0;box-shadow:0 4px 13px #254b2710;min-width:0}
+.henova-wallet-page .henova-wallet-card h3{margin:0 0 12px;font-size:17px;color:#2c5b3e}
+.henova-wallet-page .henova-wallet-info{background:#f0f8e9;border:1px solid #deebd5;border-radius:13px;padding:11px 12px;color:#597453;font-size:12px;line-height:1.75;margin:10px 0 16px}
+.henova-wallet-page .henova-wallet-label{display:block;font-size:12px;color:#537b59;font-weight:800;margin-bottom:8px}
+.henova-wallet-page .henova-wallet-input{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;direction:ltr;text-align:left;padding:14px 12px;font-size:13px;font-weight:600;color:#254d38;letter-spacing:.1px;border:1.5px solid #caddbf;background:#fbfdf9;border-radius:13px;outline:none}
+.henova-wallet-page .henova-wallet-input:focus{border-color:#60ae6b;box-shadow:0 0 0 3px #6abd7430}
+.henova-wallet-page .henova-wallet-save{display:block;width:100%;margin-top:12px;padding:13px 14px;background:linear-gradient(#ffe090,#efba52);border:0;border-radius:14px;box-shadow:0 3px #c9943f;color:#624219;font-weight:900;font-size:14px}
+.henova-wallet-page .henova-wallet-note{font-size:11px;color:#65836a;line-height:1.6;margin:10px 0 0;overflow-wrap:anywhere}
+.henova-wallet-page .henova-wallet-history{font-size:12px;color:#648568;padding:9px 0 15px;line-height:1.7;overflow-wrap:anywhere}
+.henova-wallet-page .henova-wallet-disabled{width:100%;display:block;border:0;border-radius:15px;padding:14px;background:#f8df9a;color:#8a7a53;font-size:14px;font-weight:800;opacity:.7}
+
+
+.hv-simple-withdraw .henova-wallet-heading{text-align:center;margin-bottom:4px}.hv-withdraw-subtitle{text-align:center;color:#68866d;margin:0 0 15px}.hv-simple-withdraw .hv-withdraw-summary{background:linear-gradient(145deg,#35a8eb,#1e67b5);color:white;border-radius:24px;padding:24px;box-shadow:0 10px 25px #28599133}.hv-withdraw-summary small{display:block;opacity:.9}.hv-withdraw-summary strong{display:block;font-size:42px}.hv-withdraw-summary p{font-size:19px;margin:7px 0 13px}.hv-withdraw-pill{display:inline-block;border-radius:30px;padding:8px 14px;background:#ffffff28;border:1px solid #ffffff77}.hv-simple-withdraw .henova-wallet-card{margin-top:18px}.hv-amount-line{display:flex;align-items:center;gap:10px;border:2px solid #b4d4b0;border-radius:16px;padding:10px;background:#f7fbf5}.hv-amount-line input{min-width:0;width:100%;font-size:25px;font-weight:800;border:0;outline:0;background:transparent;color:#2d5334}.hv-amount-line strong{font-size:13px;color:#246294;white-space:nowrap}.hv-withdraw-percent{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.hv-withdraw-percent button{border:1px solid #b5d9bb;border-radius:13px;padding:10px 2px;color:#326a90;background:#e7f1dc}.hv-withdraw-total{display:flex;justify-content:space-between;gap:8px;border-radius:15px;background:#edf5e6;padding:16px;margin:14px 0;font-size:16px}.hv-withdraw-total strong{color:#256b9a}.hv-withdraw-form small{color:#6b876e}.hv-withdraw-form .henova-wallet-save:disabled{opacity:.5;box-shadow:none}.hv-withdraw-advanced summary{cursor:pointer;font-weight:800;color:#376b4b}.hv-withdraw-advanced[open] summary{margin-bottom:15px}
+body.henova-payout-admin-active main>.farm-toolbar,body.henova-payout-admin-active main>.stats,body.henova-payout-admin-active #nav{display:none!important}
+body.henova-payout-admin-active main{background:#f4faed!important;padding:12px 14px 36px!important;min-height:100vh!important;overflow:visible!important}
+body.henova-payout-admin-active #view{display:block!important;position:static!important;transform:none!important;inset:auto!important;width:100%!important;max-width:560px!important;margin:auto!important;overflow:visible!important;z-index:auto!important}
+body.henova-payout-admin-active .henova-admin-payout-page{max-width:560px!important;margin:auto!important;padding:12px 0 60px!important}
+.henova-admin-back{background:#e7f1de;border:1px solid #c4dcc0;border-radius:12px;padding:9px 16px;color:#2f6845;font-weight:800;margin-bottom:13px}
+/* Dedicated payout approvals screen: no farm toolbar, balances, or floating artwork. */
+main:has(.henova-admin-payout-page)>.farm-toolbar,
+main:has(.henova-admin-payout-page)>.stats{display:none!important}
+main:has(.henova-admin-payout-page){padding-top:10px!important;overflow-x:hidden!important}
+main:has(.henova-admin-payout-page) #view{width:100%;position:relative!important;inset:auto!important;transform:none!important;margin:0!important;padding:0!important;overflow:visible!important}
+.henova-admin-payout-page{padding:8px 0 135px!important;direction:ltr!important}
+.henova-admin-list{display:flex!important;flex-direction:column!important;gap:14px!important}
+.henova-admin-list>.henova-wallet-card{order:0;box-shadow:0 4px 14px #1d5c2b10}
+.henova-admin-head{position:relative!important;top:auto!important}
+.henova-admin-tests{order:10;margin-top:22px;border:1px solid #cfe2c8;border-radius:18px;background:#f7faf2;padding:12px}
+.henova-admin-tests>summary{font-size:13px;color:#436b51;font-weight:800;cursor:pointer;padding:6px}
+.henova-admin-tests>.henova-wallet-card{margin-top:12px!important}
+.henova-admin-list button{min-height:42px;border:0;border-radius:12px;padding:10px 12px;white-space:normal}
+.henova-admin-list input{width:100%;max-width:100%;box-sizing:border-box}
+
+/* Administrative payout review: isolated from farm header and artwork. */
+main:has(.henova-admin-payout-page){background:linear-gradient(180deg,#f1f9e9,#fcfff8)!important;min-height:100vh}
+main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-page) #view{position:relative;z-index:2}
+.henova-admin-payout-page{direction:ltr;position:relative;z-index:4;isolation:isolate;width:100%;max-width:520px;margin:0 auto;padding:12px 0 100px;color:#285039;min-height:60vh;box-sizing:border-box}
+.henova-admin-head{display:block;background:#fff;border:1px solid #deedd9;border-radius:22px;padding:20px 16px;margin:0 0 15px;box-shadow:0 5px 20px #21542b12}
+.henova-admin-head h2{font-size:20px;line-height:1.35;color:#2e6943;white-space:normal;overflow-wrap:anywhere;margin:0 0 12px}
+.henova-admin-head p{font-size:12px;line-height:1.6;color:#6a846f;overflow-wrap:anywhere;margin:0}
+.henova-admin-list{display:grid;gap:12px}
+.henova-admin-list .henova-wallet-card{display:block;width:100%;min-width:0;margin:0;border-radius:18px;background:white;border:1px solid #deedd9;padding:16px;overflow-wrap:anywhere}
+.henova-admin-list .henova-wallet-card h3{font-size:16px}
+.henova-admin-list .henova-wallet-card p{font-size:13px;line-height:1.7}
+.henova-admin-empty{padding:30px 14px;text-align:center;border-radius:20px;background:white;border:1px dashed #b9d9b7;font-weight:800;color:#507e58}
+.henova-admin-empty small{display:block;font-weight:500;margin-top:12px;color:#77957b;line-height:1.6}
+.henova-admin-refresh{display:block;margin:18px auto 0;width:100%;padding:14px;background:#f8cf77;color:#654717;border:0;border-radius:15px;font-size:14px;font-weight:800}
+
+
+
+/* HENOVA sponsored task: show only the task name above the ad unit. */
+.hv-sponsored-task-vertical > div:first-child > img{display:none!important}
+.hv-sponsored-task-vertical > div:first-child .hv-sponsored-copy p,
+.hv-sponsored-task-vertical > div:first-child .hv-sponsored-copy small{display:none!important}
+.hv-sponsored-task-vertical > div:first-child{gap:0!important}
+.hv-sponsored-task-vertical > div:first-child .hv-sponsored-copy{width:100%;}
+
+
+/* HENOVA daily login compact layout */
+.henova-daily-card{padding:12px!important;margin:12px 2px!important;border-radius:20px!important}
+.henova-daily-card .henova-daily-head h3{font-size:16px!important;line-height:1.2;margin:0!important}
+.henova-daily-card .henova-daily-head p{font-size:13px!important;margin:3px 0 0!important;line-height:1.25}
+.henova-daily-card .henova-daily-head button{width:44px!important;height:44px!important;min-width:44px!important;padding:0!important;border-radius:13px!important;font-size:16px!important;display:grid!important;place-items:center!important;flex:0 0 44px!important}
+.henova-daily-seven-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin-top:12px!important}
+.henova-daily-seven-grid>div{min-height:78px!important;height:78px!important;padding:6px 2px!important;gap:4px!important;border-radius:13px!important}
+.henova-daily-seven-grid>div strong{font-size:11px!important}
+.henova-daily-seven-grid>div span{font-size:18px!important}
+.henova-daily-seven-grid>div b{font-size:15px!important}
+@media(max-width:380px){.henova-daily-seven-grid{gap:6px!important}.henova-daily-seven-grid>div{height:72px!important;min-height:72px!important}}
+
+
+/* Keep AdsGram mounted off-screen until the user taps the separate Promo Code Claim button. */
+#henova-promo-sponsored-wrap{position:fixed!important;left:-10000px!important;top:0!important;width:1px!important;height:1px!important;max-width:1px!important;max-height:1px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important;z-index:-1!important;display:block!important;visibility:visible!important}
+#henova-adsgram-task{--adsgram-task-button-width:112px!important;--adsgram-task-font-size:15px!important}
+#henova-adsgram-task .hv-adsgram-yellow-button{display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;min-width:112px!important;min-height:44px!important;padding:10px 14px!important;background:linear-gradient(#93db59,#52a82d)!important;background-color:#52a82d!important;color:#fff!important;border:0!important;border-radius:17px!important;font-size:14px!important;font-weight:800!important;line-height:1.2!important;text-align:center!important;white-space:normal!important;box-shadow:0 2px 0 rgba(38,105,26,.25)!important}
+
+
+
+/* Temporary promo hen: server-timed, one per redeemed code */
+.hv-promo-hen-card{position:absolute;z-index:17;top:calc(env(safe-area-inset-top) + 178px);left:12px;display:flex;align-items:center;gap:9px;width:min(190px,54vw);padding:9px 11px;border:1px solid #f6e4a4;border-radius:15px;background:#fff8dfed;box-shadow:0 5px 14px #28491f42;color:#3b5c32;backdrop-filter:blur(7px);pointer-events:none}
+.hv-promo-hen-icon{width:34px;height:34px;object-fit:contain;flex:0 0 34px}.hv-promo-hen-card div{display:flex;flex-direction:column;min-width:0;gap:2px}
+.hv-promo-hen-card b{font-size:12px}.hv-promo-hen-card small{font-size:9px;white-space:nowrap}.hv-promo-hen-card strong{font-size:15px;font-variant-numeric:tabular-nums;color:#b06c20}
+
+/* HENOVA premium rewarded-video task card */
+#view .hv-video-task-card{position:relative!important;overflow:hidden!important;gap:14px!important;padding:16px!important;border:1px solid #d9c47b!important;border-radius:22px!important;background:linear-gradient(135deg,#fffef7 0%,#f0f7e9 58%,#e6f0dc 100%)!important;box-shadow:0 8px 22px rgba(42,82,43,.11)!important;color:#244b30!important}
+#view .hv-video-task-card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#e9c35b,#77a957)}
+#view .hv-video-task-card .hv-task-top{gap:12px!important;align-items:center!important}
+#view .hv-video-task-card .hv-video-task-icon{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 58px;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#315f3b,#193d29);border:1px solid #c9ad57;box-shadow:inset 0 1px 0 #ffffff35,0 5px 12px #244b3026;color:#f7d878;font-size:25px}
+#view .hv-video-task-card .hv-video-task-icon span{display:grid;place-items:center;width:31px;height:31px;padding-left:3px;border:1.5px solid #f7d878;border-radius:50%;background:#ffffff12}
+#view .hv-video-task-card .hv-video-task-icon i{position:absolute;right:5px;top:3px;font-size:13px;font-style:normal;color:#fff0b2}
+#view .hv-video-task-card .hv-sponsored-copy{flex:1;min-width:0}
+#view .hv-video-task-card .hv-video-task-kicker{margin:0 0 4px;color:#9a7628;font-size:9px;font-weight:900;letter-spacing:1.35px;line-height:1.2}
+#view .hv-video-task-card .hv-sponsored-copy h3{margin:0 0 5px!important;color:#244b30!important;font-size:16px!important;font-weight:900!important;line-height:1.25!important}
+#view .hv-video-task-card .hv-sponsored-copy p{margin:0!important;color:#607b60!important;font-size:12px!important;line-height:1.35!important}
+#view .hv-video-task-card .hv-video-task-reward{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 67px;min-width:67px;padding:8px 5px;border:1px solid #e3cd82;border-radius:14px;background:linear-gradient(145deg,#fff8d9,#f5e7ae);box-shadow:inset 0 1px 0 #fff}
+#view .hv-video-task-card .hv-video-task-reward strong{color:#73561b;font-size:19px;font-weight:1000;line-height:1}
+#view .hv-video-task-card .hv-video-task-reward small{margin-top:4px;color:#94732b;font-size:8px;font-weight:900;letter-spacing:1px;line-height:1}
+#view .hv-video-task-card .hv-video-task-action{width:100%!important;justify-content:stretch!important}
+#view .hv-video-task-card .hv-video-task-action button{width:100%!important;max-width:none!important;min-height:47px!important;border:1px solid #d5b44e!important;border-radius:15px!important;background:linear-gradient(180deg,#ffdc78,#edbd49)!important;color:#3c3014!important;font-size:14px!important;font-weight:900!important;box-shadow:0 4px 0 #c69b37,0 7px 13px #785a1b20!important}
+#view .hv-video-task-card .hv-video-task-action button:disabled{opacity:.68;box-shadow:none!important}
+@media(max-width:390px){#view .hv-video-task-card{padding:13px!important}#view .hv-video-task-card .hv-video-task-icon{width:50px;height:50px;flex-basis:50px;border-radius:15px}#view .hv-video-task-card .hv-video-task-reward{flex-basis:59px;min-width:59px}#view .hv-video-task-card .hv-video-task-reward strong{font-size:17px}}
+</style><style id="henova-tasks-layout-fix">
+/* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
+main.hv-tasks-mode .stats{display:none!important}
+main.hv-tasks-mode #view{padding-top:2px}
+main.hv-tasks-mode #view>.title{margin:12px 6px 16px;font-size:27px}
+main.hv-tasks-mode #view>.item{display:flex;align-items:center;gap:12px;padding:14px;margin:10px 0;border-radius:20px;min-height:96px;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
+main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:56px!important;height:56px!important;flex:0 0 56px!important;object-fit:cover}
+main.hv-tasks-mode #view>.item .grow{min-width:0;flex:1 1 0;overflow-wrap:anywhere}
+main.hv-tasks-mode #view>.item h3{font-size:17px;line-height:1.25;margin:0 0 5px}
+main.hv-tasks-mode #view>.item p{font-size:14px;line-height:1.35;margin:0 0 4px}
+main.hv-tasks-mode #view>.item small{font-size:12px;line-height:1.35}
+main.hv-tasks-mode #view>.item button{min-width:0;max-width:132px;flex-shrink:0;font-size:13px;padding:11px 10px;line-height:1.2;border-radius:13px;white-space:normal;overflow-wrap:break-word}
+main.hv-tasks-mode #view>.item>div[style*="display:grid"]{flex:0 0 116px!important;width:116px;min-width:0}
+main.hv-tasks-mode #view>.item>div[style*="display:grid"] button{width:100%}
+main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:11px!important;overflow:visible}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-task-top{display:flex;gap:12px;align-items:center;min-width:0}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action{width:100%;max-width:none}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action button{display:block;width:100%;max-width:none}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-action{width:100%!important;min-width:0!important;max-width:100%!important}
+main.hv-tasks-mode #view adsgram-task{display:block;max-width:100%;width:100%;min-width:0}
+/* Sponsored AdsGram task: match HENOVA yellow action button without changing ad handling. */
+main.hv-tasks-mode #henova-adsgram-task::part(button),
+main.hv-tasks-mode #henova-adsgram-task::part(action),
+main.hv-tasks-mode #henova-adsgram-task::part(task-button),
+main.hv-tasks-mode #henova-adsgram-task button,
+main.hv-tasks-mode #henova-adsgram-task [role="button"],
+main.hv-tasks-mode .hv-sponsored-task-vertical .hv-sponsored-action button{
+ background:#fac756!important;
+ background-color:#fac756!important;
+ color:#211b0d!important;
+ border:0!important;
+ border-radius:16px!important;
+ font-weight:700!important;
+ box-shadow:none!important;
+}
+main.hv-tasks-mode #henova-adsgram-task [slot="button"],
+main.hv-tasks-mode #henova-adsgram-task [slot="claim"]{color:#211b0d!important;font-weight:700!important}
+
+@media(max-width:390px){
+ main.hv-tasks-mode #view>.item{gap:9px;padding:12px}
+ main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:48px!important;height:48px!important;flex-basis:48px!important}
+ main.hv-tasks-mode #view>.item h3{font-size:15px}
+ main.hv-tasks-mode #view>.item>div[style*="display:grid"]{flex-basis:104px!important;width:104px}
+ main.hv-tasks-mode #view>.item button{font-size:12px;padding:10px 7px}
+}
+
+/* HENOVA sponsored task visual alignment; AdsGram owns task completion and reward. */
+main.hv-tasks-mode #view>.hv-sponsored-polished{padding:15px!important;border-radius:22px!important;gap:10px!important;min-height:0!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished>.hv-sponsored-action{padding:0!important;border:0!important;overflow:visible!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished .hv-sponsored-copy h3{font-size:17px!important;margin:0 0 5px!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished .hv-sponsored-copy p{color:#668c65!important;font-size:15px!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished .hv-sponsored-copy small{color:#36543c!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task{width:100%!important;min-width:0!important;--button-background:#fac756;--button-color:#211b0d;--primary-color:#fac756;--accent-color:#fac756}
+main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(button),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(action),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(task-button),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(claim-button),main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task::part(complete-button){background:#fac756!important;color:#211b0d!important;border:0!important;border-radius:16px!important;font-weight:700!important;min-height:46px!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task button,main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task [role="button"]{background:#fac756!important;color:#211b0d!important;border-radius:16px!important;border:0!important;font-weight:700!important;min-height:46px!important}
+main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task [slot="button"],main.hv-tasks-mode #view>.hv-sponsored-polished adsgram-task [slot="claim"]{color:#211b0d!important;font-weight:800!important}
+
+/* Compact ad-task cards for mobile. External AdsGram content remains interactive. */
+main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{
+ padding:14px 15px!important;margin:9px 0!important;border-radius:22px!important;gap:10px!important;
+ box-shadow:0 2px 10px rgba(35,66,35,.035)!important;
+}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-task-top,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical>div:first-child{display:flex!important;align-items:center!important;gap:12px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-task-avatar,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical>div:first-child img{height:52px!important;width:52px!important;flex:0 0 52px!important;border-radius:15px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-copy h3,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-copy h3{
+ font-size:16px!important;line-height:1.25!important;margin:0 0 4px!important;
+}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-copy p,
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-copy p{font-size:14px!important;margin:0 0 3px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-video-task-action{justify-content:stretch!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-video-task-action button{
+ width:100%!important;max-width:100%!important;min-height:48px!important;
+ background:#fac756!important;color:#211b0d!important;border-radius:15px!important;font-size:15px!important;
+}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-action{padding:0!important;min-height:0!important}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task{
+ display:block!important;width:100%!important;min-height:52px!important;
+ --primary-color:#fac756;--button-background:#fac756;--button-color:#211b0d;
+}
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(button),
+main.hv-tasks-mode #view>.hv-sponsored-task-vertical adsgram-task::part(task-button){
+ background:#fac756!important;color:#211b0d!important;border-radius:15px!important;
+}
+@media(max-width:390px){
+ main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{padding:12px!important}
+ main.hv-tasks-mode #view>.hv-sponsored-task-vertical .hv-sponsored-copy h3{font-size:15px!important}
+}
+</style><script src="https://telegram.org/js/telegram-web-app.js"></script><style id="henova-sponsored-task-card-style-v1">
+/* Match native HENOVA task-card layout without changing AdsGram verification. */
+#view .hv-sponsored-card{display:grid;grid-template-columns:58px minmax(0,1fr) minmax(115px,41%);align-items:center;gap:12px;min-height:124px;padding:17px 15px}
+#view .hv-sponsored-icon{width:58px;height:58px;min-width:58px;border-radius:15px;background:#e7f1da;display:flex;align-items:center;justify-content:center;font-size:28px}
+#view .hv-sponsored-copy{min-width:0;overflow-wrap:anywhere}
+#view .hv-sponsored-copy h3{font-size:17px;line-height:1.22;margin:0 0 7px}
+#view .hv-sponsored-copy p{font-size:14px;margin:0 0 4px}
+#view .hv-sponsored-copy small{display:block;line-height:1.3}
+#view .hv-sponsored-action{min-width:0;max-width:100%;overflow-wrap:anywhere}
+#view .hv-sponsored-action adsgram-task{display:block;width:100%;min-width:0;min-height:70px}
+#view .hv-sponsored-action button{max-width:100%;white-space:normal}
+#view .hv-sponsored-copy #henova-adsgram-status:empty{display:none}
+@media(max-width:390px){#view .hv-sponsored-card{grid-template-columns:48px minmax(0,1fr) minmax(110px,40%);gap:8px;padding:14px 10px}#view .hv-sponsored-icon{width:48px;height:48px;min-width:48px}#view .hv-sponsored-copy h3{font-size:15px}}
+/* AdsGram is an externally rendered task; give its dynamic label a full-width row. */
+#view .hv-sponsored-card:has(#henova-adsgram-task){display:grid;grid-template-columns:58px minmax(0,1fr)!important;grid-template-areas:"icon copy" "action action";gap:10px 12px;align-items:center;direction:inherit}
+#view .hv-sponsored-card:has(#henova-adsgram-task)>.hv-sponsored-icon{grid-area:icon}
+#view .hv-sponsored-card:has(#henova-adsgram-task)>.hv-sponsored-copy{grid-area:copy;overflow-wrap:normal;word-break:normal}
+#view .hv-sponsored-card:has(#henova-adsgram-task)>.hv-sponsored-action{grid-area:action;min-width:0;width:100%;overflow-wrap:normal;word-break:normal}
+#view .hv-sponsored-card:has(#henova-adsgram-task) adsgram-task{display:block;width:100%;min-width:0;max-width:100%;min-height:64px}
+#view .hv-sponsored-card:has(#henova-adsgram-task) adsgram-task::part(container){max-width:100%}
+@media(max-width:390px){#view .hv-sponsored-card:has(#henova-adsgram-task){grid-template-columns:48px minmax(0,1fr)!important}}
+/* Consistent tidy layout for the last two AdsGram tasks. */
+#view .hv-video-task-card{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:12px!important;min-height:0!important;direction:inherit}
+#view .hv-video-task-card .hv-task-top{display:flex;gap:12px;align-items:center;width:100%;min-width:0}
+#view .hv-video-task-card .hv-task-avatar{width:58px;height:58px;flex:0 0 58px;border-radius:50%;object-fit:cover}
+#view .hv-video-task-card .hv-sponsored-copy{flex:1;min-width:0;overflow-wrap:normal;word-break:normal}
+#view .hv-video-task-card .hv-sponsored-copy h3{margin:0 0 6px;font-size:17px;line-height:1.3}
+#view .hv-video-task-card .hv-sponsored-copy p{margin:0;font-size:14px;line-height:1.4}
+#view .hv-video-task-card .hv-video-task-action{display:flex;justify-content:flex-end;width:100%;max-width:none}
+#view .hv-video-task-card .hv-video-task-action button{min-height:44px;white-space:nowrap}
+#view .hv-home-sponsored-card{margin:14px 0 18px!important;padding:14px!important;border:1px solid #d8c98e!important;border-radius:18px!important;background:linear-gradient(135deg,#fffdf3,#edf5e3)!important;box-shadow:0 5px 14px rgba(43,75,35,.10)!important}
+ #view .hv-home-sponsored-card .hv-sponsored-copy h3{font-size:16px!important;margin:0 0 4px!important}
+ #view .hv-home-sponsored-card .hv-sponsored-copy p{font-size:14px!important;margin:0 0 3px!important}
+ #view .hv-home-sponsored-card .hv-sponsored-action{padding:0!important}
+ #view .hv-home-sponsored-card adsgram-task{min-height:50px!important}
+/* Home AdsGram: original task widget only, no extra card/container styling */
+main.farm-mode #view>.hv-home-sponsored-card{
+ position:absolute!important;left:50%!important;right:auto!important;
+ bottom:calc(env(safe-area-inset-bottom) + 174px)!important;
+ transform:translateX(-50%)!important;width:min(320px,calc(100% - 20px))!important;
+ height:auto!important;min-height:0!important;margin:0!important;padding:0!important;
+ display:block!important;z-index:18!important;box-sizing:border-box!important;
+ background:transparent!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;backdrop-filter:none!important;overflow:visible!important;
+}
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task{
+ display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;
+ min-height:0!important;height:auto!important;margin:0!important;padding:0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ --adsgram-task-font-size:14px!important;
+}
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(title),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(name),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(description),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(text),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task::part(reward),
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task [slot="reward"]{
+ white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important;
+}
+main.farm-mode #view>.hv-home-sponsored-card adsgram-task [slot="reward"]{
+ display:inline-block!important;max-width:none!important;
+}
+main.farm-mode #view>.hv-home-sponsored-card .hv-adsgram-yellow-button{
+ min-width:0!important;width:auto!important;min-height:28px!important;height:28px!important;
+ padding:4px 12px!important;border-radius:8px!important;font-size:11px!important;line-height:1!important;
+}
+@media(max-width:360px){
+ main.farm-mode #view>.hv-home-sponsored-card{width:calc(100% - 16px)!important}
+ main.farm-mode #view>.hv-home-sponsored-card adsgram-task{--adsgram-task-font-size:13px!important}
+ main.farm-mode #view>.hv-home-sponsored-card .hv-adsgram-yellow-button{min-height:26px!important;height:26px!important;padding:3px 9px!important;font-size:10px!important}
+}
+#view .hv-sponsored-task-vertical{min-height:0!important}
+#view .hv-sponsored-task-vertical .hv-sponsored-action{min-width:0!important;overflow:hidden!important}
+#view .hv-sponsored-task-vertical adsgram-task{display:block!important;max-width:100%;width:100%;overflow-wrap:normal;word-break:normal}
+@media(max-width:390px){#view .hv-video-task-card .hv-task-avatar{width:48px;height:48px;flex-basis:48px}#view .hv-video-task-card{gap:10px!important}}
+/* Mobile polish for AdsGram tasks: compact video card, no clipped task CTA. */
+#view .hv-video-task-card{display:grid!important;grid-template-columns:58px minmax(0,1fr) auto!important;grid-template-areas:"avatar description action";gap:12px!important;align-items:center!important;min-height:0!important;padding:16px 14px!important}
+#view .hv-video-task-card .hv-task-top{display:contents!important}
+#view .hv-video-task-card .hv-task-avatar{grid-area:avatar}
+#view .hv-video-task-card .hv-sponsored-copy{grid-area:description;min-width:0!important}
+#view .hv-video-task-card .hv-sponsored-copy h3{font-size:15px!important;line-height:1.24!important}
+#view .hv-video-task-card .hv-sponsored-copy p{font-size:13px!important}
+#view .hv-video-task-card .hv-video-task-action{grid-area:action;display:block!important;width:auto!important;min-width:0;justify-self:end}
+#view .hv-video-task-card .hv-video-task-action button{font-size:13px!important;padding:12px 10px!important;min-height:44px;max-width:100%;white-space:normal!important}
+#view .hv-sponsored-task-vertical{padding:16px 14px!important;gap:10px!important}
+#view .hv-sponsored-task-vertical>.hv-sponsored-action{box-sizing:border-box!important;width:100%!important;max-width:100%!important;padding:0 10px!important;overflow:visible!important}
+#view .hv-sponsored-task-vertical adsgram-task{box-sizing:border-box!important;display:block!important;width:100%!important;max-width:100%!important;zoom:.85}
+@media(max-width:430px){#view .hv-video-task-card{grid-template-columns:50px minmax(0,1fr) 94px!important;gap:9px!important}#view .hv-video-task-card .hv-task-avatar{width:50px;height:50px;flex-basis:50px}#view .hv-video-task-card .hv-sponsored-copy h3{font-size:14px!important}#view .hv-video-task-card .hv-sponsored-copy p{font-size:12px!important}}
+/* HENOVA task-card consistency: keep AdsGram cards compact on mobile. */
+#view .hv-sponsored-task-vertical{display:flex!important;flex-direction:column!important;align-items:stretch!important;min-height:0!important;padding:16px!important;gap:8px!important}
+#view .hv-sponsored-task-vertical>.hv-sponsored-action{width:100%!important;min-width:0!important;padding:0!important;overflow:visible!important}
+#view .hv-sponsored-task-vertical adsgram-task{display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;zoom:1!important;overflow:visible!important;min-height:0!important}
+#view .hv-sponsored-task-vertical .hv-sponsored-copy h3{font-size:16px!important}
+#view .hv-sponsored-task-vertical .hv-sponsored-copy p{font-size:14px!important}
+#view .hv-video-task-card{min-height:0!important;margin-bottom:13px!important}
+@media(max-width:430px){#view .hv-sponsored-task-vertical{padding:14px 12px!important}#view .hv-sponsored-task-vertical>.hv-sponsored-action{margin:0!important}#view .hv-sponsored-task-vertical adsgram-task{font-size:13px!important}}
+</style>
+<style id="henova-telegram-fullscreen-safe-layout">
+/* Telegram draws native close/menu controls over the top ~150px in fullscreen.
+   Keep the shared profile/tools toolbar beneath them on EVERY tab. */
+html.telegram-fullscreen main:not(.farm-mode){
+ padding-top:12px!important;
+}
+html.telegram-fullscreen main:not(.farm-mode)>header.farm-toolbar{
+ position:relative!important;
+ inset:auto!important;
+ top:auto!important;
+ left:auto!important;
+ right:auto!important;
+ margin:145px 0 14px!important;
+ width:100%!important;
+ z-index:20!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:space-between!important;
+ gap:8px!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ padding:0!important;
+}
+html.telegram-fullscreen main:not(.farm-mode)>header .farm-user{min-width:0;flex:1 1 auto;max-width:52%;overflow:hidden}
+html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools{flex:0 0 auto;display:flex;gap:5px}
+html.telegram-fullscreen main.farm-mode .farm-toolbar,
+html.telegram-fullscreen main.farm-mode>header{
+ top:155px!important;
+}
+html.telegram-fullscreen main.farm-mode .stats{
+ top:215px!important;
+}
+html.telegram-fullscreen main.farm-mode .stats>div{
+ min-height:44px!important;
+ padding:5px 9px!important;
+ background:#f2f5ddeb!important;
+}
+html.telegram-fullscreen main.farm-mode .stats b{font-size:20px!important}
+/* Keep the main hen close to the feeding trough; walk and peck within a small area. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ left:40%!important;
+ top:45%!important;
+ animation:henovaHenShortFeedV17 15s ease-in-out infinite!important;
+}
+@keyframes henovaHenShortFeedV17{
+ 0%,10%,90%,100%{translate:0 0}
+ 30%,62%{translate:-3vw 2vh}
+ 77%{translate:-1.5vw 1vh}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing{animation-duration:15s!important}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{animation-duration:15s!important}
+html.telegram-fullscreen #nav{padding-bottom:max(18px,env(safe-area-inset-bottom,0px))!important}
+@media(max-width:380px){
+ html.telegram-fullscreen main:not(.farm-mode)>header .farm-tools button{min-width:35px!important;padding:5px!important}
+}
+</style>
+<style id="henova-compact-task-controls-v2">
+/* Compact task controls on small Telegram screens; preserve all click targets. */
+main.hv-tasks-mode #view>.title{font-size:22px!important;margin:8px 6px 12px!important}
+main.hv-tasks-mode #view>.item{padding:11px 12px!important;min-height:76px!important;gap:9px!important}
+main.hv-tasks-mode #view>.item h3{font-size:15px!important}
+main.hv-tasks-mode #view>.item p{font-size:12px!important}
+main.hv-tasks-mode #view>.item button{font-size:12px!important;padding:8px 11px!important;max-width:120px!important;min-height:38px!important}
+main.hv-tasks-mode #view>.hv-video-task-card .hv-sponsored-action button{width:100%!important;max-width:100%!important;min-height:42px!important;padding:9px 12px!important;font-size:15px!important}
+main.hv-tasks-mode #view>.hv-video-task-card,main.hv-tasks-mode #view>.hv-sponsored-task-vertical{padding:12px!important;gap:7px!important}
+main.hv-tasks-mode #view>.item>.face,main.hv-tasks-mode #view>.item>img{width:46px!important;height:46px!important;flex-basis:46px!important}
+main.hv-tasks-mode #view .primary{padding:9px 12px!important;font-size:14px!important;min-height:40px!important}
+@media(max-width:430px){
+ main.hv-tasks-mode #view{font-size:13px}
+ main.hv-tasks-mode #view>.item button{border-radius:11px!important}
+}
+</style>
+<style id="henova-farm-visual-polish-20261101">
+/* Decorative refresh: retain the existing original HENOVA illustration and all actions. */
+main.farm-mode #farm-scene.farm-v3{
+ background-image:linear-gradient(180deg,rgba(47,102,22,.06),rgba(54,112,20,.12)),url('./assets/henova-game-scene-no-old-pond-20261101.svg?v=1')!important;
+ background-position:center center!important;
+ background-size:100% 100%!important;
+}
+main.farm-mode .farm-toolbar{
+ gap:8px!important;
+}
+main.farm-mode .farm-user{
+ border:2px solid rgba(255,251,221,.92)!important;
+ box-shadow:0 3px 0 rgba(55,93,34,.38),0 8px 15px rgba(36,73,23,.16)!important;
+ background:rgba(249,251,225,.91)!important;
+}
+main.farm-mode .farm-tools button{
+ border-radius:17px!important;
+ background:linear-gradient(165deg,#fffdeb,#e1edc7)!important;
+ border:2px solid #fff7da!important;
+ box-shadow:0 3px 0 rgba(71,109,40,.42),0 5px 11px #193d2229!important;
+}
+html.telegram-fullscreen main.farm-mode .stats{
+ top:218px!important;
+ gap:9px!important;
+}
+main.farm-mode .stats>div{
+ background:linear-gradient(165deg,rgba(255,254,231,.96),rgba(227,240,202,.94))!important;
+ border:2px solid #fff6cb!important;
+ box-shadow:0 4px 0 rgba(76,113,37,.45),0 8px 14px rgba(28,60,25,.16)!important;
+ border-radius:27px!important;
+}
+main.farm-mode .stats b{font-weight:900!important;letter-spacing:-.5px}
+main.farm-mode .collect-dock{
+ background:linear-gradient(160deg,rgba(245,253,219,.95),rgba(215,238,189,.97))!important;
+ border:2px solid rgba(255,248,210,.96)!important;
+ border-radius:27px!important;
+ box-shadow:0 4px 0 #608d3da8,0 11px 25px #213b2433!important;
+}
+main.farm-mode .collect-action button{
+ background:linear-gradient(180deg,#ffe879,#ffcb45)!important;
+ color:#52370f!important;
+ border:2px solid #fff0ad!important;
+ border-radius:24px!important;
+ box-shadow:0 5px 0 #c58b23!important;
+ font-weight:900!important;
+}
+main.farm-mode .collect-info{color:#3c6c2b!important}
+main.farm-mode .collect-info strong{font-weight:900!important}
+main.farm-mode~nav{
+ background:linear-gradient(180deg,#f4f8de,#dfeccc)!important;
+ border-top:2px solid #fcf6d5!important;
+ box-shadow:0 -6px 15px rgba(42,78,27,.12)!important;
+}
+main.farm-mode~nav button{font-weight:800!important}
+main.farm-mode~nav button.active{color:#2c742e!important}
+</style>
+
+
+
+<style id="henova-farm-coordinate-layout-v1">
+/* Stable, deliberate art positions; decorative elements never intercept taps. */
+main.farm-mode #farm-scene.farm-v3{
+ --hv-feed-x:40%;
+ --hv-feed-y:49%;
+ --hv-flower-a-x:6%;
+ --hv-flower-a-y:55%;
+ --hv-flower-b-x:87%;
+ --hv-flower-b-y:52%;
+}
+/* Two tiny flower clusters defined with transparent CSS petals — no opaque tiles. */
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster{
+ position:absolute!important;
+ z-index:7!important;
+ width:35px!important;
+ height:27px!important;
+ background:transparent!important;
+ pointer-events:none!important;
+ box-shadow:none!important;
+ filter:none!important;
+ opacity:.88;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-a{left:var(--hv-flower-a-x)!important;top:var(--hv-flower-a-y)!important}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-b{left:var(--hv-flower-b-x)!important;top:var(--hv-flower-b-y)!important}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster::before,
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster::after{
+ content:"";position:absolute;width:11px;height:11px;border-radius:50%;
+ background:radial-gradient(circle,#edc04d 0 23%,#fff5d2 25% 50%,transparent 53%);
+ box-shadow:none;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster::before{left:3px;top:6px}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster::after{right:4px;bottom:3px}
+/* Hen walks a short marked route beside the embedded wooden feeder, never over the pond. */
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ left:var(--hv-feed-x)!important;
+ top:var(--hv-feed-y)!important;
+ animation:henovaFeederRouteV18 14s ease-in-out infinite!important;
+}
+@keyframes henovaFeederRouteV18{
+ 0%,12%,88%,100%{translate:-4vw 2vh}
+ 35%,62%{translate:0 0}
+ 75%{translate:-2vw 1vh}
+}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-facing,
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action{animation-duration:14s!important}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;translate:0 0!important}
+}
+</style>
+<style id="henova-measured-scene-layout-v2">
+/* Fixed normalized scene coordinates. Original background illustration retains the scenery.
+   Overlay pieces are only enhanced when not already baked into the main scene. */
+main.farm-mode #farm-scene.farm-v3{
+ --hv-barn-left:8%; --hv-barn-top:25%;
+ --hv-pond-right:6%; --hv-pond-top:56%;
+ --hv-feeder-x:44%; --hv-feeder-y:47%;
+ --hv-hen-home-x:39%; --hv-hen-home-y:48%;
+}
+/* Hide legacy duplicate art pieces when their equivalents exist in scene SVG. */
+main.farm-mode #farm-scene.farm-v3 .v3-barn,
+main.farm-mode #farm-scene.farm-v3 .v3-pond,
+main.farm-mode #farm-scene.farm-v3 .v3-water,
+main.farm-mode #farm-scene.farm-v3 .v3-rock{display:none!important}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster{
+ width:24px!important;height:20px!important;opacity:.78!important;
+ background:none!important;box-shadow:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-a{left:5%!important;top:54%!important}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-b{right:6%!important;left:auto!important;top:52%!important}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{
+ left:var(--hv-hen-home-x)!important;
+ top:var(--hv-hen-home-y)!important;
+ width:clamp(67px,16vw,94px)!important;
+ animation:henovaMeasuredFeeding 16s ease-in-out infinite!important;
+}
+@keyframes henovaMeasuredFeeding{
+ 0%,12%,88%,100%{translate:-2.5vw 2vh}
+ 32%,66%{translate:2vw 0}
+ 77%{translate:0 1vh}
+}
+/* Avoid heavy overlapping overlays over the barn roof and windmill. */
+html.telegram-fullscreen main.farm-mode .farm-toolbar{top:151px!important}
+html.telegram-fullscreen main.farm-mode .stats{top:222px!important}
+main.farm-mode .stats>div{background:rgba(248,251,227,.90)!important}
+@media(prefers-reduced-motion:reduce){
+ main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{animation:none!important;translate:0!important}
+}
+</style>
+
+<style id="henova-farm-order-fix-20261101">
+/* Correct the overlay positions without changing the baked landscape artwork. */
+html.telegram-fullscreen main.farm-mode .farm-toolbar{top:142px!important}
+html.telegram-fullscreen main.farm-mode .stats{top:207px!important;gap:9px!important}
+main.farm-mode .stats>div{min-height:43px!important;padding:5px 9px!important;border-radius:22px!important}
+main.farm-mode .stats b{font-size:19px!important}
+main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a{left:39%!important;top:48%!important;width:clamp(61px,14vw,82px)!important;animation:henovaNearFeederFix 15s ease-in-out infinite!important}
+@keyframes henovaNearFeederFix{0%,15%,90%,100%{translate:-3vw 1vh}35%,65%{translate:1vw 0}78%{translate:-1vw .5vh}}
+main.farm-mode #farm-scene.farm-v3 .henova-flower-cluster{display:none!important}
+</style>
+
+
+
+<style id="henova-ponds-removed-final-20261101">
+/* Both pond overlays are disabled; background art is the pond-free SVG. */
+html body main.farm-mode #farm-scene.farm-v3{
+ background-image:url('./assets/henova-game-scene-no-old-pond-20261101.svg?v=5')!important;
+ background-size:100% 100%!important;background-position:center!important;background-repeat:no-repeat!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .v3-pond,
+html body main.farm-mode #farm-scene.farm-v3 .v3-water,
+html body main.farm-mode #farm-scene.farm-v3 .henova-legacy-pond-cover{display:none!important}
+</style>
+<meta name="henova-release" content="2026-11-01-withdrawal-unlock-v2"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><style id="henova-lift-farm-hud-20261101">
+/* Keep top HUD above the farmhouse roof, inside Telegram's safe header area. */
+body main.farm-mode .farm-toolbar,
+html.telegram-fullscreen body main.farm-mode .farm-toolbar{
+ top:calc(max(env(safe-area-inset-top, 0px), 18px) + 115px)!important;
+}
+body main.farm-mode .stats,
+html.telegram-fullscreen body main.farm-mode .stats{
+ top:calc(max(env(safe-area-inset-top, 0px), 18px) + 173px)!important;
+ gap:9px!important;
+}
+</style>
+<style id="henova-visual-v11-migration">
+/* Scenery-only migration: leave existing live collection, ads, wallet, tabs, sounds and owned hens intact. */
+main.farm-mode #farm-scene.farm-v3 {
+  background:#6caa4a!important;
+  background-image:none!important;
+  isolation:isolate;
+}
+main.farm-mode #farm-scene.farm-v3 > .henova-farm-v11-background {
+  display:block!important;
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center!important;
+  z-index:1!important;
+  pointer-events:none!important;
+  user-select:none!important;
+}
+/* Hide only obsolete landscape DOM artwork; do not touch gameplay components. */
+main.farm-mode #farm-scene.farm-v3 > div:not(.farm-hen):not(.henova-owned-hen) {display:none!important;}
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b,
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c {display:none!important;}
+/* Existing hen is the only starter hen and retains henovaTapHen -> henovaPlayCluck. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a {
+  display:block!important;
+  position:absolute!important;
+  left:40%!important;
+  right:auto!important;
+  top:77%!important;
+  bottom:auto!important;
+  width:clamp(72px,20vw,110px)!important;
+  height:auto!important;
+  opacity:1!important;
+  visibility:visible!important;
+  z-index:11!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  -webkit-tap-highlight-color:transparent!important;
+  touch-action:manipulation;
+}
+main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen {
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:9!important;
+  pointer-events:auto!important;
+}
+/* HUD is untouched: nav, collect dock, balance, languages, payout/admin flows. */
+</style>
+<style id="henova-natural-walk-and-feed-v25">
+/* Main hen: walk on the grass beside the trough, stop to eat, then walk back.
+   CSS-only movement avoids extra JS loops and preserves the existing hen click/cluck. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  display:block!important;
+  left:55%!important;
+  top:44%!important;
+  right:auto!important;
+  bottom:auto!important;
+  width:clamp(64px,17vw,94px)!important;
+  z-index:15!important;
+  pointer-events:auto!important;
+  cursor:pointer!important;
+  translate:none!important;
+  transform-origin:center bottom!important;
+  animation:henovaStarterNaturalWalkV25 17s linear infinite!important;
+  will-change:transform;
+}
+/* One step every few pixels, and a full pause beside the grain tray. */
+@keyframes henovaStarterNaturalWalkV25{
+  0%,10%{transform:translate3d(20px,8px,0)}
+  14%{transform:translate3d(15px,6px,0)}
+  18%{transform:translate3d(7px,6px,0)}
+  22%{transform:translate3d(-1px,4px,0)}
+  27%{transform:translate3d(-12px,5px,0)}
+  32%,65%{transform:translate3d(-21px,5px,0)}
+  69%{transform:translate3d(-19px,6px,0)}
+  73%{transform:translate3d(-11px,5px,0)}
+  78%{transform:translate3d(1px,5px,0)}
+  84%{transform:translate3d(14px,7px,0)}
+  88%,100%{transform:translate3d(20px,8px,0)}
+}
+/* Direction changes only while the hen is standing still, never mid-stride. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  display:block!important;
+  transform-origin:50% 70%!important;
+  animation:henovaStarterFacingV25 17s steps(1,end) infinite!important;
+}
+@keyframes henovaStarterFacingV25{
+  0%,65.9%{transform:scaleX(-1)}
+  66%,96.9%{transform:scaleX(1)}
+  97%,100%{transform:scaleX(-1)}
+}
+/* Gentle body bob when walking, then several small head dips when eating. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+  display:block!important;
+  transform-origin:56% 83%!important;
+  animation:henovaStarterBodyAndPeckV25 17s ease-in-out infinite!important;
+}
+@keyframes henovaStarterBodyAndPeckV25{
+  0%,10%,12%,16%,20%,24%,28%,32%,36%,42%,47%,52%,57%,62%,65%,68%,72%,76%,80%,84%,88%,100%{transform:translateY(0) rotate(0deg)}
+  14%,18%,22%,26%,30%,71%,74%,78%,82%,86%{transform:translateY(-2px) rotate(-1deg)}
+  39%,44%,49%,54%,59%{transform:translateY(4px) rotate(8deg)}
+}
+/* Prevent a second legacy image animation from moving it during feeding. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a img{
+  animation:none!important;
+  width:100%!important;
+  height:auto!important;
+  display:block!important;
+  pointer-events:none!important;
+}
+/* Retain the familiar touch reaction and the original real cluck audio. */
+main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action.hen-tap-v11{
+  animation:henovaHenTapV11 .48s ease-out 1!important;
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a,
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing,
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{
+    animation:none!important;
+  }
+  main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{transform:translate3d(0,0,0)!important}
+}
+</style>
+<style id="henova-hud-roof-clearance-v19">
+/* Raise HENOVA's existing live HUD enough to clear the farm roof.
+   Do not change the scenery, layout beneath the farm, or action handlers. */
+body main.farm-mode > header.farm-toolbar,
+body main.farm-mode > .farm-toolbar,
+html.telegram-fullscreen body main.farm-mode > header.farm-toolbar,
+html.telegram-fullscreen body main.farm-mode > .farm-toolbar {
+  top:calc(max(env(safe-area-inset-top, 0px), 18px) + 70px)!important;
+}
+body main.farm-mode > .stats,
+html.telegram-fullscreen body main.farm-mode > .stats {
+  top:calc(max(env(safe-area-inset-top, 0px), 18px) + 128px)!important;
+}
+/* Compact screens keep the same spacing, with a safe Telegram header offset. */
+@media(max-height:680px) {
+  body main.farm-mode > header.farm-toolbar,
+  body main.farm-mode > .farm-toolbar,
+  html.telegram-fullscreen body main.farm-mode > header.farm-toolbar,
+  html.telegram-fullscreen body main.farm-mode > .farm-toolbar {
+    top:calc(max(env(safe-area-inset-top, 0px), 18px) + 65px)!important;
+  }
+  body main.farm-mode > .stats,
+  html.telegram-fullscreen body main.farm-mode > .stats {
+    top:calc(max(env(safe-area-inset-top, 0px), 18px) + 123px)!important;
+  }
+}
+</style>
+<style id="henova-feeder-display-v26">
+/* The feed trough is now part of the farm background itself. Keep the old
+   DOM element measurable for any interaction positioning, but invisible to
+   prevent a duplicate, flat tray painted on top. */
+main.farm-mode #farm-scene.farm-v3 > .v3-feeder{
+ opacity:0!important;
+ pointer-events:none!important;
+}
+</style>
+<style id="henova-approved-hay-bales-v31">
+/* Replace the single legacy hay prop with the user-approved golden four-bale artwork.
+   Keep this scenery-only; no interaction or reward logic changes. */
+body main.farm-mode #farm-scene.farm-v3 > .henova-cartoon-hay {
+  display:block!important;
+  position:absolute!important;
+  top:66.2%!important;
+  left:1%!important;
+  width:29%!important;
+  height:12%!important;
+  padding:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent url('./assets/henova-hay-approved-v31.svg?v=20261102-approved') center center/contain no-repeat!important;
+  filter:drop-shadow(1px 4px 2px rgba(40,70,28,.23))!important;
+  pointer-events:none!important;
+  z-index:6!important;
+}
+/* Hide the old duplicate hay props; the approved illustration is the only hay. */
+body main.farm-mode #farm-scene.farm-v3 > .v3-hay,
+body main.farm-mode #farm-scene.farm-v3 > .v3-hay-bales {
+  display:none!important;
+}
+</style>
+<style id="henova-approved-egg-nest-v32">
+/* The approved nest is now rendered once in the scene illustration.
+   Do not display the earlier DOM nest sprite over the new artwork. */
+body main.farm-mode #farm-scene.farm-v3 > .v3-nest{display:none!important}
+</style>
+<style id="henova-hay-single-layer-v33">
+/* Hay is now inside the farm image; do not render duplicate old DOM hay assets. */
+body main.farm-mode #farm-scene.farm-v3 > div.henova-cartoon-hay,
+body main.farm-mode #farm-scene.farm-v3 > div.v3-hay-bales,
+body main.farm-mode #farm-scene.farm-v3 > div.v3-hay {
+ display:none!important;
+}
+</style>
+<style id="henova-fountain-pond-replacement-v36">
+/* The approved pond fountain is embedded in the main farm image. Hide the
+   legacy decorative pond so it cannot appear above or below the new art. */
+body main.farm-mode #farm-scene.farm-v3 > .v3-pond {
+  display:none!important;
+}
+</style>
+<style id="henova-purchase-only-hen-exit-20261112">
+/* Existing hens stay in their farm positions. Only the newly purchased hen
+   gets a one-time walk from the farmhouse doorway to its assigned spot. */
+body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  animation:none!important;
+  translate:0 0!important;
+  opacity:1!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+  animation:none!important;
+  translate:0 0!important;
+  transform:none!important;
+  opacity:1!important;
+  will-change:auto!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
+  animation:henovaPurchasedHenExitV2 8.5s cubic-bezier(.35,.08,.25,1) both!important;
+  translate:0 0!important;
+  will-change:transform,opacity;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .hen-facing{
+  animation:henovaPurchasedHenFacingV2 8.5s steps(1,end) both!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .hen-action{
+  animation:none!important;
+  transform:none!important;
+}
+main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit .hen-action img{
+  animation:henovaHouseWalkGait 1.05s steps(2,end) infinite!important;
+}
+@keyframes henovaPurchasedHenExitV2{
+  0%{transform:translate3d(var(--purchase-entry-x),var(--purchase-entry-y),0) scale(.88);opacity:1}
+  12%{transform:translate3d(calc(var(--purchase-entry-x)*.88),calc(var(--purchase-entry-y)*.88),0) scale(.9);opacity:1}
+  88%{transform:translate3d(0,0,0) scale(1.02);opacity:1}
+  100%{transform:translate3d(0,0,0) scale(1);opacity:1}
+}
+@keyframes henovaPurchasedHenFacingV2{
+  0%,88%{transform:scaleX(1)}
+  89%,100%{transform:scaleX(-1)}
+}
+@media(prefers-reduced-motion:reduce){
+  main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
+    animation:none!important;transform:none!important;opacity:1!important
+  }
+}
+</style>
+<style id="henova-premium-main-actions-v1">
+main.farm-mode .collect-dock{min-height:88px;padding:9px 10px;gap:11px;border:1px solid #fff9df;background:linear-gradient(145deg,rgba(250,255,237,.97),rgba(225,239,204,.96));box-shadow:0 9px 24px rgba(36,74,29,.24),inset 0 1px 0 #fff}
+main.farm-mode .collect-info{flex-basis:34%;text-align:left;padding-left:5px}
+main.farm-mode[dir="rtl"] .collect-info{text-align:right;padding-left:0;padding-right:5px}
+main.farm-mode .collect-info strong{font-size:16px;font-weight:950;letter-spacing:.1px;color:#315f2d}
+main.farm-mode .collect-info small{display:block;margin-top:4px;font-size:11px;color:#8a7437}
+main.farm-mode .collect-action{display:flex;flex-direction:column;justify-content:center;gap:5px}
+main.farm-mode .collect-action button.hv-collect-primary{min-height:54px;display:flex;align-items:center;justify-content:center;gap:8px;padding:8px 10px;border:1px solid #fff1a5;border-radius:16px;background:linear-gradient(180deg,#ffe98d 0%,#ffc83f 48%,#eea91f 100%);color:#50350b;font-size:16px;font-weight:950;letter-spacing:.1px;box-shadow:0 5px 0 #b97918,0 8px 15px rgba(116,75,12,.20),inset 0 1px 0 rgba(255,255,255,.8);text-shadow:0 1px 0 rgba(255,255,255,.35);transition:transform .14s ease,filter .14s ease,box-shadow .14s ease;-webkit-tap-highlight-color:transparent}
+.hv-collect-icon{font-size:21px;filter:drop-shadow(0 2px 1px #a96e2444)}.hv-collect-label{white-space:nowrap}.hv-collect-count{font-size:11px;font-weight:900;opacity:.82;white-space:nowrap}
+main.farm-mode .collect-action button.hv-collect-primary:active{transform:translateY(3px);box-shadow:0 2px 0 #b97918,0 4px 8px rgba(116,75,12,.18)}
+main.farm-mode .collect-action button.hv-collect-primary:disabled{opacity:.58;filter:saturate(.55);box-shadow:0 2px 0 #b9a16b;cursor:not-allowed}
+.item button.hv-buy-primary{min-width:94px;min-height:52px;display:flex;align-items:center;justify-content:center;gap:7px;padding:8px 11px;border:1px solid #ffe7a0;border-radius:15px;background:linear-gradient(180deg,#ffe99a 0%,#ffc64a 52%,#efa92b 100%);color:#56370b;font-size:13px;font-weight:950;line-height:1.15;box-shadow:0 4px 0 #bd8428,0 6px 12px rgba(116,75,12,.13),inset 0 1px 0 #fff9df;transition:transform .14s ease,filter .14s ease,box-shadow .14s ease;-webkit-tap-highlight-color:transparent}
+.hv-buy-icon{font-size:18px;filter:drop-shadow(0 1px 1px #98651f44)}.item button.hv-buy-primary small{display:block;margin-top:4px;font-size:10px;font-weight:850;opacity:.8}
+.item button.hv-buy-primary:active{transform:translateY(3px);box-shadow:0 1px 0 #bd8428,0 2px 5px rgba(116,75,12,.12)}
+.item button.hv-buy-primary:disabled{opacity:.52;filter:grayscale(.3);box-shadow:0 2px 0 #c3b28e;cursor:not-allowed}
+@media(prefers-reduced-motion:reduce){main.farm-mode .collect-action button.hv-collect-primary,.item button.hv-buy-primary{transition:none}}
+@media(max-width:370px){main.farm-mode .collect-info{flex-basis:31%}main.farm-mode .collect-action button.hv-collect-primary{gap:5px;padding:8px 6px;font-size:14px}.hv-collect-count{font-size:10px}.item button.hv-buy-primary{min-width:82px;padding:7px}}
+</style><style id="henova-legend-eggs-purchase-v1">.item button.hv-buy-eggs{background:linear-gradient(180deg,#e6f7c9 0%,#b8df82 55%,#8fc45a 100%);border-color:#d9efb7;color:#244b1d;box-shadow:0 4px 0 #689b43,0 6px 12px rgba(52,102,35,.13),inset 0 1px 0 #f7ffe9}.item button.hv-buy-eggs:active{box-shadow:0 1px 0 #689b43,0 2px 5px rgba(52,102,35,.12)}</style><style id="henova-full-maintenance-lock-v2">
+html,body{min-height:100%;overflow:hidden!important}
+body.hv-maintenance-locked>main,
+body.hv-maintenance-locked>nav,
+body.hv-maintenance-locked>#overlay,
+body.hv-maintenance-locked>#fullscreen-status{display:none!important}
+#henova-maintenance-screen{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;overflow:auto;padding:28px 22px;padding-top:calc(28px + env(safe-area-inset-top));padding-bottom:calc(28px + env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% 0%,#426e42 0%,#193d2c 52%,#10291f 100%);color:#fff9e8;font-family:system-ui,-apple-system,sans-serif;text-align:center}
+#henova-maintenance-screen .hv-maintenance-card{width:min(440px,100%);padding:34px 24px 30px;border:1px solid #d9bd6b88;border-radius:28px;background:linear-gradient(155deg,#244b36f2,#173526f5);box-shadow:0 24px 70px #06190f99,inset 0 1px #fff2}
+#henova-maintenance-screen .hv-maintenance-emblem{width:92px;height:92px;margin:0 auto 22px;display:grid;place-items:center;border:1px solid #e4c66f;border-radius:28px;background:linear-gradient(145deg,#f7df91,#bd8b34);box-shadow:0 9px 25px #080f0870;color:#25442c;font-size:43px}
+#henova-maintenance-screen .hv-maintenance-brand{font-size:13px;letter-spacing:5px;font-weight:900;color:#f4d783}
+#henova-maintenance-screen h1{margin:13px 0 10px;font-size:clamp(25px,7vw,34px);line-height:1.2;letter-spacing:1px}
+#henova-maintenance-screen .hv-maintenance-rule{width:62px;height:3px;margin:18px auto;background:linear-gradient(90deg,#b98a36,#f7df91);border-radius:9px}
+#henova-maintenance-screen p{margin:0;color:#e2eadb;font-size:14px;line-height:1.8;font-weight:500}
+#henova-maintenance-screen .hv-maintenance-status{display:inline-flex;align-items:center;gap:8px;margin-top:24px;padding:9px 14px;border:1px solid #d9bd6b66;border-radius:30px;background:#fff1;color:#f4d783;font-size:11px;font-weight:900;letter-spacing:1.5px}
+#henova-maintenance-screen .hv-maintenance-dot{width:7px;height:7px;border-radius:50%;background:#f4d783;box-shadow:0 0 12px #f4d783;animation:hvMaintenancePulse 1.7s ease-in-out infinite}
+@keyframes hvMaintenancePulse{50%{opacity:.35;transform:scale(.75)}}
+</style><style id="henova-one-flock-movement-v39">
+/* Base presentation only. Each owned hen receives its own generated keyframes inline. */
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen *,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *{
+ transition:none!important;translate:none!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
+ position:absolute!important;display:block!important;visibility:visible!important;opacity:1!important;
+ right:auto!important;bottom:auto!important;transform:none!important;pointer-events:auto!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+ width:clamp(34px,7.4vw,49px)!important;max-width:49px!important;will-change:left,top;
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-b,
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-c{width:clamp(36px,7.8vw,51px)!important;will-change:left,top}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen img,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
+ display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
+}
+/* Each of the three built-in hens has a different route and feeding rhythm. */
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:48%!important;top:52%!important;animation:hvStarterWalkV39 33s ease-in-out -9s infinite!important}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:68%!important;top:61%!important;animation:hvStarterBWalkV39 39s ease-in-out -17s infinite!important}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:30%!important;top:70%!important;animation:hvStarterCWalkV39 36s ease-in-out -23s infinite!important}
@@ -11,10 +2696,6 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvS
 @keyframes hvStarterTurnV39{0%,47%{transform:scaleX(1)}48%,82%{transform:scaleX(-1)}83%,100%{transform:scaleX(1)}}
 @keyframes hvStarterBPeckV39{0%,17%,41%,65%,89%,100%{transform:translateY(0) rotate(0)}22%,46%,70%,94%{transform:translateY(3px) rotate(7deg)}27%,51%,75%{transform:translateY(0) rotate(0)}}
 @keyframes hvStarterCPeckV39{0%,12%,37%,62%,87%,100%{transform:translateY(0) rotate(0)}17%,42%,67%,92%{transform:translateY(3px) rotate(8deg)}22%,47%,72%{transform:translateY(0) rotate(0)}}
-html body main.farm-mode #farm-scene.farm-v3 .farm-hen img,
-html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
- display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
-}
 </style>
 </head><body class="hv-maintenance-locked"><section id="henova-maintenance-screen" role="status" aria-live="polite"><div class="hv-maintenance-card"><div class="hv-maintenance-emblem" aria-hidden="true">🛠️</div><div class="hv-maintenance-brand">HENOVA FARM</div><h1>UNDER MAINTENANCE</h1><div class="hv-maintenance-rule"></div><p>Our farm is temporarily closed while we make important improvements.<br>We’ll be back soon. Thank you for your patience and support.</p><div class="hv-maintenance-status"><span class="hv-maintenance-dot"></span>MAINTENANCE IN PROGRESS</div></div></section><main><header class="farm-toolbar"><div class="farm-user"><span class="farm-avatar" id="farm-avatar">H</span><span class="farm-user-copy"><strong id="farm-user-name">HENOVA</strong><small id="farm-user-handle">CHICKEN FARM</small></span></div><div class="farm-tools"><button onclick="henovaOpenLeaderboard()" title="Leaderboard" aria-label="Leaderboard">🏆</button><button onclick="toggleFarmSound()" id="sound-toggle" title="Sound">🔊</button><button onclick="settings()" title="Languages and settings">🌐</button></div></header><div class="stats"><div>🥚 <b id="balance">0</b><small>EGGS</small></div><div>🪙 <b id="coins">0</b><small>COINS</small></div></div><div id="view"></div></main><nav id="nav"></nav>
 
