@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#397b4b"/><stop offset="1" stop-color="#153d2a"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="0.9" y2="1"><stop stop-color="#fff0a8"/><stop offset=".48" stop-color="#e8bf55"/><stop offset="1" stop-color="#b98228"/></linearGradient>
+ <linearGradient id="egg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffdf0"/><stop offset="1" stop-color="#e8dfbd"/></linearGradient>
+ <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#061b10" flood-opacity=".35"/></filter>
+</defs>
+<rect width="160" height="160" rx="28" fill="url(#bg)"/>
+<circle cx="80" cy="68" r="54" fill="none" stroke="#e7c66b" stroke-opacity=".26" stroke-width="2"/>
+<circle cx="80" cy="68" r="45" fill="#ffffff" opacity=".045"/>
+<path d="M80 24 C64 24 47 55 47 79 C47 101 61 116 80 116 C99 116 113 101 113 79 C113 55 96 24 80 24Z" fill="url(#egg)" stroke="#d9bd72" stroke-width="2" filter="url(#shadow)"/>
+<circle cx="82" cy="72" r="23" fill="url(#gold)" stroke="#a97926" stroke-width="2"/>
+<path d="M76 59 Q74 57 74 63 L74 82 Q74 87 79 84 L94 75 Q99 72 94 69Z" fill="#244b32"/>
+<path d="M28 125 H132" stroke="#d8bb65" stroke-opacity=".65" stroke-width="2" stroke-linecap="round"/>
+<text x="80" y="143" fill="#fff3c4" font-family="Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="2" text-anchor="middle">HENOVA</text>
+</svg>
