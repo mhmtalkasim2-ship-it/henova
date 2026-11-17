@@ -2684,18 +2684,18 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
  display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
 }
 /* Each of the three built-in hens has a different route and feeding rhythm. */
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:17%!important;top:49%!important;animation:hvStarterWalkV41 12s ease-in-out -2s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:49%!important;top:65%!important;animation:hvStarterBWalkV41 12s ease-in-out -5s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:81%!important;top:78%!important;animation:hvStarterCWalkV41 12s ease-in-out -8s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:17%!important;top:49%!important;animation:hvStarterWalkV41 24s ease-in-out -2s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:49%!important;top:65%!important;animation:hvStarterBWalkV41 24s ease-in-out -5s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:81%!important;top:78%!important;animation:hvStarterCWalkV41 24s ease-in-out -8s infinite!important}
 /* The flock occupies upper, middle and lower open areas of the farm.
-   Every three-second cycle includes a short pause to peck and eat. */
+   Every six-second cycle includes a short pause to peck and eat. */
 @keyframes hvStarterWalkV41{0%{left:17%;top:49%}18.3%,25%{left:23%;top:53%}43.3%,50%{left:28%;top:50%}68.3%,75%{left:21%;top:55%}93.3%,100%{left:17%;top:49%}}
 @keyframes hvStarterBWalkV41{0%{left:49%;top:65%}18.3%,25%{left:55%;top:61%}43.3%,50%{left:60%;top:66%}68.3%,75%{left:53%;top:69%}93.3%,100%{left:49%;top:65%}}
 @keyframes hvStarterCWalkV41{0%{left:81%;top:78%}18.3%,25%{left:86%;top:73%}43.3%,50%{left:89%;top:79%}68.3%,75%{left:84%;top:82%}93.3%,100%{left:81%;top:78%}}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{animation:hvStarterTurnV39 33s steps(1,end) -9s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{animation:hvStarterPeckV40 12s ease-in-out -2s infinite!important;transform-origin:68% 78%}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{animation:hvStarterPeckV40 12s ease-in-out -5s infinite!important;transform-origin:68% 78%}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvStarterPeckV40 12s ease-in-out -8s infinite!important;transform-origin:68% 78%}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{animation:hvStarterPeckV40 24s ease-in-out -2s infinite!important;transform-origin:68% 78%}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{animation:hvStarterPeckV40 24s ease-in-out -5s infinite!important;transform-origin:68% 78%}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvStarterPeckV40 24s ease-in-out -8s infinite!important;transform-origin:68% 78%}
 @keyframes hvStarterPeckV40{0%,18%,25%,43%,50%,68%,75%,93%,100%{transform:translateY(0) rotate(0)}20%,22%,27%,29%,45%,47%,52%,54%,70%,72%,77%,79%,95%,97%{transform:translateY(4px) rotate(10deg)}}
 @keyframes hvStarterTurnV39{0%,47%{transform:scaleX(1)}48%,82%{transform:scaleX(-1)}83%,100%{transform:scaleX(1)}}
 @keyframes hvStarterBPeckV39{0%,17%,41%,65%,89%,100%{transform:translateY(0) rotate(0)}22%,46%,70%,94%{transform:translateY(3px) rotate(7deg)}27%,51%,75%{transform:translateY(0) rotate(0)}}
@@ -4861,7 +4861,7 @@ function henovaOwnedHensMarkup(){
      const y2=clamp(y0+((seed*7)%15-7),45,85);
      const x3=clamp(x0+((seed*13)%17-8),5,94);
      const y3=clamp(y0+((seed*9)%13-6),45,85);
-     const duration=12;
+     const duration=24;
      const delay=-((seed*7)%120)/10;
      const walkName='hvHenWalkV40_'+n;
      const turnName='hvHenTurnV40_'+n;
@@ -4871,7 +4871,7 @@ function henovaOwnedHensMarkup(){
        '@keyframes '+turnName+'{0%,18%{transform:scaleX(1)}19%,43%{transform:scaleX(-1)}44%,68%{transform:scaleX(1)}69%,93%{transform:scaleX(-1)}94%,100%{transform:scaleX(1)}}'+
        '@keyframes '+peckName+'{0%,18%,25%,43%,50%,68%,75%,93%,100%{transform:translateY(0) rotate(0)}20%,22%,27%,29%,45%,47%,52%,54%,70%,72%,77%,79%,95%,97%{transform:translateY(4px) rotate(10deg)}}';
      const faceStyle='animation:'+turnName+' '+duration+'s steps(1,end) '+delay+'s infinite!important;transform-origin:50% 80%;';
-     const actionDuration=(4.8+(seed%6)*.73).toFixed(2);
+     const actionDuration=(9.6+(seed%6)*1.46).toFixed(2);
      const actionDelay=(-((seed*13)%70)/10).toFixed(1);
      const actionStyle='animation:'+peckName+' '+actionDuration+'s ease-in-out '+actionDelay+'s infinite!important;transform-origin:68% 78%;';
      const roamStyle='--roam-base-left:'+x0+'%;--roam-base-top:'+y0+'%;'+entryStyle;
