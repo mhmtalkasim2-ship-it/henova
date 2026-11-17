@@ -5052,7 +5052,7 @@ function henovaOwnedHensMarkup(){
      const delay=-((n*7)%duration);
      const face=dx1<0?'-1':'1';
      const backFace=dx1<0?'1':'-1';
-     const roamStyle='--roam-x1:'+dx1+'vw;--roam-y1:'+dy1+'vh;--roam-x2:'+dx2+'vw;--roam-y2:'+dy2+'vh;--roam-duration:'+duration+'s;--roam-delay:'+delay+'s;--roam-face:'+face+';--roam-face-back:'+backFace+';'+entryStyle;
+     const roamStyle='--roam-base-left:'+point[0]+'%;--roam-base-top:'+point[1]+'%;--roam-x1:'+dx1+'vw;--roam-y1:'+dy1+'vh;--roam-x2:'+dx2+'vw;--roam-y2:'+dy2+'vh;--roam-duration:'+duration+'s;--roam-delay:'+delay+'s;--roam-face:'+face+';--roam-face-back:'+backFace+';'+entryStyle;
      if(isNewPurchase)henovaPurchasedHenArrival=null;
      return '<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+point[0]+'%;top:'+point[1]+'%;'+roamStyle+'" onanimationend="if(event.animationName===&quot;henovaPurchasedHenExitV2&quot;)this.classList.remove(&quot;henova-new-purchase-exit&quot;)" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing"><div class="hen-action"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    }).join('');
@@ -6277,5 +6277,87 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
   html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
     animation-play-state:running!important;
   }
+}
+</style>
+
+<!-- HENOVA SINGLE MOVEMENT ENGINE V36 2026-11-17 -->
+<style id="henova-single-movement-engine-v36">
+/* One movement system only: animate the actual layout coordinates.
+   This avoids conflicts between transform, translate and old doorway keyframes. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+ position:absolute!important;left:48%!important;top:52%!important;right:auto!important;bottom:auto!important;
+ translate:none!important;transform:none!important;
+ animation:hvStarterPositionV36 34s ease-in-out -9s infinite!important;
+ animation-play-state:running!important;will-change:left,top!important;
+}
+@keyframes hvStarterPositionV36{
+ 0%,7%{left:48%;top:52%}
+ 22%{left:60%;top:58%}
+ 40%,48%{left:70%;top:65%}
+ 67%{left:53%;top:61%}
+ 84%{left:37%;top:56%}
+ 100%{left:48%;top:52%}
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
+ position:absolute!important;left:68%!important;top:61%!important;right:auto!important;bottom:auto!important;
+ translate:none!important;transform:none!important;
+ animation:hvHenBPositionV36 39s ease-in-out -13s infinite!important;
+ animation-play-state:running!important;will-change:left,top!important;
+}
+@keyframes hvHenBPositionV36{
+ 0%,8%{left:68%;top:61%} 25%{left:80%;top:67%}
+ 43%,51%{left:82%;top:73%} 73%{left:64%;top:68%}
+ 100%{left:68%;top:61%}
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+ position:absolute!important;left:30%!important;top:70%!important;right:auto!important;bottom:auto!important;
+ translate:none!important;transform:none!important;
+ animation:hvHenCPositionV36 42s ease-in-out -21s infinite!important;
+ animation-play-state:running!important;will-change:left,top!important;
+}
+@keyframes hvHenCPositionV36{
+ 0%,8%{left:30%;top:70%} 24%{left:18%;top:64%}
+ 44%,52%{left:14%;top:72%} 76%{left:35%;top:67%}
+ 100%{left:30%;top:70%}
+}
+/* Bought hens start from their own saved spots, then roam within safe scene bounds. */
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+ position:absolute!important;
+ left:var(--roam-base-left)!important;top:var(--roam-base-top)!important;
+ right:auto!important;bottom:auto!important;
+ translate:none!important;transform:none!important;
+ animation:hvOwnedPositionV36 var(--roam-duration,25s) ease-in-out var(--roam-delay,-3s) infinite!important;
+ animation-play-state:running!important;will-change:left,top!important;
+}
+@keyframes hvOwnedPositionV36{
+ 0%,8%{left:var(--roam-base-left);top:var(--roam-base-top)}
+ 25%{left:calc(var(--roam-base-left) + var(--roam-x1,4vw));top:calc(var(--roam-base-top) + var(--roam-y1,-2vh))}
+ 43%,53%{left:calc(var(--roam-base-left) + var(--roam-x1,4vw));top:calc(var(--roam-base-top) + var(--roam-y1,-2vh))}
+ 72%{left:calc(var(--roam-base-left) + var(--roam-x2,-3vw));top:calc(var(--roam-base-top) + var(--roam-y2,1vh))}
+ 100%{left:var(--roam-base-left);top:var(--roam-base-top)}
+}
+/* Facing and pecking stay on inner layers and cannot cancel body travel. */
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen .hen-facing,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
+ animation:none!important;transform:none!important;translate:none!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen .hen-action,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+ animation:hvGroundPeckV36 5.8s ease-in-out infinite!important;
+ transform-origin:68% 78%!important;
+}
+@keyframes hvGroundPeckV36{
+ 0%,18%,38%,58%,78%,100%{transform:translateY(0) rotate(0)}
+ 23%,43%,63%,83%{transform:translateY(3px) rotate(7deg)}
+ 28%,48%,68%,88%{transform:translateY(0) rotate(0)}
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
+ display:block!important;visibility:visible!important;opacity:1!important;
+ animation-play-state:running!important;
+}
+@media(prefers-reduced-motion:reduce){
+ html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
+ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{animation-play-state:running!important}
 }
 </style>
