@@ -2645,7 +2645,8 @@ main.farm-mode .collect-action button.hv-collect-primary:disabled{opacity:.58;fi
 @media(prefers-reduced-motion:reduce){main.farm-mode .collect-action button.hv-collect-primary,.item button.hv-buy-primary{transition:none}}
 @media(max-width:370px){main.farm-mode .collect-info{flex-basis:31%}main.farm-mode .collect-action button.hv-collect-primary{gap:5px;padding:8px 6px;font-size:14px}.hv-collect-count{font-size:10px}.item button.hv-buy-primary{min-width:82px;padding:7px}}
 </style><style id="henova-legend-eggs-purchase-v1">.item button.hv-buy-eggs{background:linear-gradient(180deg,#e6f7c9 0%,#b8df82 55%,#8fc45a 100%);border-color:#d9efb7;color:#244b1d;box-shadow:0 4px 0 #689b43,0 6px 12px rgba(52,102,35,.13),inset 0 1px 0 #f7ffe9}.item button.hv-buy-eggs:active{box-shadow:0 1px 0 #689b43,0 2px 5px rgba(52,102,35,.12)}</style><style id="henova-full-maintenance-lock-v2">
-html,body{min-height:100%;overflow:hidden!important}
+/* Keep the maintenance screen scrollable without locking the entire app document. */
+html,body{min-height:100%;overflow-x:hidden!important;overflow-y:auto!important}
 body.hv-maintenance-locked>main,
 body.hv-maintenance-locked>nav,
 body.hv-maintenance-locked>#overlay,
