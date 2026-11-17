@@ -1915,6 +1915,25 @@ main:has(.henova-admin-payout-page) .farm-mode,main:has(.henova-admin-payout-pag
 .hv-promo-hen-card{position:absolute;z-index:17;top:calc(env(safe-area-inset-top) + 178px);left:12px;display:flex;align-items:center;gap:9px;width:min(190px,54vw);padding:9px 11px;border:1px solid #f6e4a4;border-radius:15px;background:#fff8dfed;box-shadow:0 5px 14px #28491f42;color:#3b5c32;backdrop-filter:blur(7px);pointer-events:none}
 .hv-promo-hen-icon{width:34px;height:34px;object-fit:contain;flex:0 0 34px}.hv-promo-hen-card div{display:flex;flex-direction:column;min-width:0;gap:2px}
 .hv-promo-hen-card b{font-size:12px}.hv-promo-hen-card small{font-size:9px;white-space:nowrap}.hv-promo-hen-card strong{font-size:15px;font-variant-numeric:tabular-nums;color:#b06c20}
+
+/* HENOVA premium rewarded-video task card */
+#view .hv-video-task-card{position:relative!important;overflow:hidden!important;gap:14px!important;padding:16px!important;border:1px solid #d9c47b!important;border-radius:22px!important;background:linear-gradient(135deg,#fffef7 0%,#f0f7e9 58%,#e6f0dc 100%)!important;box-shadow:0 8px 22px rgba(42,82,43,.11)!important;color:#244b30!important}
+#view .hv-video-task-card:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#e9c35b,#77a957)}
+#view .hv-video-task-card .hv-task-top{gap:12px!important;align-items:center!important}
+#view .hv-video-task-card .hv-video-task-icon{position:relative;display:flex;align-items:center;justify-content:center;flex:0 0 58px;width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#315f3b,#193d29);border:1px solid #c9ad57;box-shadow:inset 0 1px 0 #ffffff35,0 5px 12px #244b3026;color:#f7d878;font-size:25px}
+#view .hv-video-task-card .hv-video-task-icon span{display:grid;place-items:center;width:31px;height:31px;padding-left:3px;border:1.5px solid #f7d878;border-radius:50%;background:#ffffff12}
+#view .hv-video-task-card .hv-video-task-icon i{position:absolute;right:5px;top:3px;font-size:13px;font-style:normal;color:#fff0b2}
+#view .hv-video-task-card .hv-sponsored-copy{flex:1;min-width:0}
+#view .hv-video-task-card .hv-video-task-kicker{margin:0 0 4px;color:#9a7628;font-size:9px;font-weight:900;letter-spacing:1.35px;line-height:1.2}
+#view .hv-video-task-card .hv-sponsored-copy h3{margin:0 0 5px!important;color:#244b30!important;font-size:16px!important;font-weight:900!important;line-height:1.25!important}
+#view .hv-video-task-card .hv-sponsored-copy p{margin:0!important;color:#607b60!important;font-size:12px!important;line-height:1.35!important}
+#view .hv-video-task-card .hv-video-task-reward{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:0 0 67px;min-width:67px;padding:8px 5px;border:1px solid #e3cd82;border-radius:14px;background:linear-gradient(145deg,#fff8d9,#f5e7ae);box-shadow:inset 0 1px 0 #fff}
+#view .hv-video-task-card .hv-video-task-reward strong{color:#73561b;font-size:19px;font-weight:1000;line-height:1}
+#view .hv-video-task-card .hv-video-task-reward small{margin-top:4px;color:#94732b;font-size:8px;font-weight:900;letter-spacing:1px;line-height:1}
+#view .hv-video-task-card .hv-video-task-action{width:100%!important;justify-content:stretch!important}
+#view .hv-video-task-card .hv-video-task-action button{width:100%!important;max-width:none!important;min-height:47px!important;border:1px solid #d5b44e!important;border-radius:15px!important;background:linear-gradient(180deg,#ffdc78,#edbd49)!important;color:#3c3014!important;font-size:14px!important;font-weight:900!important;box-shadow:0 4px 0 #c69b37,0 7px 13px #785a1b20!important}
+#view .hv-video-task-card .hv-video-task-action button:disabled{opacity:.68;box-shadow:none!important}
+@media(max-width:390px){#view .hv-video-task-card{padding:13px!important}#view .hv-video-task-card .hv-video-task-icon{width:50px;height:50px;flex-basis:50px;border-radius:15px}#view .hv-video-task-card .hv-video-task-reward{flex-basis:59px;min-width:59px}#view .hv-video-task-card .hv-video-task-reward strong{font-size:17px}}
 </style><style id="henova-tasks-layout-fix">
 /* Task page: no wallet balances, neat native cards and consistent mobile sizing. */
 main.hv-tasks-mode .stats{display:none!important}
@@ -5206,7 +5225,7 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 if(tab===2){
  // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
  const firstAdTasks='<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Cyber_MineBot.jpg" alt="Cyber Mine" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Cyber Mine':s.lang==='tr'?'Bize Katıl · Cyber Mine':'Join Us · Cyber Mine')+'</h3><p>🪙 +10M · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenVictorsCompany()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-victors-company-claim" onclick="henovaClaimVictorsCompany()" '+(henovaVictorsCompanyClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
- const watchVideoTask='<article class="item hv-video-task-card"><div class="hv-task-top"><div class="hv-sponsored-icon">📺</div><div class="hv-sponsored-copy"><h3>'+henovaVideoRewardText().title+'</h3><p>'+henovaVideoRewardText().desc+'</p></div></div><div class="hv-video-task-action"><button id="henova-reward-video-btn" type="button" onclick="henovaWatchRewardVideo()">'+henovaVideoRewardText().button+'</button></div></article>';
+ const watchVideoTask='<article class="item hv-video-task-card"><div class="hv-task-top"><div class="hv-video-task-icon" aria-hidden="true"><span>▶</span><i>✦</i></div><div class="hv-sponsored-copy"><div class="hv-video-task-kicker">HENOVA • REWARDS</div><h3>'+henovaVideoRewardText().title+'</h3><p>'+henovaVideoRewardText().desc+'</p></div><div class="hv-video-task-reward"><strong>10M</strong><small>COINS</small></div></div><div class="hv-video-task-action"><button id="henova-reward-video-btn" type="button" onclick="henovaWatchRewardVideo()">'+henovaVideoRewardText().button+'</button></div></article>';
  const tasksHeading=el.querySelector('h1.title');
  if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks+watchVideoTask);
  void henovaVideoCooldownRefresh().catch(error=>console.warn('Watch-ad task status unavailable',error));
