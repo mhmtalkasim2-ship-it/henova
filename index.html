@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#347b48"><title>HENOVA • Chicken Farm</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#123b22"><title>HENOVA • Chicken Farm</title>
 <script src="https://sad.adsgram.ai/js/sad.min.js" defer></script>
 <script src="https://unpkg.com/@tonconnect/ui@3.0.0/dist/tonconnect-ui.min.js" defer></script>
 <style>
@@ -5827,12 +5827,33 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
 </script>
 
 <style id="henova-deep-green-ground-v1">
-/* Deep natural-green ground across every app page, while keeping cards readable. */
-html,body{background:#173f25!important}
-main:not(.farm-mode){background:linear-gradient(180deg,#285b35 0%,#1c492b 48%,#153d24 100%)!important}
-/* Darken only the lower farm landscape over the approved scene artwork. */
-main.farm-mode .scene.realistic-ready{background-image:linear-gradient(180deg,transparent 38%,rgba(27,83,35,.18) 52%,rgba(17,70,29,.48) 100%),url('./assets/henova-farm-scene.jpg')!important;background-size:cover!important;background-position:center center!important}
-main.farm-mode .scene:not(.realistic-ready){background:radial-gradient(ellipse at 47% 56%,#397d3c 0%,#286b32 72%,#1b5529 100%)!important}
+/* Stage 1: dark-green canvas visible immediately while the farm scene is loading. */
+html,body{background:#123b22!important}
+body{background-color:#123b22!important}
+body.hv-maintenance-locked{background:#123b22!important}
+main{background:linear-gradient(180deg,#214e2e 0%,#173f25 55%,#12351f 100%)!important}
+/* Stage 2: tint the real loaded farm artwork's grass/ground, not a legacy scene selector. */
+html body main.farm-mode #farm-scene.farm-v3{
+  background-color:#173f25!important;
+}
+html body main.farm-mode #farm-scene.farm-v3::after{
+  content:""!important;
+  display:block!important;
+  position:absolute!important;
+  left:0!important;right:0!important;bottom:0!important;
+  height:68%!important;
+  z-index:2!important;
+  pointer-events:none!important;
+  background:linear-gradient(to bottom,
+    rgba(18,59,31,0) 0%,
+    rgba(18,59,31,.18) 20%,
+    rgba(13,55,27,.38) 56%,
+    rgba(10,48,23,.55) 100%)!important;
+  mix-blend-mode:multiply!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .henova-farm-v11-background{z-index:1!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen,
+html body main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen{z-index:4!important}
 </style>
 </body></html>
 
