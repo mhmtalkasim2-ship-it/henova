@@ -5806,6 +5806,25 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action img{
 
 
 
+<script id="henova-maintenance-admin-bypass-v1">
+/* Only the verified HENOVA admin Telegram account may enter during maintenance. */
+(function(){
+  var ADMIN_TELEGRAM_ID='1035565575';
+  function applyAdminMaintenanceAccess(){
+    var currentId=String(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user&&window.Telegram.WebApp.initDataUnsafe.user.id||'');
+    if(currentId!==ADMIN_TELEGRAM_ID)return;
+    document.body.classList.remove('hv-maintenance-locked');
+    var screen=document.getElementById('henova-maintenance-screen');
+    if(screen)screen.remove();
+    document.documentElement.style.overflow='';
+    document.body.style.overflow='';
+    try{window.Telegram.WebApp.ready()}catch(e){}
+  }
+  applyAdminMaintenanceAccess();
+  document.addEventListener('DOMContentLoaded',applyAdminMaintenanceAccess,{once:true});
+  window.addEventListener('load',applyAdminMaintenanceAccess,{once:true});
+})();
+</script>
 </body></html>
 
 <!-- HENOVA REAL VISIBLE WALK FIX V34 -->
