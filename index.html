@@ -3177,7 +3177,7 @@ async function henovaClaimNGMCloud(){
 let henovaVictorsCompanyOpened=false,henovaVictorsCompanyBusy=false,henovaVictorsCompanyClaimed=false;
 function henovaOpenVictorsCompany(){
  henovaVictorsCompanyOpened=true;
- const url='https://t.me/Cyber_MineBot/CYM?startapp=ref_1035565575';
+ const url='https://t.me/Victors_Company_bot/app?startapp=ref_5599121F94';
  const webApp=window.Telegram?.WebApp;
  if(typeof webApp?.openTelegramLink==='function')webApp.openTelegramLink(url);
  else window.open(url,'_blank','noopener,noreferrer');
@@ -3189,11 +3189,11 @@ async function henovaClaimVictorsCompany(){
  henovaVictorsCompanyBusy=true;
  const btn=document.getElementById('henova-victors-company-claim');if(btn)btn.disabled=true;
  try{
-  const result=await henovaCall('claim_cyber_mine_once');
+  const result=await henovaCall('claim_victors_company_once');
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaVictorsCompanyClaimed=true;
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
-  if(result.claimed)henovaShowRewardCard(10000000,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
+  if(result.claimed)henovaShowRewardCard(Number(result.coins_added)||10000000,'coins');else toast(ar?'استلمت هذه المكافأة سابقاً':tr?'Ödül zaten alındı':'Reward already claimed');
  }catch(e){toast(ar?'تعذر استلام المكافأة الآن':tr?'Ödül alınamadı':'Could not claim reward')}
  finally{henovaVictorsCompanyBusy=false;const current=document.getElementById('henova-victors-company-claim');if(current)current.disabled=henovaVictorsCompanyClaimed}
 }
@@ -5048,7 +5048,7 @@ el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article clas
 
 if(tab===2){
  // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
- const firstAdTasks='<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Cyber_MineBot.jpg" alt="Cyber Mine" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Cyber Mine':s.lang==='tr'?'Bize Katıl · Cyber Mine':'Join Us · Cyber Mine')+'</h3><p>🪙 +10M · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenVictorsCompany()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-victors-company-claim" onclick="henovaClaimVictorsCompany()" '+(henovaVictorsCompanyClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
+ const firstAdTasks='<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/Victors_Company_bot.jpg" alt="Victor’s Company" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Victor’s Company':s.lang==='tr'?'Bize Katıl · Victor’s Company':'Join Us · Victor’s Company')+'</h3><p>🪙 +10M · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenVictorsCompany()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-victors-company-claim" onclick="henovaClaimVictorsCompany()" '+(henovaVictorsCompanyClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
  const watchVideoTask='<article class="item hv-video-task-card"><div class="hv-task-top"><div class="hv-video-task-icon" aria-hidden="true"><img src="./assets/henova-watch-ad-icon.svg?v=20261117" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit"></div><div class="hv-sponsored-copy"><div class="hv-video-task-kicker">HENOVA • REWARDS</div><h3>'+henovaVideoRewardText().title+'</h3><p>'+henovaVideoRewardText().desc+'</p></div><div class="hv-video-task-reward"><strong>10M</strong><small>COINS</small></div></div><div class="hv-video-task-action"><button id="henova-reward-video-btn" type="button" onclick="henovaWatchRewardVideo()">'+henovaVideoRewardText().button+'</button></div></article>';
  const tasksHeading=el.querySelector('h1.title');
  if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks+watchVideoTask);
