@@ -2684,14 +2684,14 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
  display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
 }
 /* Each of the three built-in hens has a different route and feeding rhythm. */
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:24%!important;top:78%!important;animation:hvStarterWalkV40 12s ease-in-out -2s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:50%!important;top:81%!important;animation:hvStarterBWalkV40 12s ease-in-out -5s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:76%!important;top:79%!important;animation:hvStarterCWalkV40 12s ease-in-out -8s infinite!important}
-/* Each route walks for about 2.2 seconds, pauses to peck for 0.8 seconds,
-   then continues. The three starter hens use separate lower-grass lanes. */
-@keyframes hvStarterWalkV40{0%{left:24%;top:78%}18.3%,25%{left:30%;top:77%}43.3%,50%{left:34%;top:79%}68.3%,75%{left:28%;top:81%}93.3%,100%{left:24%;top:78%}}
-@keyframes hvStarterBWalkV40{0%{left:50%;top:81%}18.3%,25%{left:56%;top:80%}43.3%,50%{left:60%;top:82%}68.3%,75%{left:54%;top:83%}93.3%,100%{left:50%;top:81%}}
-@keyframes hvStarterCWalkV40{0%{left:76%;top:79%}18.3%,25%{left:82%;top:78%}43.3%,50%{left:86%;top:80%}68.3%,75%{left:80%;top:82%}93.3%,100%{left:76%;top:79%}}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:17%!important;top:49%!important;animation:hvStarterWalkV41 12s ease-in-out -2s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:49%!important;top:65%!important;animation:hvStarterBWalkV41 12s ease-in-out -5s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:81%!important;top:78%!important;animation:hvStarterCWalkV41 12s ease-in-out -8s infinite!important}
+/* The flock occupies upper, middle and lower open areas of the farm.
+   Every three-second cycle includes a short pause to peck and eat. */
+@keyframes hvStarterWalkV41{0%{left:17%;top:49%}18.3%,25%{left:23%;top:53%}43.3%,50%{left:28%;top:50%}68.3%,75%{left:21%;top:55%}93.3%,100%{left:17%;top:49%}}
+@keyframes hvStarterBWalkV41{0%{left:49%;top:65%}18.3%,25%{left:55%;top:61%}43.3%,50%{left:60%;top:66%}68.3%,75%{left:53%;top:69%}93.3%,100%{left:49%;top:65%}}
+@keyframes hvStarterCWalkV41{0%{left:81%;top:78%}18.3%,25%{left:86%;top:73%}43.3%,50%{left:89%;top:79%}68.3%,75%{left:84%;top:82%}93.3%,100%{left:81%;top:78%}}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{animation:hvStarterTurnV39 33s steps(1,end) -9s infinite!important}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{animation:hvStarterPeckV40 12s ease-in-out -2s infinite!important;transform-origin:68% 78%}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{animation:hvStarterPeckV40 12s ease-in-out -5s infinite!important;transform-origin:68% 78%}
@@ -4850,22 +4850,22 @@ function henovaOwnedHensMarkup(){
      // Every bird receives its own generated route, timing, facing and peck rhythm.
      const seed=n+1;
      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-     // Keep roaming on the open lower grass lane, away from the fountain,
-     // feeder and other illustrated farm props. Each hen gets a separate lane.
-     const lane=(seed-1)%5;
-     const x0=clamp(10+lane*18+((seed*7)%7-3),7,91);
-     const y0=76+((seed*5)%8);
-     const x1=clamp(x0+((seed*11)%13-6),6,92);
-     const y1=clamp(y0+((seed*3)%5-2),74,89);
-     const x2=clamp(x0+((seed*17)%15-7),6,92);
-     const y2=clamp(y0+((seed*7)%5-2),74,89);
-     const x3=clamp(x0+((seed*13)%13-6),6,92);
-     const y3=clamp(y0+((seed*9)%5-2),74,89);
+     // Spread the flock through the full visible farm instead of clustering
+     // beside the collection dock. Keep routes within the scene and vary lanes.
+     const lane=(seed-1)%7;
+     const x0=clamp(8+lane*13+((seed*7)%9-4),6,92);
+     const y0=48+((seed*17)%35);
+     const x1=clamp(x0+((seed*11)%19-9),5,94);
+     const y1=clamp(y0+((seed*3)%13-6),45,85);
+     const x2=clamp(x0+((seed*17)%23-11),5,94);
+     const y2=clamp(y0+((seed*7)%15-7),45,85);
+     const x3=clamp(x0+((seed*13)%17-8),5,94);
+     const y3=clamp(y0+((seed*9)%13-6),45,85);
      const duration=12;
      const delay=-((seed*7)%120)/10;
-     const walkName='hvHenWalkV39_'+n;
-     const turnName='hvHenTurnV39_'+n;
-     const peckName='hvHenPeckV39_'+n;
+     const walkName='hvHenWalkV40_'+n;
+     const turnName='hvHenTurnV40_'+n;
+     const peckName='hvHenPeckV40_'+n;
      individualKeyframes+=
        '@keyframes '+walkName+'{0%{left:'+x0+'%;top:'+y0+'%}18.3%,25%{left:'+x1+'%;top:'+y1+'%}43.3%,50%{left:'+x2+'%;top:'+y2+'%}68.3%,75%{left:'+x3+'%;top:'+y3+'%}93.3%,100%{left:'+x0+'%;top:'+y0+'%}}'+
        '@keyframes '+turnName+'{0%,18%{transform:scaleX(1)}19%,43%{transform:scaleX(-1)}44%,68%{transform:scaleX(1)}69%,93%{transform:scaleX(-1)}94%,100%{transform:scaleX(1)}}'+
