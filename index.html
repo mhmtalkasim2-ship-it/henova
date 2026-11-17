@@ -6221,3 +6221,61 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation-del
   }
 }
 </style>
+
+<!-- HENOVA FORCE FLOCK MOTION V35 2026-11-17 -->
+<style id="henova-force-flock-motion-v35">
+/* The device's reduced-motion accessibility setting was cancelling every hen
+   animation. Farm movement is part of the game, so keep the flock animated. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  animation:henovaNaturalStarterRoam20261116 29s ease-in-out -8s infinite!important;
+  will-change:translate!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  animation:henovaDecorativeRoamB20261116 32s ease-in-out -11s infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  animation:henovaDecorativeRoamC20261116 35s ease-in-out -19s infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+  animation:henovaNaturalOwnedRoam20261116 var(--roam-duration,24s) ease-in-out var(--roam-delay,-3s) infinite!important;
+  will-change:translate!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{
+  animation:henovaStarterFacing20261117 29s steps(1,end) -8s infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
+  animation-name:henovaDecorativeRoamB20261116,henovaDecorativeTurnB20261117!important;
+  animation-duration:32s,32s!important;
+  animation-timing-function:ease-in-out,steps(1,end)!important;
+  animation-delay:-11s,-11s!important;
+  animation-iteration-count:infinite,infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+  animation-name:henovaDecorativeRoamC20261116,henovaDecorativeTurnC20261117!important;
+  animation-duration:35s,35s!important;
+  animation-timing-function:ease-in-out,steps(1,end)!important;
+  animation-delay:-19s,-19s!important;
+  animation-iteration-count:infinite,infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing{
+  animation:henovaNaturalOwnedTurn20261117 var(--roam-duration,24s) steps(1,end) var(--roam-delay,-3s) infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen .hen-action,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+  animation:henovaNaturalGroundPeck20261116 7.2s ease-in-out infinite!important;
+}
+/* Explicitly defeat any reduced-motion rule earlier in this stylesheet. */
+@media(prefers-reduced-motion:reduce){
+  html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
+  html body main.farm-mode #farm-scene.farm-v3 .farm-hen .hen-facing,
+  html body main.farm-mode #farm-scene.farm-v3 .farm-hen .hen-action,
+  html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen,
+  html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-facing,
+  html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action{
+    animation-play-state:running!important;
+  }
+}
+</style>
