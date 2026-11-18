@@ -2644,7 +2644,7 @@ main.farm-mode .collect-action button.hv-collect-primary:disabled{opacity:.58;fi
 .item button.hv-buy-primary:disabled{opacity:.52;filter:grayscale(.3);box-shadow:0 2px 0 #c3b28e;cursor:not-allowed}
 @media(prefers-reduced-motion:reduce){main.farm-mode .collect-action button.hv-collect-primary,.item button.hv-buy-primary{transition:none}}
 @media(max-width:370px){main.farm-mode .collect-info{flex-basis:31%}main.farm-mode .collect-action button.hv-collect-primary{gap:5px;padding:8px 6px;font-size:14px}.hv-collect-count{font-size:10px}.item button.hv-buy-primary{min-width:82px;padding:7px}}
-</style><style id="henova-legend-eggs-purchase-v1">.item button.hv-buy-eggs{background:linear-gradient(180deg,#e6f7c9 0%,#b8df82 55%,#8fc45a 100%);border-color:#d9efb7;color:#244b1d;box-shadow:0 4px 0 #689b43,0 6px 12px rgba(52,102,35,.13),inset 0 1px 0 #f7ffe9}.item button.hv-buy-eggs:active{box-shadow:0 1px 0 #689b43,0 2px 5px rgba(52,102,35,.12)}</style><style id="henova-one-flock-movement-v40">
+</style><style id="henova-legend-eggs-purchase-v1">.item button.hv-buy-eggs{background:linear-gradient(180deg,#e6f7c9 0%,#b8df82 55%,#8fc45a 100%);border-color:#d9efb7;color:#244b1d;box-shadow:0 4px 0 #689b43,0 6px 12px rgba(52,102,35,.13),inset 0 1px 0 #f7ffe9}.item button.hv-buy-eggs:active{box-shadow:0 1px 0 #689b43,0 2px 5px rgba(52,102,35,.12)}</style><style id="henova-one-flock-movement-v42">
 /* Base presentation only. Each owned hen receives its own generated keyframes inline. */
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen *,
@@ -2658,7 +2658,7 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
  right:auto!important;bottom:auto!important;transform:none!important;pointer-events:auto!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
- width:clamp(34px,7.4vw,49px)!important;max-width:49px!important;will-change:left,top;
+ width:clamp(36px,7.8vw,51px)!important;max-width:51px!important;will-change:left,top;
 }
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a,
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-b,
@@ -2667,20 +2667,45 @@ html body main.farm-mode #farm-scene.farm-v3 .farm-hen img,
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen img{
  display:block!important;width:100%!important;height:auto!important;object-fit:contain!important;
 }
-/* Each of the three built-in hens has a different route and feeding rhythm. */
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:17%!important;top:49%!important;animation:hvStarterWalkV41 24s ease-in-out -2s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:49%!important;top:65%!important;animation:hvStarterBWalkV41 24s ease-in-out -5s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:81%!important;top:78%!important;animation:hvStarterCWalkV41 24s ease-in-out -8s infinite!important}
-/* The flock occupies upper, middle and lower open areas of the farm.
-   Every six-second cycle includes a short pause to peck and eat. */
-@keyframes hvStarterWalkV41{0%{left:17%;top:49%}18.3%,25%{left:23%;top:53%}43.3%,50%{left:28%;top:50%}68.3%,75%{left:21%;top:55%}93.3%,100%{left:17%;top:49%}}
-@keyframes hvStarterBWalkV41{0%{left:49%;top:65%}18.3%,25%{left:55%;top:61%}43.3%,50%{left:60%;top:66%}68.3%,75%{left:53%;top:69%}93.3%,100%{left:49%;top:65%}}
-@keyframes hvStarterCWalkV41{0%{left:81%;top:78%}18.3%,25%{left:86%;top:73%}43.3%,50%{left:89%;top:79%}68.3%,75%{left:84%;top:82%}93.3%,100%{left:81%;top:78%}}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{animation:hvStarterTurnV39 33s steps(1,end) -9s infinite!important}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{animation:hvStarterPeckV40 24s ease-in-out -2s infinite!important;transform-origin:68% 78%}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{animation:hvStarterPeckV40 24s ease-in-out -5s infinite!important;transform-origin:68% 78%}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvStarterPeckV40 24s ease-in-out -8s infinite!important;transform-origin:68% 78%}
+/* The old visual migration hid two built-in hens; the current flock engine animates all three. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b,
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+ display:block!important;visibility:visible!important;opacity:1!important;
+}
+/* Each hen has its own broad grass route, speed and phase. The fixed left/top
+   anchors are intentional: movement is applied with margins so older !important
+   positioning rules cannot freeze the keyframes. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a{left:17%!important;top:49%!important;animation:hvStarterWalkV42 26s ease-in-out -2s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{left:49%!important;top:65%!important;animation:hvStarterBWalkV42 31s ease-in-out -7s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:81%!important;top:78%!important;animation:hvStarterCWalkV42 36s ease-in-out -13s infinite!important}
+@keyframes hvStarterWalkV42{0%,100%{margin-left:0vw;margin-top:0vh}18.3%,25%{margin-left:12vw;margin-top:4vh}43.3%,50%{margin-left:22vw;margin-top:1vh}68.3%,75%{margin-left:14vw;margin-top:10vh}93.3%{margin-left:0vw;margin-top:0vh}}
+@keyframes hvStarterBWalkV42{0%,100%{margin-left:0vw;margin-top:0vh}18.3%,25%{margin-left:8vw;margin-top:-8vh}43.3%,50%{margin-left:15vw;margin-top:-2vh}68.3%,75%{margin-left:5vw;margin-top:7vh}93.3%{margin-left:0vw;margin-top:0vh}}
+@keyframes hvStarterCWalkV42{0%,100%{margin-left:0vw;margin-top:0vh}18.3%,25%{margin-left:8vw;margin-top:-8vh}43.3%,50%{margin-left:-7vw;margin-top:-13vh}68.3%,75%{margin-left:-15vw;margin-top:-2vh}93.3%{margin-left:0vw;margin-top:0vh}}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{animation:hvStarterTurnV39 31s steps(1,end) -6s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{animation:hvStarterPeckV40 26s ease-in-out -2s infinite!important;transform-origin:68% 78%}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{animation:hvStarterBActionV42 31s ease-in-out -7s infinite!important;transform-origin:68% 78%}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvStarterCActionV42 36s ease-in-out -13s infinite!important;transform-origin:68% 78%}
 @keyframes hvStarterPeckV40{0%,18%,25%,43%,50%,68%,75%,93%,100%{transform:translateY(0) rotate(0)}20%,22%,27%,29%,45%,47%,52%,54%,70%,72%,77%,79%,95%,97%{transform:translateY(4px) rotate(10deg)}}
+@keyframes hvStarterBActionV42{
+ 0%,18%,100%{transform:scaleX(1) translateY(0) rotate(0)}
+ 20%,22%{transform:scaleX(1) translateY(4px) rotate(9deg)}
+ 25%,43%{transform:scaleX(-1) translateY(0) rotate(0)}
+ 45%,47%{transform:scaleX(-1) translateY(4px) rotate(9deg)}
+ 50%,68%{transform:scaleX(1) translateY(0) rotate(0)}
+ 70%,72%{transform:scaleX(1) translateY(4px) rotate(9deg)}
+ 75%,93%{transform:scaleX(-1) translateY(0) rotate(0)}
+ 95%,97%{transform:scaleX(-1) translateY(4px) rotate(9deg)}
+}
+@keyframes hvStarterCActionV42{
+ 0%,18%,100%{transform:scaleX(-1) translateY(0) rotate(0)}
+ 20%,22%{transform:scaleX(-1) translateY(4px) rotate(8deg)}
+ 25%,43%{transform:scaleX(1) translateY(0) rotate(0)}
+ 45%,47%{transform:scaleX(1) translateY(4px) rotate(8deg)}
+ 50%,68%{transform:scaleX(-1) translateY(0) rotate(0)}
+ 70%,72%{transform:scaleX(-1) translateY(4px) rotate(8deg)}
+ 75%,93%{transform:scaleX(1) translateY(0) rotate(0)}
+ 95%,97%{transform:scaleX(1) translateY(4px) rotate(8deg)}
+}
 @keyframes hvStarterTurnV39{0%,47%{transform:scaleX(1)}48%,82%{transform:scaleX(-1)}83%,100%{transform:scaleX(1)}}
 @keyframes hvStarterBPeckV39{0%,17%,41%,65%,89%,100%{transform:translateY(0) rotate(0)}22%,46%,70%,94%{transform:translateY(3px) rotate(7deg)}27%,51%,75%{transform:translateY(0) rotate(0)}}
 @keyframes hvStarterCPeckV39{0%,12%,37%,62%,87%,100%{transform:translateY(0) rotate(0)}17%,42%,67%,92%{transform:translateY(3px) rotate(8deg)}22%,47%,72%{transform:translateY(0) rotate(0)}}
@@ -4839,17 +4864,17 @@ function henovaOwnedHensMarkup(){
      const lane=(seed-1)%7;
      const x0=clamp(8+lane*13+((seed*7)%9-4),6,92);
      const y0=48+((seed*17)%35);
-     const x1=clamp(x0+((seed*11)%19-9),5,94);
-     const y1=clamp(y0+((seed*3)%13-6),45,85);
-     const x2=clamp(x0+((seed*17)%23-11),5,94);
-     const y2=clamp(y0+((seed*7)%15-7),45,85);
-     const x3=clamp(x0+((seed*13)%17-8),5,94);
-     const y3=clamp(y0+((seed*9)%13-6),45,85);
-     const duration=24;
-     const delay=-((seed*7)%120)/10;
-     const walkName='hvHenWalkV40_'+n;
-     const turnName='hvHenTurnV40_'+n;
-     const peckName='hvHenPeckV40_'+n;
+     const x1=clamp(x0+((seed*11)%31-15),5,94);
+     const y1=clamp(y0+((seed*3)%17-8),43,86);
+     const x2=clamp(x0+((seed*17)%39-19),5,94);
+     const y2=clamp(y0+((seed*7)%19-9),43,86);
+     const x3=clamp(x0+((seed*13)%27-13),5,94);
+     const y3=clamp(y0+((seed*9)%17-8),43,86);
+     const duration=22+(seed%5)*3;
+     const delay=-((seed*7)%(duration*10))/10;
+     const walkName='hvHenWalkV42_'+n;
+     const turnName='hvHenTurnV42_'+n;
+     const peckName='hvHenPeckV42_'+n;
      individualKeyframes+=
        '@keyframes '+walkName+'{0%{left:'+x0+'%;top:'+y0+'%}18.3%,25%{left:'+x1+'%;top:'+y1+'%}43.3%,50%{left:'+x2+'%;top:'+y2+'%}68.3%,75%{left:'+x3+'%;top:'+y3+'%}93.3%,100%{left:'+x0+'%;top:'+y0+'%}}'+
        '@keyframes '+turnName+'{0%,18%{transform:scaleX(1)}19%,43%{transform:scaleX(-1)}44%,68%{transform:scaleX(1)}69%,93%{transform:scaleX(-1)}94%,100%{transform:scaleX(1)}}'+
@@ -4864,7 +4889,7 @@ function henovaOwnedHensMarkup(){
      individualMarkup+='<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+x0+'%;top:'+y0+'%;'+roamStyle+walkStyle+'" onanimationend="if(event.animationName===&quot;henovaPurchasedHenExitV2&quot;)this.classList.remove(&quot;henova-new-purchase-exit&quot;)" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing" style="'+faceStyle+'"><div class="hen-action" style="'+actionStyle+'"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    });
  });
- return '<style id="henova-individual-hen-routes-v39">'+individualKeyframes+'</style>'+individualMarkup;
+ return '<style id="henova-individual-hen-routes-v42">'+individualKeyframes+'</style>'+individualMarkup;
 }
 
 /* AdsGram task-56216: native task widget. Never credit withdrawable eggs from a browser event. */
