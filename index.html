@@ -5340,11 +5340,12 @@ html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a {
   animation-duration:30s!important;
   animation-timing-function:ease-in-out!important;
 }
+/* SVG animates legs, body and head independently; keep the whole image stationary. */
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action img,
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action img {
-  animation:henovaNaturalChickenGait20261119 .54s ease-in-out infinite!important;
-  transform-origin:52% 82%!important;
-  will-change:transform;
+  animation:none!important;
+  transform:none!important;
+  will-change:auto;
 }
 @media(prefers-reduced-motion:reduce) {
   html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action img,
