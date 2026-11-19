@@ -5326,6 +5326,34 @@ html body main.farm-mode #farm-scene.farm-v3 > .henova-farm-v11-background{z-ind
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen,
 html body main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen{z-index:4!important}
 </style>
+
+<style id="henova-natural-chicken-gait-20261119">
+/* Natural walking: slow the feeder route and add a gentle alternating body/footfall rhythm.
+   Travel stays on the outer wrapper; gait runs on the inner image to avoid transform conflicts. */
+@keyframes henovaNaturalChickenGait20261119 {
+  0%,100% { transform:translateY(0) rotate(0deg); }
+  24% { transform:translateY(-1.7px) rotate(-0.8deg); }
+  50% { transform:translateY(0) rotate(0.2deg); }
+  76% { transform:translateY(-1.3px) rotate(0.8deg); }
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a {
+  animation-duration:30s!important;
+  animation-timing-function:ease-in-out!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action img,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action img {
+  animation:henovaNaturalChickenGait20261119 .54s ease-in-out infinite!important;
+  transform-origin:52% 82%!important;
+  will-change:transform;
+}
+@media(prefers-reduced-motion:reduce) {
+  html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a .hen-action img,
+  html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action img {
+    animation:none!important;
+    transform:none!important;
+  }
+}
+</style>
 </body></html>
 
 <!-- HENOVA REAL VISIBLE WALK FIX V34 -->
