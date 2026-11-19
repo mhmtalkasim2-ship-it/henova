@@ -5357,15 +5357,14 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action img {
 </style>
 
 <style id="henova-flock-motion-stability-20261119">
-/* Restore the two companion hens: older legacy CSS hid them even though
-   the later flock animation defines routes for them. Keep all three birds
-   the same size and move each wrapper slowly; the SVG handles its own legs,
-   body and pecking independently. */
+/* Keep the three built-in hens identical in size. The main flock stylesheet
+   reserves translate: none !important to avoid transform conflicts, so the
+   companion routes must animate margins rather than the translate property. */
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b,
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
   display:block!important;
   position:absolute!important;
-  width:clamp(80px,20vw,122px)!important;
+  width:clamp(36px,7.8vw,51px)!important;
   height:auto!important;
   right:auto!important;
   bottom:auto!important;
@@ -5375,14 +5374,14 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
   pointer-events:none!important;
   overflow:visible!important;
   transition:none!important;
-  will-change:auto!important;
+  will-change:margin-left,margin-top!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
-  left:10%!important;top:61%!important;
-  animation:henovaCompanionBWalk20261119 34s ease-in-out infinite!important;
+  left:49%!important;top:65%!important;
+  animation:henovaCompanionBWalk20261119 34s ease-in-out -7s infinite!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
-  left:72%!important;top:65%!important;
+  left:81%!important;top:78%!important;
   animation:henovaCompanionCWalk20261119 38s ease-in-out -11s infinite!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img,
@@ -5393,24 +5392,25 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
   will-change:auto!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{
-  animation:henovaCompanionBFace20261119 34s steps(1,end) infinite!important;
+  animation:henovaCompanionBFace20261119 34s steps(1,end) -7s infinite!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
   animation:henovaCompanionCFace20261119 38s steps(1,end) -11s infinite!important;
 }
+/* Margin-based travel is compatible with the shared translate:none!important rule. */
 @keyframes henovaCompanionBWalk20261119{
-  0%,12%{translate:0 0}
-  30%,38%{translate:7vw -2vh}
-  58%,66%{translate:13vw 1vh}
-  82%,90%{translate:6vw 3vh}
-  100%{translate:0 0}
+  0%,12%{margin-left:0;margin-top:0}
+  30%,38%{margin-left:10vw;margin-top:-3vh}
+  58%,66%{margin-left:19vw;margin-top:1vh}
+  82%,90%{margin-left:9vw;margin-top:5vh}
+  100%{margin-left:0;margin-top:0}
 }
 @keyframes henovaCompanionCWalk20261119{
-  0%,12%{translate:0 0}
-  30%,38%{translate:-7vw -2vh}
-  58%,66%{translate:-13vw 1vh}
-  82%,90%{translate:-6vw 3vh}
-  100%{translate:0 0}
+  0%,12%{margin-left:0;margin-top:0}
+  30%,38%{margin-left:-9vw;margin-top:-1vh}
+  58%,66%{margin-left:-19vw;margin-top:-8vh}
+  82%,90%{margin-left:-11vw;margin-top:-2vh}
+  100%{margin-left:0;margin-top:0}
 }
 @keyframes henovaCompanionBFace20261119{
   0%,37%{transform:scaleX(1)}
@@ -5428,6 +5428,7 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
   html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img,
   html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
     animation:none!important;translate:0 0!important;transform:none!important;
+    margin-left:0!important;margin-top:0!important;
   }
 }
 </style>
