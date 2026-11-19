@@ -5355,6 +5355,83 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen .hen-action img {
   }
 }
 </style>
+
+<style id="henova-flock-motion-stability-20261119">
+/* Restore the two companion hens: older legacy CSS hid them even though
+   the later flock animation defines routes for them. Keep all three birds
+   the same size and move each wrapper slowly; the SVG handles its own legs,
+   body and pecking independently. */
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b,
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+  display:block!important;
+  position:absolute!important;
+  width:clamp(80px,20vw,122px)!important;
+  height:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  opacity:1!important;
+  visibility:visible!important;
+  z-index:8!important;
+  pointer-events:none!important;
+  overflow:visible!important;
+  transition:none!important;
+  will-change:auto!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b{
+  left:10%!important;top:61%!important;
+  animation:henovaCompanionBWalk20261119 34s ease-in-out infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{
+  left:72%!important;top:65%!important;
+  animation:henovaCompanionCWalk20261119 38s ease-in-out -11s infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img,
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
+  display:block!important;width:100%!important;height:auto!important;
+  max-width:none!important;opacity:1!important;
+  transform-origin:50% 85%!important;
+  will-change:auto!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{
+  animation:henovaCompanionBFace20261119 34s steps(1,end) infinite!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
+  animation:henovaCompanionCFace20261119 38s steps(1,end) -11s infinite!important;
+}
+@keyframes henovaCompanionBWalk20261119{
+  0%,12%{translate:0 0}
+  30%,38%{translate:7vw -2vh}
+  58%,66%{translate:13vw 1vh}
+  82%,90%{translate:6vw 3vh}
+  100%{translate:0 0}
+}
+@keyframes henovaCompanionCWalk20261119{
+  0%,12%{translate:0 0}
+  30%,38%{translate:-7vw -2vh}
+  58%,66%{translate:-13vw 1vh}
+  82%,90%{translate:-6vw 3vh}
+  100%{translate:0 0}
+}
+@keyframes henovaCompanionBFace20261119{
+  0%,37%{transform:scaleX(1)}
+  38%,89%{transform:scaleX(-1)}
+  90%,100%{transform:scaleX(1)}
+}
+@keyframes henovaCompanionCFace20261119{
+  0%,37%{transform:scaleX(-1)}
+  38%,89%{transform:scaleX(1)}
+  90%,100%{transform:scaleX(-1)}
+}
+@media(prefers-reduced-motion:reduce){
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b,
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c,
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img,
+  html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
+    animation:none!important;translate:0 0!important;transform:none!important;
+  }
+}
+</style>
+
 </body></html>
 
 <!-- HENOVA REAL VISIBLE WALK FIX V34 -->
