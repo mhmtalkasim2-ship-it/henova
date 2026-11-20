@@ -3148,7 +3148,7 @@ const app=window.Telegram?.WebApp;
 if(!app?.initData)return toast(s.lang==='ar'?'افتح HENOVA من تيليجرام':s.lang==='tr'?'HENOVA uygulamasını Telegramda aç':'Open HENOVA in Telegram');
 try{
 const data=await henovaCall('join_channel',{requestId:crypto.randomUUID()});
-if(data.ok){const oldCoins=s.coins;const state=await henovaCall('state');henovaApplyState(state.state);render();if(state.state.coins>=oldCoins+10000000)henovaShowRewardCard(10000000,'coins');else toast(s.lang==='ar'?'تم التحقق، لا توجد مكافأة جديدة':s.lang==='tr'?'Doğrulandı, yeni ödül yok':'Verified; no new reward')}
+if(data.ok){const oldCoins=s.coins;const state=await henovaCall('state');henovaApplyState(state.state);render();if(state.state.coins>=oldCoins+10000000)henovaShowRewardCard(50000000,'coins');else toast(s.lang==='ar'?'تم التحقق، لا توجد مكافأة جديدة':s.lang==='tr'?'Doğrulandı, yeni ödül yok':'Verified; no new reward')}
 else toast(hvError(data.error));
 }catch(e){toast(hvError(e.message))}
 }
@@ -3163,7 +3163,7 @@ async function henovaClaimPost80(){
   if(!result?.ok)throw Error(result?.error||'reward_unavailable');
   henovaPost80Claimed=true;
   const state=await henovaCall('state');if(state?.state){henovaApplyState(state.state);render();}
-  if(result.claimed)henovaShowRewardCard(10000000,'coins');
+  if(result.claimed)henovaShowRewardCard(50000000,'coins');
   else toast(s.lang==='ar'?'المكافأة مستلمة مسبقاً':s.lang==='tr'?'Ödül zaten alındı':'Reward already claimed');
  }catch(e){toast(String(e?.message||e));}
  finally{henovaPost80Busy=false;const b=document.getElementById('henova-post80-claim');if(b)b.disabled=henovaPost80Claimed;}
@@ -3189,7 +3189,7 @@ async function henovaClaimNGMCloud(){
   const fresh=await henovaCall('state');if(fresh?.state){henovaApplyState(fresh.state);render()}
   if(result.claimed){
    henovaNGMCloudClaimed=false;
-   henovaShowRewardCard(10000000,'coins');
+   henovaShowRewardCard(50000000,'coins');
   }else{
    const seconds=Math.max(1,Number(result.retry_after_seconds)||43200);
    const hours=Math.floor(seconds/3600),minutes=Math.ceil((seconds%3600)/60);
@@ -3228,7 +3228,7 @@ async function henovaCheckWithdrawals(){
  try{
   const result=await henovaCall('verify_withdrawals_channel');
   const message=!result.joined?hvError('not_joined'):result.reward_claimed?(s.lang==='ar'?'✅ تم إضافة 10M عملة إلى رصيدك':s.lang==='tr'?'✅ Bakiyene 10M jeton eklendi':'✅ 10M coins added to your balance'):(s.lang==='ar'?'✅ تم تأكيد الاشتراك، المكافأة مستلمة سابقاً':s.lang==='tr'?'✅ Üyelik onaylandı, ödül daha önce alındı':'✅ Membership verified; reward already claimed');
-  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);render();henovaShowRewardCard(10000000,'coins')}
+  if(result.reward_claimed){const state=await henovaCall('state');henovaApplyState(state.state);render();henovaShowRewardCard(50000000,'coins')}
   if(field)field.textContent=message;
   toast(message);
  }catch(e){const message=hvError(e.message);if(field)field.textContent=message;toast(message)}
@@ -3248,7 +3248,7 @@ async function henovaCheckPromoCodesTask(){
    const state=await henovaCall('state');
    henovaApplyState(state.state);
    render();
-   henovaShowRewardCard(10000000,'coins');
+   henovaShowRewardCard(50000000,'coins');
   }
   if(field)field.textContent=message;
   toast(message);
@@ -4896,11 +4896,11 @@ function henovaOwnedHensMarkup(){
 const HENOVA_ADSGRAM_TASK='task-56216';
 function henovaAdsgramLabels(){
 return ({
- en:{name:'Complete Sponsored Task',reward:'10M coins',interval:'Available anytime',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
- ar:{name:'أكمل المهمة الممولة',reward:'10M عملة',interval:'متاحة في أي وقت',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
- tr:{name:'Sponsorlu Görevi Tamamla',reward:'10M jeton',interval:'Her zaman kullanılabilir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
+ en:{name:'Complete Sponsored Task',reward:'50M coins',interval:'Available anytime',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'},
+ ar:{name:'أكمل المهمة الممولة',reward:'50M عملة',interval:'متاحة في أي وقت',button:'إكمال المهمة',claim:'استلام',done:'مكتملة',pending:'اكتملت المهمة. المكافأة تنتظر التحقق الآمن.',unavailable:'لا توجد مهمة ممولة متاحة حالياً.'},
+ tr:{name:'Sponsorlu Görevi Tamamla',reward:'50M jeton',interval:'Her zaman kullanılabilir',button:'Görevi tamamla',claim:'Al',done:'Tamamlandı',pending:'Görev tamamlandı. Ödül güvenli doğrulama bekliyor.',unavailable:'Şu anda sponsorlu görev bulunmuyor.'}
 })[s.lang]||({
-name:'Complete Sponsored Task',reward:'10M coins',interval:'Available anytime',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
+name:'Complete Sponsored Task',reward:'50M coins',interval:'Available anytime',button:'Complete task',claim:'Claim',done:'Completed',pending:'Task completed. Reward is pending secure verification.',unavailable:'No sponsored task available right now.'
 });
 }
 function henovaSponsoredEnableEntry(){
@@ -4944,9 +4944,9 @@ async function henovaVideoCooldownRefresh(){
 setInterval(henovaVideoCooldownDraw,1000);
 
 function henovaVideoRewardText(){
- return ({en:{title:'Watch Advertisement',desc:'10M coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
- ar:{title:'شاهد الإعلان',desc:'10M عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
- tr:{title:'Reklam İzle',desc:'10M jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'10M coins · Complete the ad',button:'Watch Ad',unavailable:'Ad unavailable'};
+ return ({en:{title:'Watch Advertisement',desc:'50M coins · Complete the ad',button:'Watch Ad',unavailable:'Ad currently unavailable'},
+ ar:{title:'شاهد الإعلان',desc:'50M عملة · أكمل الإعلان',button:'شاهد الإعلان',unavailable:'الإعلان غير متاح حالياً'},
+ tr:{title:'Reklam İzle',desc:'50M jeton · Reklamı tamamla',button:'Reklam İzle',unavailable:'Reklam şu anda mevcut değil'}})[s.lang]||{title:'Watch Advertisement',desc:'50M coins · Complete the ad',button:'Watch Ad',unavailable:'Ad unavailable'};
 }
 function henovaShowRewardCard(amount,unit,isGift=false){
  const ar=s.lang==='ar',tr=s.lang==='tr',eggs=unit==='eggs';
@@ -4978,7 +4978,7 @@ async function henovaWatchSponsoredReward(){
      localStorage.setItem(key,String(entry.id));
      const fresh=await henovaCall('state').catch(()=>null);
      if(fresh?.state){henovaApplyState(fresh.state);render();}
-     henovaShowRewardCard(10000000,'coins');
+     henovaShowRewardCard(50000000,'coins');
      return;
     }
    }
@@ -5065,16 +5065,16 @@ const dailyRewards=[10000000,10000000,10000000,10000000,10000000,10000000,100000
 const streak=Number(s.dailyStreak)||0;
 const nextDay=claimed?(streak||1):(streak>=7?1:Math.min(7,streak+1));
 const dailyDays='<section dir="ltr" class="henova-daily-seven-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:15px;width:100%;max-width:100%;box-sizing:border-box">'+dailyRewards.map((reward,i)=>'<div style="box-sizing:border-box;min-width:0;min-height:90px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:'+(i+1===nextDay?'#73b946':'#fff8df')+';color:'+(i+1===nextDay?'white':'#715522')+';border:1px solid #e3d8ac;border-radius:14px;text-align:center;padding:9px 3px"><strong style="font-size:12px;white-space:nowrap">'+promoWords.day+' '+(i+1)+'</strong><span style="font-size:22px;line-height:1">'+(claimed&&i+1===nextDay?'✓':'🪙')+'</span><b style="font-size:16px">'+(reward>=1000000?(reward/1000000)+'M':reward)+'</b></div>').join('')+'</section>';
-el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article class="item henova-daily-card" style="border:2px solid #b4d794;border-radius:22px;background:linear-gradient(140deg,#f4fbe7,#e0f0cf);display:block;padding:13px"><div class="henova-daily-head" style="display:flex;align-items:center;gap:10px;min-height:48px"><span style="font-size:32px;line-height:1">📋</span><div class="grow"><h3>'+promoWords.daily+'</h3><p>🪙 '+(dailyRewards[nextDay-1]>=1000000?(dailyRewards[nextDay-1]/1000000)+'M':dailyRewards[nextDay-1])+' Coins · '+(claimed?promoWords.today:(s.lang==='ar'?'مكافأة اليوم':s.lang==='tr'?'Bugünün ödülü':'Today’s reward'))+'</p></div><button onclick="daily()" '+(claimed?'disabled':'')+' style="border-radius:22px">'+(claimed?'✓':hvText('claim'))+'</button></div>'+dailyDays+'</article>'+'<article class="item" style="background:linear-gradient(120deg,#fff8df,#e7f3d8);border:1px solid #d6c58c;border-radius:18px"><span class="face">🎁</span><div class="grow"><h3>'+(s.lang==='ar'?'ادعُ صديقاً اليوم':s.lang==='tr'?'Bugün 1 Arkadaş Davet Et':'Invite 1 Friend Today')+'</h3><p>🪙 +10M '+(s.lang==='ar'?'عملة · صديق واحد فقط يومياً':s.lang==='tr'?'Jeton · Günde yalnızca 1 arkadaş':'Coins · Only 1 friend per day')+'</p><div style="height:7px;background:#ccddba;border-radius:8px;overflow:hidden"><div style="height:100%;width:'+(henovaDailyInviteRewarded?100:0)+'%;background:#74a65c"></div></div><small>'+(henovaDailyInviteRewarded?(s.lang==='ar'?'اكتملت مهمة اليوم':s.lang==='tr'?'Bugünün görevi tamamlandı':"Today's task completed"):(s.lang==='ar'?'بانتظار تسجيل صديق جديد':s.lang==='tr'?'Yeni arkadaşın kaydı bekleniyor':'Waiting for a new friend to register'))+'</small></div><button onclick="openTab(3)" style="border-radius:24px">'+(henovaDailyInviteRewarded?'✓':henovaDailyInviteProgress+'/1')+'</button></article>'+
+el.innerHTML='<h1 class="title">🎁 '+names[2]+'</h1>'+promoCard+'<article class="item henova-daily-card" style="border:2px solid #b4d794;border-radius:22px;background:linear-gradient(140deg,#f4fbe7,#e0f0cf);display:block;padding:13px"><div class="henova-daily-head" style="display:flex;align-items:center;gap:10px;min-height:48px"><span style="font-size:32px;line-height:1">📋</span><div class="grow"><h3>'+promoWords.daily+'</h3><p>🪙 '+(dailyRewards[nextDay-1]>=1000000?(dailyRewards[nextDay-1]/1000000)+'M':dailyRewards[nextDay-1])+' Coins · '+(claimed?promoWords.today:(s.lang==='ar'?'مكافأة اليوم':s.lang==='tr'?'Bugünün ödülü':'Today’s reward'))+'</p></div><button onclick="daily()" '+(claimed?'disabled':'')+' style="border-radius:22px">'+(claimed?'✓':hvText('claim'))+'</button></div>'+dailyDays+'</article>'+'<article class="item" style="background:linear-gradient(120deg,#fff8df,#e7f3d8);border:1px solid #d6c58c;border-radius:18px"><span class="face">🎁</span><div class="grow"><h3>'+(s.lang==='ar'?'ادعُ صديقاً اليوم':s.lang==='tr'?'Bugün 1 Arkadaş Davet Et':'Invite 1 Friend Today')+'</h3><p>🪙 +10M '+(s.lang==='ar'?'عملة · صديق واحد فقط يومياً':s.lang==='tr'?'50M Jeton · Günde yalnızca 1 arkadaş':'Coins · Only 1 friend per day')+'</p><div style="height:7px;background:#ccddba;border-radius:8px;overflow:hidden"><div style="height:100%;width:'+(henovaDailyInviteRewarded?100:0)+'%;background:#74a65c"></div></div><small>'+(henovaDailyInviteRewarded?(s.lang==='ar'?'اكتملت مهمة اليوم':s.lang==='tr'?'Bugünün görevi tamamlandı':"Today's task completed"):(s.lang==='ar'?'بانتظار تسجيل صديق جديد':s.lang==='tr'?'Yeni arkadaşın kaydı bekleniyor':'Waiting for a new friend to register'))+'</small></div><button onclick="openTab(3)" style="border-radius:24px">'+(henovaDailyInviteRewarded?'✓':henovaDailyInviteProgress+'/1')+'</button></article>'+
 '<article class="item" style="background:linear-gradient(120deg,#f5f7e8,#e4f0d4);border:1px solid #d4deb9;border-radius:18px"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:15px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'تفاعل مع أحدث منشوراتنا':s.lang==='tr'?'En Son Gönderimizle Etkileşime Geç':'Interact With Our Latest Post')+'</h3><p>🪙 +10M · '+(s.lang==='ar'?'عملة · مرة واحدة فقط':s.lang==='tr'?'Tek seferlik':'One-time reward')+'</p></div><div style="display:grid;gap:6px"><button onclick="henovaOpenPost80()">'+(s.lang==='ar'?'فتح المنشور':s.lang==='tr'?'Gönderiyi aç':'Open Post')+'</button><button id="henova-post80-claim" onclick="henovaClaimPost80()" '+(henovaPost80Claimed?'disabled':'')+'>'+(henovaPost80Claimed?'✓':(s.lang==='ar'?'استلام':s.lang==='tr'?'Al':'Claim'))+'</button></div></article>'+'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_FARM.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:50%;object-fit:cover"><div class="grow"><h3>'+name+'</h3><p>🪙 '+hvText('taskDesc')+'</p><small id="join-timer">'+(Date.now()<henovaChannelNext?henovaTaskClock(Math.ceil((henovaChannelNext-Date.now())/1000)):hvText('ready'))+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenChannel()">'+hvText('open')+'</button><button id="join-claim" onclick="henovaJoinReward()" '+(Date.now()<henovaChannelNext?'disabled':'')+'>'+hvText('verify')+'</button></div></article>'+
-'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_WITHDRAWALS.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:14px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'قناة السحب':s.lang==='tr'?'Çekim Kanalı':'Withdrawals Channel')+'</h3><p>HENOVA Withdrawals · +10M Coins</p><small id="withdraw-channel-status">'+(s.lang==='ar'?'تحقق من اشتراكك':s.lang==='tr'?'Üyeliğini doğrula':'Verify membership')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenWithdrawals()">'+hvText('open')+'</button><button onclick="henovaCheckWithdrawals()">'+hvText('verify')+'</button></div></article>'+
-'<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/PickaxeEmpireApp.jpg" alt="Pickaxe Empire" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src='+'\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\''+'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Pickaxe Empire':s.lang==='tr'?'Bize Katıl · Pickaxe Empire':'Join Us · Pickaxe Empire')+'</h3><p>🪙 +10M · '+(s.lang==='ar'?'كل 12 ساعة':s.lang==='tr'?'Her 12 saatte bir':'Every 12 hours')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق واستلم مكافأتك، تتجدد كل 12 ساعة':s.lang==='tr'?'Uygulamayı aç ve ödülünü al; her 12 saatte yenilenir':'Open the app and claim your reward; refreshes every 12 hours')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGMCloud()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-ngm-cloud-claim" onclick="henovaClaimNGMCloud()">'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
+'<article class="item"><img src="https://t.me/i/userpic/320/HENOVA_WITHDRAWALS.jpg" alt="HENOVA" style="width:58px;height:58px;border-radius:14px;object-fit:cover"><div class="grow"><h3>'+(s.lang==='ar'?'قناة السحب':s.lang==='tr'?'Çekim Kanalı':'Withdrawals Channel')+'</h3><p>HENOVA Withdrawals · +50M Coins</p><small id="withdraw-channel-status">'+(s.lang==='ar'?'تحقق من اشتراكك':s.lang==='tr'?'Üyeliğini doğrula':'Verify membership')+'</small></div><div style="display:grid;gap:5px"><button onclick="henovaOpenWithdrawals()">'+hvText('open')+'</button><button onclick="henovaCheckWithdrawals()">'+hvText('verify')+'</button></div></article>'+
+'<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/PickaxeEmpireApp.jpg" alt="Pickaxe Empire" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px" onerror="this.src='+'\'https://t.me/i/userpic/320/HENOVA_FARM.jpg\''+'"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Pickaxe Empire':s.lang==='tr'?'Bize Katıl · Pickaxe Empire':'Join Us · Pickaxe Empire')+'</h3><p>🪙 +50M · '+(s.lang==='ar'?'كل 12 ساعة':s.lang==='tr'?'Her 12 saatte bir':'Every 12 hours')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق واستلم مكافأتك، تتجدد كل 12 ساعة':s.lang==='tr'?'Uygulamayı aç ve ödülünü al; her 12 saatte yenilenir':'Open the app and claim your reward; refreshes every 12 hours')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenNGMCloud()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-ngm-cloud-claim" onclick="henovaClaimNGMCloud()">'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
 }
 
 if(tab===2){
  // Keep both ad tasks at the very top of the Tasks page, directly below its heading.
  const firstAdTasks='<article class="item" style="display:flex;align-items:center;gap:12px"><img src="https://t.me/i/userpic/320/KingyMiner_bot.jpg" alt="Kingy Miner" style="width:58px;height:58px;border-radius:14px;object-fit:cover;flex:0 0 58px"><div class="grow" style="min-width:0"><h3>'+(s.lang==='ar'?'انضم إلينا · Kingy Miner':s.lang==='tr'?'Bize Katıl · Kingy Miner':'Join Us · Kingy Miner')+'</h3><p>🪙 +50M · '+(s.lang==='ar'?'عملة · مرة واحدة':s.lang==='tr'?'jeton · Tek seferlik':'coins · One time only')+'</p><small>'+(s.lang==='ar'?'افتح التطبيق ثم تحقق واستلم مكافأتك مرة واحدة':s.lang==='tr'?'Uygulamayı aç, doğrula ve tek seferlik ödülünü al':'Open the app, then verify and claim your one-time reward')+'</small></div><div style="display:grid;gap:5px;flex:0 0 auto"><button onclick="henovaOpenKingyMiner()">'+(s.lang==='ar'?'فتح التطبيق':s.lang==='tr'?'Uygulamayı Aç':'Open App')+'</button><button id="henova-kingy-miner-claim" onclick="henovaClaimVictorsCompany()" '+(henovaVictorsCompanyClaimed?'disabled':'')+'>'+(s.lang==='ar'?'تحقق واستلم':s.lang==='tr'?'Doğrula ve Al':'Verify & Claim')+'</button></div></article>';
- const watchVideoTask='<article class="item hv-video-task-card"><div class="hv-task-top"><div class="hv-video-task-icon" aria-hidden="true"><img src="./assets/henova-watch-ad-icon.svg?v=20261117" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit"></div><div class="hv-sponsored-copy"><div class="hv-video-task-kicker">HENOVA • REWARDS</div><h3>'+henovaVideoRewardText().title+'</h3><p>'+henovaVideoRewardText().desc+'</p></div><div class="hv-video-task-reward"><strong>10M</strong><small>COINS</small></div></div><div class="hv-video-task-action"><button id="henova-reward-video-btn" type="button" onclick="henovaWatchRewardVideo()">'+henovaVideoRewardText().button+'</button></div></article>';
+ const watchVideoTask='<article class="item hv-video-task-card"><div class="hv-task-top"><div class="hv-video-task-icon" aria-hidden="true"><img src="./assets/henova-watch-ad-icon.svg?v=20261117" alt="" style="display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit"></div><div class="hv-sponsored-copy"><div class="hv-video-task-kicker">HENOVA • REWARDS</div><h3>'+henovaVideoRewardText().title+'</h3><p>'+henovaVideoRewardText().desc+'</p></div><div class="hv-video-task-reward"><strong>50M</strong><small>COINS</small></div></div><div class="hv-video-task-action"><button id="henova-reward-video-btn" type="button" onclick="henovaWatchRewardVideo()">'+henovaVideoRewardText().button+'</button></div></article>';
  const tasksHeading=el.querySelector('h1.title');
  if(tasksHeading)tasksHeading.insertAdjacentHTML('afterend',firstAdTasks+watchVideoTask);
  void henovaVideoCooldownRefresh().catch(error=>console.warn('Watch-ad task status unavailable',error));
