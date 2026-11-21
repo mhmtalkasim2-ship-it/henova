@@ -2681,7 +2681,7 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c{left:81%!importan
 @keyframes hvStarterWalkV42{0%,100%{margin-left:0vw;margin-top:0vh}18.3%,25%{margin-left:12vw;margin-top:4vh}43.3%,50%{margin-left:22vw;margin-top:1vh}68.3%,75%{margin-left:14vw;margin-top:10vh}93.3%{margin-left:0vw;margin-top:0vh}}
 @keyframes hvStarterBWalkV42{0%,100%{margin-left:0vw;margin-top:0vh}18.3%,25%{margin-left:8vw;margin-top:-8vh}43.3%,50%{margin-left:15vw;margin-top:-2vh}68.3%,75%{margin-left:5vw;margin-top:7vh}93.3%{margin-left:0vw;margin-top:0vh}}
 @keyframes hvStarterCWalkV42{0%,100%{margin-left:0vw;margin-top:0vh}18.3%,25%{margin-left:8vw;margin-top:-8vh}43.3%,50%{margin-left:-7vw;margin-top:-13vh}68.3%,75%{margin-left:-15vw;margin-top:-2vh}93.3%{margin-left:0vw;margin-top:0vh}}
-html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{animation:hvStarterTurnV39 31s steps(1,end) -6s infinite!important}
+html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-facing{animation:hvStarterTurnV39 30s steps(1,end) -2s infinite!important}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-a .hen-action{animation:hvStarterPeckV40 26s ease-in-out -2s infinite!important;transform-origin:68% 78%}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b img{animation:hvStarterBActionV42 31s ease-in-out -7s infinite!important;transform-origin:68% 78%}
 html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvStarterCActionV42 36s ease-in-out -13s infinite!important;transform-origin:68% 78%}
@@ -2706,7 +2706,7 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{animation:hvS
  75%,93%{transform:scaleX(1) translateY(0) rotate(0)}
  95%,97%{transform:scaleX(1) translateY(4px) rotate(8deg)}
 }
-@keyframes hvStarterTurnV39{0%,47%{transform:scaleX(1)}48%,82%{transform:scaleX(-1)}83%,100%{transform:scaleX(1)}}
+@keyframes hvStarterTurnV39{0%,43.3%{transform:scaleX(1)}43.4%,93.2%{transform:scaleX(-1)}93.3%,100%{transform:scaleX(1)}}
 @keyframes hvStarterBPeckV39{0%,17%,41%,65%,89%,100%{transform:translateY(0) rotate(0)}22%,46%,70%,94%{transform:translateY(3px) rotate(7deg)}27%,51%,75%{transform:translateY(0) rotate(0)}}
 @keyframes hvStarterCPeckV39{0%,12%,37%,62%,87%,100%{transform:translateY(0) rotate(0)}17%,42%,67%,92%{transform:translateY(3px) rotate(8deg)}22%,47%,72%{transform:translateY(0) rotate(0)}}
 </style>
@@ -4875,9 +4875,14 @@ function henovaOwnedHensMarkup(){
      const walkName='hvHenWalkV42_'+n;
      const turnName='hvHenTurnV42_'+n;
      const peckName='hvHenPeckV42_'+n;
+     // Match each hen's facing to the sign of each actual horizontal route segment.
+     const face1=x1===x0?1:(x1>x0?1:-1);
+     const face2=x2===x1?face1:(x2>x1?1:-1);
+     const face3=x3===x2?face2:(x3>x2?1:-1);
+     const face4=x0===x3?face3:(x0>x3?1:-1);
      individualKeyframes+=
        '@keyframes '+walkName+'{0%{left:'+x0+'%;top:'+y0+'%}18.3%,25%{left:'+x1+'%;top:'+y1+'%}43.3%,50%{left:'+x2+'%;top:'+y2+'%}68.3%,75%{left:'+x3+'%;top:'+y3+'%}93.3%,100%{left:'+x0+'%;top:'+y0+'%}}'+
-       '@keyframes '+turnName+'{0%,18%{transform:scaleX(1)}19%,43%{transform:scaleX(-1)}44%,68%{transform:scaleX(1)}69%,93%{transform:scaleX(-1)}94%,100%{transform:scaleX(1)}}'+
+       '@keyframes '+turnName+'{0%,18.3%{transform:scaleX('+face1+')}19%,43.3%{transform:scaleX('+face2+')}44%,68.3%{transform:scaleX('+face3+')}69%,93.3%{transform:scaleX('+face4+')}94%,100%{transform:scaleX('+face1+')}}'+
        '@keyframes '+peckName+'{0%,18%,25%,43%,50%,68%,75%,93%,100%{transform:translateY(0) rotate(0)}20%,22%,27%,29%,45%,47%,52%,54%,70%,72%,77%,79%,95%,97%{transform:translateY(4px) rotate(10deg)}}';
      const faceStyle='animation:'+turnName+' '+duration+'s steps(1,end) '+delay+'s infinite!important;transform-origin:50% 80%;';
      const actionDuration=(9.6+(seed%6)*1.46).toFixed(2);
@@ -5413,14 +5418,12 @@ html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-c img{
   100%{margin-left:0;margin-top:0}
 }
 @keyframes henovaCompanionBFace20261119{
-  0%,37%{transform:scaleX(1)}
-  38%,89%{transform:scaleX(-1)}
-  90%,100%{transform:scaleX(1)}
+  0%,65.9%{transform:scaleX(1)}
+  66%,100%{transform:scaleX(-1)}
 }
 @keyframes henovaCompanionCFace20261119{
-  0%,37%{transform:scaleX(-1)}
-  38%,89%{transform:scaleX(1)}
-  90%,100%{transform:scaleX(-1)}
+  0%,65.9%{transform:scaleX(-1)}
+  66%,100%{transform:scaleX(1)}
 }
 @media(prefers-reduced-motion:reduce){
   html body main.farm-mode #farm-scene.farm-v3 > .farm-hen.hen-b,
