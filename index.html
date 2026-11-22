@@ -4859,16 +4859,20 @@ function henovaOwnedHensMarkup(){
      // Every bird receives its own generated route, timing, facing and peck rhythm.
      const seed=n+1;
      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
+     // Keep the full hen sprite inside the scene, not just its left anchor.
+     const routeWidth=document.getElementById('farm-scene')?.clientWidth||window.innerWidth;
+     const henWidth=Math.max(36,Math.min(51,window.innerWidth*.078));
+     const maxLeft=clamp(100-(henWidth/routeWidth*100)-2,6,94);
      // Spread the flock through the full visible farm instead of clustering
      // beside the collection dock. Keep routes within the scene and vary lanes.
      const lane=(seed-1)%7;
-     const x0=clamp(8+lane*13+((seed*7)%9-4),6,92);
+     const x0=clamp(8+lane*13+((seed*7)%9-4),6,maxLeft);
      const y0=48+((seed*17)%35);
-     const x1=clamp(x0+((seed*11)%31-15),5,94);
+     const x1=clamp(x0+((seed*11)%31-15),5,maxLeft);
      const y1=clamp(y0+((seed*3)%17-8),43,86);
-     const x2=clamp(x0+((seed*17)%39-19),5,94);
+     const x2=clamp(x0+((seed*17)%39-19),5,maxLeft);
      const y2=clamp(y0+((seed*7)%19-9),43,86);
-     const x3=clamp(x0+((seed*13)%27-13),5,94);
+     const x3=clamp(x0+((seed*13)%27-13),5,maxLeft);
      const y3=clamp(y0+((seed*9)%17-8),43,86);
      const duration=22+(seed%5)*3;
      const delay=-((seed*7)%(duration*10))/10;
