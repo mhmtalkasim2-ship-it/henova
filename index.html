@@ -2655,7 +2655,11 @@ html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen *{
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen{
  position:absolute!important;display:block!important;visibility:visible!important;opacity:1!important;
- right:auto!important;bottom:auto!important;transform:none!important;pointer-events:auto!important;
+ right:auto!important;bottom:auto!important;pointer-events:auto!important;
+}
+html body main.farm-mode #farm-scene.farm-v3 .farm-hen,
+html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
+ transform:none!important;
 }
 html body main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-exit){
  width:clamp(36px,7.8vw,51px)!important;max-width:51px!important;will-change:left,top;
@@ -5340,7 +5344,7 @@ html body main.farm-mode #farm-scene.farm-v3 > .henova-owned-hen{z-index:4!impor
   76% { transform:translateY(-1.3px) rotate(0.8deg); }
 }
 html body main.farm-mode #farm-scene.farm-v3 .farm-hen.hen-a {
-  animation-duration:30s!important;
+  animation-duration:26s!important;
   animation-timing-function:ease-in-out!important;
 }
 /* SVG animates legs, body and head independently; keep the whole image stationary. */
