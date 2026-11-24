@@ -4846,26 +4846,27 @@ function henovaOwnedHensMarkup(){
    const points=HENOVA_HEN_SPOTS[breed];
    Array.from({length:count},(_,i)=>{
      const point=points[i];
-     const sceneWidth=Math.min(520,document.querySelector('main')?.clientWidth||window.innerWidth);
+     const sceneWidth=document.getElementById('farm-scene')?.clientWidth||document.querySelector('main')?.clientWidth||window.innerWidth;
      const sceneHeight=document.getElementById('farm-scene')?.clientHeight||Math.round(sceneWidth*1.18);
-     const entryDx=Math.round(sceneWidth*(30-point[0])/100);
-     const entryDy=Math.round(sceneHeight*(43-point[1])/100);
      const isNewPurchase=henovaPurchasedHenArrival?.breed===breed&&i===count-1;
-     const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;':'';
      const arrivalClass=isNewPurchase?' henova-new-purchase-exit':'';
      const n=henOrdinal++;
      // Every bird receives its own generated route, timing, facing and peck rhythm.
      const seed=n+1;
      const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
      // Keep the full hen sprite inside the scene, not just its left anchor.
-     const routeWidth=document.getElementById('farm-scene')?.clientWidth||window.innerWidth;
+     const routeWidth=sceneWidth;
      const henWidth=Math.max(36,Math.min(51,window.innerWidth*.078));
      const maxLeft=clamp(100-(henWidth/routeWidth*100)-2,6,94);
      // Spread the flock through the full visible farm instead of clustering
      // beside the collection dock. Keep routes within the scene and vary lanes.
      const lane=(seed-1)%7;
-     const x0=clamp(8+lane*13+((seed*7)%9-4),6,maxLeft);
-     const y0=48+((seed*17)%35);
+     const x0=isNewPurchase?clamp(point[0],6,maxLeft):clamp(8+lane*13+((seed*7)%9-4),6,maxLeft);
+     const y0=isNewPurchase?clamp(point[1],43,86):48+((seed*17)%35);
+     // The arrival offset must be measured from the exact roaming destination.
+     const entryDx=Math.round(sceneWidth*(30-x0)/100);
+     const entryDy=Math.round(sceneHeight*(43-y0)/100);
+     const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;':'';
      const x1=clamp(x0+((seed*11)%31-15),5,maxLeft);
      const y1=clamp(y0+((seed*3)%17-8),43,86);
      const x2=clamp(x0+((seed*17)%39-19),5,maxLeft);
