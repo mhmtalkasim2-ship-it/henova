@@ -2597,7 +2597,7 @@ main.farm-mode #farm-scene.farm-v3 .henova-owned-hen:not(.henova-new-purchase-ex
   will-change:auto!important;
 }
 main.farm-mode #farm-scene.farm-v3 .henova-owned-hen.henova-new-purchase-exit{
-  animation:henovaPurchasedHenExitV2 8.5s cubic-bezier(.35,.08,.25,1) both!important;
+  animation:henovaPurchasedHenExitV2 8.5s cubic-bezier(.35,.08,.25,1) var(--purchase-exit-delay,0s) both!important;
   translate:0 0!important;
   will-change:transform,opacity;
 }
@@ -2847,7 +2847,12 @@ async function henovaAction(action,item){
     }
     localStorage.removeItem('henova-pending-action-v1');
     if(action==='purchase'){
-      henovaPurchasedHenArrival={breed:item||'',startedAt:Date.now()};
+      const purchasedBreed=item||'';
+      const displayedCount=Math.max(0,Math.min(HENOVA_MAX_HENS_PER_BREED,Math.floor(Number(s.hen[purchasedBreed])||0))-(purchasedBreed==='starter'?1:0));
+      if(displayedCount>0){
+        const startedAt=Date.now();
+        henovaPurchasedHenArrivals.push({breed:purchasedBreed,index:displayedCount-1,startedAt});
+      }
       tab=0;
     }
     render();
@@ -4834,8 +4839,21 @@ const HENOVA_HEN_SPOTS={
  royal:[[10,79],[23,83],[7,88],[27,91],[43,83]],
  legend:[[48,74],[58,77],[71,91],[89,77],[91,89]]
 };
-let henovaPurchasedHenArrival=null;
+let henovaPurchasedHenArrivals=[];
+function henovaFinishPurchasedHenExit(hen,event,walkName,duration,delay,turnName,peckName,actionDuration,actionDelay,breed,index,startedAt){
+ if(!hen||event?.animationName!=='henovaPurchasedHenExitV2')return;
+ hen.classList.remove('henova-new-purchase-exit');
+ hen.style.setProperty('animation',walkName+' '+duration+'s ease-in-out '+delay+'s infinite','important');
+ const facing=hen.querySelector('.hen-facing');
+ if(facing)facing.style.setProperty('animation',turnName+' '+duration+'s steps(1,end) '+delay+'s infinite','important');
+ const action=hen.querySelector('.hen-action');
+ if(action)action.style.setProperty('animation',peckName+' '+actionDuration+'s ease-in-out '+actionDelay+'s infinite','important');
+ const pendingIndex=henovaPurchasedHenArrivals.findIndex(p=>p.breed===breed&&p.index===index&&p.startedAt===startedAt);
+ if(pendingIndex>=0)henovaPurchasedHenArrivals.splice(pendingIndex,1);
+}
 function henovaOwnedHensMarkup(){
+ const now=Date.now();
+ henovaPurchasedHenArrivals=henovaPurchasedHenArrivals.filter(p=>Number.isFinite(p.startedAt)&&now-p.startedAt<8500);
  let henOrdinal=0;
  let individualKeyframes='';
  let individualMarkup='';
@@ -4847,7 +4865,10 @@ function henovaOwnedHensMarkup(){
      const point=points[i];
      const sceneWidth=document.getElementById('farm-scene')?.clientWidth||document.querySelector('main')?.clientWidth||window.innerWidth;
      const sceneHeight=document.getElementById('farm-scene')?.clientHeight||Math.round(sceneWidth*1.18);
-     const isNewPurchase=henovaPurchasedHenArrival?.breed===breed&&i===count-1;
+     const pendingArrival=henovaPurchasedHenArrivals.find(p=>p.breed===breed&&p.index===i);
+     const purchaseElapsed=pendingArrival?Math.max(0,(Date.now()-pendingArrival.startedAt)/1000):0;
+     const isNewPurchase=!!pendingArrival&&purchaseElapsed<8.5;
+     const arrivalStartedAt=isNewPurchase?pendingArrival.startedAt:0;
      const arrivalClass=isNewPurchase?' henova-new-purchase-exit':'';
      const n=henOrdinal++;
      // Every bird receives its own generated route, timing, facing and peck rhythm.
@@ -4865,7 +4886,7 @@ function henovaOwnedHensMarkup(){
      // The arrival offset must be measured from the exact roaming destination.
      const entryDx=Math.round(sceneWidth*(30-x0)/100);
      const entryDy=Math.round(sceneHeight*(43-y0)/100);
-     const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;--purchase-facing:'+(x0<30?-1:1)+';':'';
+     const entryStyle=isNewPurchase?'--purchase-entry-x:'+entryDx+'px;--purchase-entry-y:'+entryDy+'px;--purchase-facing:'+(x0<30?-1:1)+';--purchase-exit-delay:-'+purchaseElapsed.toFixed(2)+'s;':'';
      const x1=clamp(x0+((seed*11)%31-15),5,maxLeft);
      const y1=clamp(y0+((seed*3)%17-8),43,86);
      const x2=clamp(x0+((seed*17)%39-19),5,maxLeft);
@@ -4892,8 +4913,7 @@ function henovaOwnedHensMarkup(){
      const actionStyle=isNewPurchase?'transform-origin:68% 78%;':('animation:'+peckName+' '+actionDuration+'s ease-in-out '+actionDelay+'s infinite!important;transform-origin:68% 78%;');
      const roamStyle='--roam-base-left:'+x0+'%;--roam-base-top:'+y0+'%;'+entryStyle;
      const walkStyle=isNewPurchase?'':('animation:'+walkName+' '+duration+'s ease-in-out '+delay+'s infinite!important;');
-     if(isNewPurchase)henovaPurchasedHenArrival=null;
-     individualMarkup+='<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+x0+'%;top:'+y0+'%;'+roamStyle+walkStyle+'" onanimationend="if(event.animationName===&quot;henovaPurchasedHenExitV2&quot;){this.classList.remove(&quot;henova-new-purchase-exit&quot;);this.style.setProperty(&quot;animation&quot;,&quot;' + walkName + ' ' + duration + 's ease-in-out ' + delay + 's infinite&quot;,&quot;important&quot;);const f=this.querySelector(&quot;.hen-facing&quot;);if(f)f.style.setProperty(&quot;animation&quot;,&quot;' + turnName + ' ' + duration + 's steps(1,end) ' + delay + 's infinite&quot;,&quot;important&quot;);const a=this.querySelector(&quot;.hen-action&quot;);if(a)a.style.setProperty(&quot;animation&quot;,&quot;' + peckName + ' ' + actionDuration + 's ease-in-out ' + actionDelay + 's infinite&quot;,&quot;important&quot;)}" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing" style="'+faceStyle+'"><div class="hen-action" style="'+actionStyle+'"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
+     individualMarkup+='<div class="henova-owned-hen henova-breed-'+breed+arrivalClass+'" style="left:'+x0+'%;top:'+y0+'%;'+roamStyle+walkStyle+'" onanimationend="henovaFinishPurchasedHenExit(this,event,&quot;' + walkName + '&quot;,' + duration + ',' + delay + ',&quot;' + turnName + '&quot;,&quot;' + peckName + '&quot;,' + actionDuration + ',' + actionDelay + ',&quot;' + breed + '&quot;,' + i + ',' + arrivalStartedAt + ')" role="button" tabindex="0" aria-label="'+h[2]+'" onclick="henovaTapHen(event)" onkeydown="if(event.key===&quot;Enter&quot;||event.key===&quot; &quot;){event.preventDefault();henovaTapHen(event)}"><div class="hen-facing" style="'+faceStyle+'"><div class="hen-action" style="'+actionStyle+'"><img loading="lazy" draggable="false" src="'+henovaBreedImage(breed)+'" alt="'+h[2]+'"></div></div></div>';
    });
  });
  return '<style id="henova-individual-hen-routes-v42">'+individualKeyframes+'</style>'+individualMarkup;
