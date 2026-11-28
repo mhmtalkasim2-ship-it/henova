@@ -29,12 +29,10 @@ async function ensureHenovaStartButton(botToken,supabaseUrl){
     console.warn("HENOVA bot has existing webhook; preserving its configuration");
     return;
   }
-  if(!current){
-    const bytes=await crypto.subtle.digest("SHA-256",encoder.encode("henova-webhook-1:"+botToken));
-    const secret=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,"0")).join("");
-    await botApi("setWebhook",{url:endpoint,secret_token:secret,allowed_updates:["message"],max_connections:10,drop_pending_updates:false});
-    console.info("HENOVA bot /start webhook registered");
-  }
+  const bytes=await crypto.subtle.digest("SHA-256",encoder.encode("henova-webhook-1:"+botToken));
+  const secret=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,"0")).join("");
+  await botApi("setWebhook",{url:endpoint,secret_token:secret,allowed_updates:["message","callback_query"],max_connections:10,drop_pending_updates:false});
+  if(!current)console.info("HENOVA bot webhook registered");
   await Promise.allSettled([
     botApi("setMyCommands",{commands:[{command:"start",description:"Open HENOVA Farm"}]}),
     botApi("setMyCommands",{language_code:"ar",commands:[{command:"start",description:"افتح مزرعة HENOVA"}]}),
@@ -120,6 +118,36 @@ function publicState(player) {
     daily_streak: player.daily_streak || 0,
   };
 }
+
+async function henovaCheckWithdrawalChannels(botToken: string, userId: number) {
+  const channels = [
+    { id: "@HENOVA_PROMO_CODES", key: "promo_codes" },
+    { id: "@HENOVA_FARM", key: "farm" },
+  ];
+  const checks = await Promise.all(channels.map(async channel => {
+    try {
+      const response = await fetch("https://api.telegram.org/bot" + botToken + "/getChatMember", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: channel.id, user_id: userId }),
+        signal: AbortSignal.timeout(8000),
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) return { key: channel.key, available: false, joined: false };
+      const member = result.result;
+      const joined = ["creator", "administrator", "member"].includes(member?.status) ||
+        (member?.status === "restricted" && member?.is_member === true);
+      return { key: channel.key, available: true, joined };
+    } catch {
+      return { key: channel.key, available: false, joined: false };
+    }
+  }));
+  return {
+    available: checks.every(check => check.available),
+    joined: checks.every(check => check.joined),
+    missing: checks.filter(check => check.available && !check.joined).map(check => check.key),
+  };
+}
+
 Deno.serve(async (request) => {
   if (request.headers.get("origin") && request.headers.get("origin") !== allowedOrigin) {
     return reply({ ok: false, error: "origin_not_allowed" }, 403);
@@ -205,6 +233,205 @@ Deno.serve(async (request) => {
     // Preserve bootstrap logic by carrying the verified membership flag, then claim below.
   }
   const action = body?.action;
+
+  // GRAM Mining pilot: only the explicitly configured Telegram owner may access it.
+  if (["gram_mining_state","gram_mining_start","gram_mining_claim"].includes(action)) {
+    const gramMiningAdminId = "1035565575";
+    if (String(telegram.id) !== gramMiningAdminId) {
+      return reply({ ok: false, error: "forbidden" }, 403);
+    }
+    if (action === "gram_mining_state") {
+      const { data, error } = await admin.from("henova_gram_mining_accounts")
+        .select("balance,total_mined,mining_started_at,mining_ends_at")
+        .eq("telegram_id", telegram.id).maybeSingle();
+      if (error) {
+        console.error("GRAM mining state lookup failed", error.code);
+        return reply({ ok: false, error: "gram_mining_unavailable" }, 503);
+      }
+      return reply({ ok: true, state: data || {
+        balance: "0.000000000", total_mined: "0.000000000",
+        mining_started_at: null, mining_ends_at: null
+      }});
+    }
+    if (action === "gram_mining_start") {
+      const { data, error } = await admin.rpc("henova_gram_mining_start", {
+        p_telegram_id: telegram.id
+      });
+      if (error) {
+        console.error("GRAM mining start failed", error.code);
+        return reply({ ok: false, error: "gram_mining_unavailable" }, 503);
+      }
+      return reply(data, data?.ok ? 200 : 409);
+    }
+    if (action === "gram_mining_claim") {
+      const { data, error } = await admin.rpc("henova_gram_mining_claim", {
+        p_telegram_id: telegram.id
+      });
+      if (error) {
+        console.error("GRAM mining claim failed", error.code);
+        return reply({ ok: false, error: "gram_mining_unavailable" }, 503);
+      }
+      return reply(data, data?.ok ? 200 : (data?.error === "not_ready" ? 409 : 400));
+    }
+  }
+
+
+
+  // User GRAM balance and separate manual GRAM withdrawals. This is independent
+  // of the legacy egg-to-GRAM payout workflow.
+  if (action === "gram_balance_state") {
+    const [{data:account,error:accountError},{data:withdrawals,error:withdrawalError},{count:availableCodeCount,error:codeCountError}] = await Promise.all([
+      admin.from("henova_gram_mining_accounts")
+        .select("balance,total_mined").eq("telegram_id",telegram.id).maybeSingle(),
+      admin.from("henova_mining_gram_withdrawals")
+        .select("id,amount,status,destination_address,payout_tx_hash,created_at,updated_at")
+        .eq("telegram_id",telegram.id).order("created_at",{ascending:false}).limit(20),
+      admin.from("henova_promo_redemptions")
+        .select("code",{count:"exact",head:true})
+        .eq("telegram_id",telegram.id).is("gram_redeemed_at",null)
+    ]);
+    if(accountError||withdrawalError||codeCountError) return reply({ok:false,error:"gram_balance_unavailable"},503);
+    return reply({ok:true,balance:account?.balance||"0.000000000",
+      total_mined:account?.total_mined||"0.000000000",
+      available_promo_codes:availableCodeCount||0,withdrawals:withdrawals||[]});
+  }
+  if (action === "gram_codes_redeem") {
+    return reply({ok:false,error:"direct_withdrawal_required"},409);
+  }
+  if (action === "gram_codes_withdrawal_request") {
+    const requestId=String(body?.requestId||"");
+    const codeCount=Number(body?.codeCount);
+    const address=String(body?.address||"").trim();
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(requestId)
+      ||!Number.isSafeInteger(codeCount)||codeCount<1
+      ||address.length<10||address.length>128)
+      return reply({ok:false,error:"invalid_request"},400);
+    let parsedAddress;
+    try{parsedAddress=Address.parse(address);}catch{return reply({ok:false,error:"invalid_ton_wallet"},400);}
+    if(parsedAddress.workChain!==0) return reply({ok:false,error:"invalid_ton_wallet"},400);
+    const normalizedAddress=address.trim(); // Preserve the exact user-entered TON friendly address for admin and payout proofs.
+    const {data,error}=await admin.rpc("henova_promo_codes_withdrawal_request",{
+      p_telegram_id:telegram.id,p_request_id:requestId,p_code_count:codeCount,p_address:normalizedAddress
+    });
+    if(error){console.error("GRAM promo-code withdrawal failed",error.code);return reply({ok:false,error:"withdrawal_unavailable"},503);}
+    if(data?.ok===true&&!data?.duplicate){
+      try{
+        const {data:player}=await admin.from("henova_players").select("username,first_name")
+          .eq("telegram_id",telegram.id).maybeSingle();
+        const username=player?.username?"@"+player.username:(player?.first_name||"Telegram user");
+        const message="💎 HENOVA — NEW GRAM WITHDRAWAL\n"+
+          "Request #"+data.id+" · Pending approval\n"+
+          "👤 "+username+" · ID: "+telegram.id+"\n"+
+          "🎟️ Promo codes: "+data.code_count+"\n"+
+          "💎 Amount: "+Number(data.amount).toFixed(9)+" GRAM\n"+
+          "👛 Wallet: "+normalizedAddress;
+        const response=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+          method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({chat_id:"-1005748276754",text:message,disable_web_page_preview:true,reply_markup:{inline_keyboard:[[{text:"✅ قبول",callback_data:"gramwd:approve:"+data.id},{text:"❌ رفض",callback_data:"gramwd:reject:"+data.id}]]}}),
+          signal:AbortSignal.timeout(7000)
+        });
+        if(!response.ok)console.warn("GRAM withdrawal admin notification HTTP",response.status);
+      }catch(e){console.warn("GRAM withdrawal admin notification failed",String(e).slice(0,100));}
+    }
+    return reply(data,data?.ok?200:(data?.error==="insufficient_codes"?409:400));
+  }
+  if (action === "admin_gram_summary") {
+    if(String(telegram.id)!=="1035565575") return reply({ok:false,error:"forbidden"},403);
+    const {data,error}=await admin.rpc("henova_gram_admin_summary",{p_admin_telegram_id:telegram.id});
+    if(error) return reply({ok:false,error:"gram_summary_unavailable"},503);
+    return reply(data,data?.ok?200:403);
+  }
+  if (action === "admin_gram_withdrawals") {
+    if(String(telegram.id)!=="1035565575") return reply({ok:false,error:"forbidden"},403);
+    const {data,error}=await admin.from("henova_mining_gram_withdrawals")
+      .select("id,telegram_id,amount,status,destination_address,payout_tx_hash,created_at,updated_at")
+      .order("created_at",{ascending:false}).limit(100);
+    if(error) return reply({ok:false,error:"withdrawal_list_unavailable"},503);
+    const ids=[...new Set((data||[]).map(x=>x.telegram_id))];
+    const {data:players,error:playersError}=ids.length
+      ?await admin.from("henova_players").select("telegram_id,username,first_name").in("telegram_id",ids)
+      :{data:[],error:null};
+    if(playersError) return reply({ok:false,error:"withdrawal_list_unavailable"},503);
+    const byId=new Map((players||[]).map(p=>[String(p.telegram_id),p]));
+    return reply({ok:true,withdrawals:(data||[]).map(w=>({...w,
+      username:byId.get(String(w.telegram_id))?.username||null,
+      first_name:byId.get(String(w.telegram_id))?.first_name||null}))});
+  }
+  if (action === "admin_gram_withdrawal_decide") {
+    if(String(telegram.id)!=="1035565575") return reply({ok:false,error:"forbidden"},403);
+    const id=Number(body?.withdrawalId);
+    const decision=String(body?.decision||"");
+    const txHash=body?.txHash==null?null:String(body.txHash).trim();
+    if(!Number.isSafeInteger(id)||id<=0||!["approve","reject","paid"].includes(decision))
+      return reply({ok:false,error:"invalid_request"},400);
+    const {data,error}=await admin.rpc("henova_gram_withdrawal_admin_decide",{
+      p_admin_telegram_id:telegram.id,p_withdrawal_id:id,p_decision:decision,p_tx_hash:txHash
+    });
+    if(error){console.error("GRAM withdrawal decision failed",error.code);return reply({ok:false,error:"withdrawal_update_unavailable"},503);}
+    if(data?.ok===true && decision==="paid"){
+      const {data:withdrawal,error:readError}=await admin.from("henova_mining_gram_withdrawals")
+        .select("id,telegram_id,amount,destination_address,payout_tx_hash,status,announcement_status,announcement_message_id")
+        .eq("id",id).maybeSingle();
+      if(readError||!withdrawal||withdrawal.status!=="paid"||! /^[a-f0-9]{64}$/.test(String(withdrawal.payout_tx_hash||""))){
+        console.error("GRAM payment proof lookup failed",readError?.code||"invalid_paid_row");
+        return reply({ok:true,...data,announcement:{sent:false,error:"payment_proof_lookup_failed"}});
+      }
+      if(withdrawal.announcement_message_id){
+        return reply({ok:true,...data,announcement:{sent:true,already_published:true,message_id:withdrawal.announcement_message_id}});
+      }
+      if(withdrawal.announcement_status==="uncertain"||withdrawal.announcement_status==="sending"){
+        return reply({ok:true,...data,announcement:{sent:false,error:"announcement_needs_manual_review"}});
+      }
+      const {data:claim,error:claimError}=await admin.from("henova_mining_gram_withdrawals")
+        .update({announcement_status:"sending",announcement_updated_at:new Date().toISOString()})
+        .eq("id",id).is("announcement_message_id",null)
+        .in("announcement_status",["pending","failed"])
+        .select("id").maybeSingle();
+      if(claimError||!claim){
+        return reply({ok:true,...data,announcement:{sent:false,error:"announcement_already_claimed"}});
+      }
+      const {data:player}=await admin.from("henova_players").select("username,first_name")
+        .eq("telegram_id",withdrawal.telegram_id).maybeSingle();
+      const who=player?.username?"@"+player.username:(player?.first_name||"HENOVA Farmer");
+      const wallet=String(withdrawal.destination_address||"");
+      const maskedWallet=wallet.length>12?wallet.slice(0,6)+"..."+wallet.slice(-5):wallet;
+      const txHash=String(withdrawal.payout_tx_hash).toLowerCase();
+      const message="💎 HENOVA — GRAM PAYMENT PROCESSED\\n"+
+        "Request #"+withdrawal.id+" · Paid\\n"+
+        "👤 "+who+" · ID: "+withdrawal.telegram_id+"\\n"+
+        "💎 Amount: "+Number(withdrawal.amount).toFixed(9)+" GRAM\\n"+
+        "🎟️ Promo-code withdrawal\\n"+
+        "👛 Wallet: "+maskedWallet+"\\n"+
+        "🔗 Transaction: "+txHash+"\\n\\n"+
+        "🐔 HENOVA — Official Withdrawal Proof";
+      let telegramResponse;
+      try{
+        telegramResponse=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{
+          method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({chat_id:"@HENOVA_WITHDRAWALS",text:message,disable_web_page_preview:true,
+            reply_markup:{inline_keyboard:[[{text:"🔎 View transaction",url:"https://tonviewer.com/transaction/"+encodeURIComponent(txHash)}]]}}),
+          signal:AbortSignal.timeout(12000)
+        });
+      }catch{
+        await admin.from("henova_mining_gram_withdrawals")
+          .update({announcement_status:"uncertain",announcement_updated_at:new Date().toISOString()}).eq("id",id);
+        return reply({ok:true,...data,announcement:{sent:false,error:"telegram_delivery_uncertain_check_channel",manual_review:true}});
+      }
+      const telegramBody=await telegramResponse.json().catch(()=>null);
+      if(!telegramResponse.ok||!telegramBody?.ok||!telegramBody?.result?.message_id){
+        await admin.from("henova_mining_gram_withdrawals")
+          .update({announcement_status:"failed",announcement_updated_at:new Date().toISOString()}).eq("id",id);
+        return reply({ok:true,...data,announcement:{sent:false,error:"telegram_rejected",description:String(telegramBody?.description||"").slice(0,120)}});
+      }
+      const messageId=telegramBody.result.message_id;
+      const {error:saveError}=await admin.from("henova_mining_gram_withdrawals")
+        .update({announcement_status:"published",announcement_message_id:messageId,announcement_updated_at:new Date().toISOString()})
+        .eq("id",id).is("announcement_message_id",null);
+      if(saveError)console.error("GRAM payment announcement tracking failed",saveError.code);
+      return reply({ok:true,...data,announcement:{sent:true,message_id:messageId,stored:!saveError}});
+    }
+    return reply(data,data?.ok?200:400);
+  }
 
   // Native GRAM top-ups: TON mainnet native coin, not a Jetton.
   if (action === "create_gram_topup") {
@@ -1706,11 +1933,13 @@ Deno.serve(async (request) => {
     if(e||!p)return reply({ok:false,error:"not_found"},404);
     if(p.telegram_post_id)return reply({ok:true,alreadyPosted:true,messageId:p.telegram_post_id});
     if(!p.active||Date.parse(p.expires_at)<=Date.now())return reply({ok:false,error:"expired"},400);
-    const markup={inline_keyboard:[[{text:"📋 Copy code",copy_text:{text:code}}],[{text:"🎮 Open HENOVA Tasks",url:"https://t.me/HenovaEggsBot/farm?startapp=tasks"}]]};
+    const markup={inline_keyboard:[[{text:"📋 Copy code",copy_text:{text:code}}],[{text:"🎁 OPEN GIFT BOX",url:"https://t.me/HenovaEggsBot/farm?startapp=tasks"}]]};
     const remaining=Math.max(0,Math.ceil((Date.parse(p.expires_at)-Date.now())/3600000));
     const timeLabel=remaining<=1?"Less than 1 h":remaining+" h";
     const rewardAsset=p.reward_type==="gift"?(p.gift_reward_type||"coins"):p.reward_type;
-    const rewardLabel=p.reward_type==="hen"
+    const rewardLabel=p.reward_type==="code"
+      ?"🎟️ Reward: +1 GRAM withdrawal code"
+      :p.reward_type==="hen"
       ?"🐔 Timed Hen · 100 eggs/hour · "+Number(p.hen_duration_hours||1)+" hour(s)"
       :p.reward_type==="gift"?"🎁 Gift Box":rewardAsset==="eggs"?"🥚 Reward: "+Number(p.reward_coins).toLocaleString("en-US")+" eggs":"💰 Reward: "+Number(p.reward_coins).toLocaleString("en-US")+" coins";
     const msg=[
@@ -1728,7 +1957,7 @@ Deno.serve(async (request) => {
       "🎁 Stay tuned for the next promo code!",
       "👇👇👇"
     ].join("\n");
-    const res=await fetch("https://api.telegram.org/bot"+botToken+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:"@HENOVA_PROMO_CODES",text:msg,reply_markup:markup}),signal:AbortSignal.timeout(10000)}).catch(()=>null);
+    const res=await fetch("https://api.telegram.org/bot"+botToken+"/copyMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:"@HENOVA_PROMO_CODES",from_chat_id:"@HENOVA_PROMO_CODES",message_id:966,caption:msg,reply_markup:markup,disable_web_page_preview:true}),signal:AbortSignal.timeout(10000)}).catch(()=>null);
     const ans=await res?.json().catch(()=>null);
     if(!ans?.ok)return reply({ok:false,error:"publish_failed",detail:String(ans?.description||"telegram_unavailable").slice(0,100)},502);
     const {error:saveError}=await admin.from("henova_promo_codes").update({telegram_post_id:ans.result.message_id,posted_at:new Date().toISOString()}).eq("code",code).is("telegram_post_id",null);
@@ -1737,17 +1966,56 @@ Deno.serve(async (request) => {
   }
   if(action==="admin_create_promo_code"){
     if(String(telegram.id)!=="1035565575")return reply({ok:false,error:"forbidden"},403);
-    const maxClaims=Number(body?.maxClaims),rewardCoins=Number(body?.rewardCoins),hours=Number(body?.hours),rewardType=String(body?.rewardType||"coins"),giftRewardType=String(body?.giftRewardType||"coins"),henDurationHours=Number(body?.henDurationHours||1);
-    if(!["coins","eggs","gift","hen"].includes(rewardType)||!["coins","eggs"].includes(giftRewardType)||!Number.isSafeInteger(maxClaims)||maxClaims<1||maxClaims>100000||!Number.isSafeInteger(hours)||hours<1||hours>720||
-       (rewardType==="hen"?(!Number.isSafeInteger(henDurationHours)||henDurationHours<1||henDurationHours>720):(!Number.isSafeInteger(rewardCoins)||rewardCoins<1||rewardCoins>100000)))return reply({ok:false,error:"invalid_promo_parameters"},400);
-    const finalReward=rewardType==="hen"?henDurationHours*100:rewardCoins;
+    const maxClaims=Number(body?.maxClaims),rewardCoins=Number(body?.rewardCoins),hours=Number(body?.hours),
+      rewardType=String(body?.rewardType||"coins"),giftRewardType=String(body?.giftRewardType||"coins"),
+      henDurationHours=Number(body?.henDurationHours||1),codeCount=Number(body?.codeCount??1);
+    if(!["coins","eggs","gift","hen","code"].includes(rewardType)||!["coins","eggs"].includes(giftRewardType)||
+       !Number.isSafeInteger(maxClaims)||maxClaims<1||maxClaims>1000000||
+       !Number.isSafeInteger(codeCount)||codeCount<1||codeCount>10000||
+       !Number.isSafeInteger(hours)||hours<1||hours>720||
+       (rewardType==="hen"?(!Number.isSafeInteger(henDurationHours)||henDurationHours<1||henDurationHours>720):
+        rewardType==="code"?false:(!Number.isSafeInteger(rewardCoins)||rewardCoins<1||rewardCoins>2000000000)))
+      return reply({ok:false,error:"invalid_promo_parameters"},400);
+    const finalReward=rewardType==="hen"?henDurationHours*100:rewardType==="code"?1:rewardCoins;
     const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-    const bytes=crypto.getRandomValues(new Uint8Array(12));
-    const code="HN"+Array.from(bytes,x=>chars[x%chars.length]).join("");
     const expiresAt=new Date(Date.now()+hours*3600000).toISOString();
-    const {error}=await admin.from("henova_promo_codes").insert({code,reward_coins:finalReward,max_claims:maxClaims,expires_at:expiresAt,active:true,reward_type:rewardType,gift_reward_type:giftRewardType,hen_duration_hours:rewardType==="hen"?henDurationHours:1});
-    if(error){console.error("promo_create",error.code);return reply({ok:false,error:"promo_create_unavailable"},503);}
-    return reply({ok:true,code,maxClaims,rewardCoins:finalReward,rewardType,giftRewardType,henDurationHours:rewardType==="hen"?henDurationHours:null,hours,expiresAt});
+    const created=[];
+    // Each batch is bounded to protect the API, while the admin can create
+    // as many separate batches as needed. Every generated code is independent.
+    for(let attempt=0;created.length<codeCount&&attempt<12;attempt++){
+      const remaining=codeCount-created.length;
+      const candidates=[];
+      const candidateSet=new Set();
+      const candidateTarget=Math.min(12000,Math.max(remaining+20,Math.ceil(remaining*1.15)));
+      while(candidates.length<candidateTarget){
+        const bytes=crypto.getRandomValues(new Uint8Array(12));
+        const code="HN"+Array.from(bytes,x=>chars[x%chars.length]).join("");
+        if(!candidateSet.has(code)&&!created.includes(code)){candidateSet.add(code);candidates.push(code);}
+      }
+      const existing=[];
+      for(let offset=0;offset<candidates.length;offset+=500){
+        const part=candidates.slice(offset,offset+500);
+        const {data,error}=await admin.from("henova_promo_codes").select("code").in("code",part);
+        if(error){console.error("promo_collision_check",error.code);return reply({ok:false,error:"promo_create_unavailable"},503);}
+        for(const row of data||[])existing.push(row.code);
+      }
+      const taken=new Set(existing);
+      const fresh=candidates.filter(code=>!taken.has(code)).slice(0,remaining);
+      for(let offset=0;offset<fresh.length;offset+=500){
+        const part=fresh.slice(offset,offset+500);
+        const rows=part.map(code=>({code,reward_coins:finalReward,max_claims:maxClaims,expires_at:expiresAt,active:true,reward_type:rewardType,gift_reward_type:giftRewardType,hen_duration_hours:rewardType==="hen"?henDurationHours:1}));
+        const {data,error}=await admin.from("henova_promo_codes").insert(rows).select("code");
+        if(error){console.error("promo_create_batch",error.code);return reply({ok:false,error:"promo_create_unavailable",created:created.length},503);}
+        for(const row of data||[])created.push(row.code);
+      }
+    }
+    if(created.length!==codeCount){
+      console.error("promo_batch_incomplete",created.length,codeCount);
+      return reply({ok:false,error:"promo_batch_incomplete",created:created.length},503);
+    }
+    return reply({ok:true,code:created[0],codes:created,codeCount:created.length,maxClaims,
+      rewardCoins:finalReward,rewardType,giftRewardType,henDurationHours:rewardType==="hen"?henDurationHours:null,
+      hours,expiresAt});
   }
   if(action==="promo_membership_check"||action==="promo_ad_start"){
     const checks=await Promise.all(["@HENOVA_FARM","@HENOVA_WITHDRAWALS"].map(async(chat)=>{
@@ -1822,6 +2090,16 @@ Deno.serve(async (request) => {
     if(error)return reply({ok:false,error:"reward_unavailable"},503);
     return reply(data);
   }
+  if (action === "claim_cyber_mine_once") {
+    const { data, error } = await admin.rpc("henova_claim_cyber_mine_once", {p_telegram_id:telegram.id});
+    if(error)return reply({ok:false,error:"reward_unavailable"},503);
+    return reply(data);
+  }
+  if (action === "claim_victors_company_once") {
+    const { data, error } = await admin.rpc("henova_claim_victors_company_once", {p_telegram_id:telegram.id});
+    if(error)return reply({ok:false,error:"reward_unavailable"},503);
+    return reply(data);
+  }
   if (action === "verify_withdrawals_channel") {
     // Verification only: do not grant coins until a separate audited reward
     // policy and idempotent reward ledger are configured.
@@ -1839,7 +2117,7 @@ Deno.serve(async (request) => {
     if (!joined) return reply({ok:true,joined:false,channel:"@HENOVA_WITHDRAWALS"});
     const { data: reward, error: claimError } = await admin.rpc("henova_claim_withdrawals_channel_reward",{p_telegram_id:telegram.id});
     if(claimError)return reply({ok:false,error:"database_unavailable"},503);
-    return reply({ok:true,joined:true,channel:"@HENOVA_WITHDRAWALS",reward_claimed:reward?.ok===true,coins_added:reward?.ok?20:0,already_claimed:reward?.error==="already_claimed"});
+    return reply({ok:true,joined:true,channel:"@HENOVA_WITHDRAWALS",reward_claimed:reward?.ok===true,eggs_added:reward?.ok?500:0,already_claimed:reward?.error==="already_claimed"});
   }
   if (action === "verify_promo_codes_channel") {
     const result = await fetch("https://api.telegram.org/bot"+botToken+"/getChatMember", {
@@ -1859,34 +2137,22 @@ Deno.serve(async (request) => {
     return reply({
       ok:true,joined:true,channel:"@HENOVA_PROMO_CODES",
       reward_claimed:reward?.ok===true,
-      coins_added:reward?.ok?20:0,
+      eggs_added:reward?.ok?500:0,
       already_claimed:reward?.error==="already_claimed"
     });
   }
   if (action === "payout_setup") {
-    const eligibilitySince="2026-10-31T12:22:20.284Z";
-    const [settings,wallet,withdrawals,videoAds,sponsoredAds,interstitialAds] = await Promise.all([
+    const [settings,wallet,withdrawals] = await Promise.all([
       admin.from("henova_payout_settings").select("asset,network,enabled,withdrawal_requests_enabled,min_eggs,max_eggs,cooldown_hours,gram_per_egg").eq("singleton",true).single(),
       admin.from("henova_ton_wallets").select("wallet_address,verified_owner").eq("telegram_id",telegram.id).maybeSingle(),
-      admin.from("henova_gram_withdrawals").select("id,eggs_amount,gram_amount,status,payout_tx_hash,created_at").eq("telegram_id",telegram.id).gte("created_at","2026-10-31T19:13:24.250Z").order("created_at",{ascending:false}).limit(10),
-      admin.from("henova_adsgram_video_rewards").select("id",{count:"exact",head:true}).eq("telegram_id",telegram.id).gte("rewarded_at",eligibilitySince),
-      admin.from("henova_adsgram_task_rewards").select("id",{count:"exact",head:true}).eq("telegram_id",telegram.id).gte("rewarded_at",eligibilitySince),
-      admin.from("henova_interstitial_open_rewards").select("id",{count:"exact",head:true}).eq("telegram_id",telegram.id).gte("rewarded_at",eligibilitySince)
+      admin.from("henova_gram_withdrawals").select("id,eggs_amount,gram_amount,status,payout_tx_hash,created_at").eq("telegram_id",telegram.id).gte("created_at","2026-10-31T19:13:24.250Z").order("created_at",{ascending:false}).limit(10)
     ]);
-    if(settings.error||wallet.error||withdrawals.error||videoAds.error||sponsoredAds.error||interstitialAds.error)
+    if(settings.error||wallet.error||withdrawals.error)
       return reply({ok:false,error:"database_unavailable"},503);
-    const eligibilityConfirmed=(videoAds.count||0)+(sponsoredAds.count||0)+(interstitialAds.count||0);
-    const eligibilityGoal=25;
-    const eligibilityPercent=Math.min(100,eligibilityConfirmed);
-    // Notify only for confirmed payments, never for pending submissions.
-    // Conditional claim prevents parallel requests from double-posting.
-    // The old wallet-page payout announcer was removed to prevent a second
-    // posting path. Verified payouts are announced via notifyVerifiedPayout,
-    // which uses the canonical #13-style template and an atomic claim.
     return reply({
       ok:true,
       payout:{...settings.data,enabled:settings.data.withdrawal_requests_enabled===true,real_payouts_enabled:false},
-      eligibility:{percent:eligibilityPercent,confirmed:eligibilityConfirmed,goal:eligibilityGoal,eligible:eligibilityConfirmed>=eligibilityGoal,since:eligibilitySince},
+      eligibility:{percent:100,confirmed:0,goal:0,eligible:true},
       wallet:wallet.data||null,
       withdrawals:withdrawals.data||[]
     });
@@ -2004,7 +2270,30 @@ Deno.serve(async (request) => {
     return reply({ok:true,wallet:{wallet_address:address,verified_owner:false},
       note:"Address saved; ownership not yet cryptographically verified"});
   }
+  if (action === "verify_withdrawal_channels") {
+    const membership = await henovaCheckWithdrawalChannels(botToken, telegram.id);
+    if (!membership.available) return reply({ ok: false, error: "verification_unavailable" }, 503);
+    return reply({ ok: true, joined: membership.joined, missing: membership.missing });
+  }
+  if (action === "cancel_gram_withdrawal") {
+    const withdrawalId = body?.withdrawalId;
+    if (!Number.isSafeInteger(withdrawalId) || withdrawalId <= 0) {
+      return reply({ ok: false, error: "invalid_request" }, 400);
+    }
+    const { data, error } = await admin.rpc("henova_cancel_gram_withdrawal", {
+      p_telegram_id: telegram.id,
+      p_withdrawal_id: withdrawalId
+    });
+    if (error) {
+      console.error("HENOVA withdrawal cancellation failed", error.code);
+      return reply({ ok: false, error: "withdrawal_cancel_unavailable" }, 503);
+    }
+    return reply(data, data?.ok ? 200 : (data?.error === "withdrawal_not_cancellable" ? 409 : 400));
+  }
   if (action === "request_gram_withdrawal") {
+    const membership = await henovaCheckWithdrawalChannels(botToken, telegram.id);
+    if (!membership.available) return reply({ ok: false, error: "verification_unavailable" }, 503);
+    if (!membership.joined) return reply({ ok: false, error: "channels_required", missing: membership.missing }, 403);
     // Authenticated Telegram requests use the database reservation and ad eligibility checks.
     const requestId=body?.requestId;
     const eggs=body?.eggs;
@@ -2101,8 +2390,9 @@ Deno.serve(async (request) => {
     // Register only genuinely new players. Existing players no longer trigger
     // the registration RPC on every fresh app opening; referral rewards remain
     // atomic inside henova_register_player for first-time registrations.
+    let welcomeGift = false;
     if (!data) {
-      const { error: initError } = await admin.rpc("henova_register_player", {
+      const { data: registration, error: initError } = await admin.rpc("henova_register_player", {
         p_telegram_id: telegram.id,
         p_first_name: telegram.first_name,
         p_username: telegram.username,
@@ -2111,6 +2401,16 @@ Deno.serve(async (request) => {
       if (initError) {
         console.error("HENOVA player registration failed", initError.code);
         return reply({ ok: false, error: "database_unavailable" }, 503);
+      }
+      if (registration?.new_player === true) {
+        const { data: gift, error: giftError } = await admin.rpc("henova_claim_welcome_gift", {
+          p_telegram_id: telegram.id
+        });
+        if (giftError) {
+          console.error("HENOVA welcome gift claim failed", giftError.code);
+          return reply({ ok: false, error: "welcome_gift_unavailable" }, 503);
+        }
+        welcomeGift = gift?.claimed === true;
       }
       const registered = await admin.from("henova_players")
         .select("egg_balance,coin_balance,starter_hens,red_hens,gold_hens,royal_hens,legend_hens,fan_level,production_started_at,last_daily_on,daily_streak,referral_eggs_earned,referral_coins_earned")
@@ -2132,7 +2432,7 @@ Deno.serve(async (request) => {
       .is("collected_at",null).gt("ends_at",new Date().toISOString())
       .order("ends_at",{ascending:true}).limit(1).maybeSingle();
     if(activePromoHenError){console.error("HENOVA active promo hen lookup failed",activePromoHenError.code);return reply({ok:false,error:"state_unavailable"},503);}
-    return reply({ ok: true, state: {
+    return reply({ ok: true, welcome_gift: welcomeGift, state: {
       ...publicState(data), promo_hen:activePromoHen||null, referrals_count: Number(stateExtras.referrals_count || 0),
       referral_eggs_earned: data.referral_eggs_earned || 0,
       referral_coins_earned: data.referral_coins_earned || 0,
@@ -2142,7 +2442,7 @@ Deno.serve(async (request) => {
       gift_chest_next_at: stateExtras.gift_chest_next_at || null
     } });
   }
-  if (!["collect", "daily", "purchase", "boost"].includes(action)) {
+  if (!["daily", "purchase", "boost", "collect"].includes(action)) {
     return reply({ ok: false, error: "unknown_action" }, 400);
   }
   const requestId = body?.requestId;
