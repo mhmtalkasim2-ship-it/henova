@@ -2786,8 +2786,10 @@ async function henovaSubmitCodeWithdrawal(){
   toast(s.lang==='ar'?'تم إرسال طلب سحب '+count+' كود بقيمة '+Number(r.amount).toFixed(3)+' GRAM':s.lang==='tr'?count+' kod için '+Number(r.amount).toFixed(3)+' GRAM çekim talebi gönderildi':'Withdrawal request submitted: '+count+' codes · '+Number(r.amount).toFixed(3)+' GRAM');
   henovaCodeWithdrawalOpen=false;await henovaGramBalanceLoad();
  }catch(e){
-  const error=String(e.message||e);
-  toast(error==='minimum_five_codes'?henovaCodeWithdrawalText('minimum'):(error==='insufficient_codes'||error==='not_enough_codes'?henovaCodeWithdrawalText('insufficient'):henovaCodeWithdrawalText('unavailable')));
+  const error=String(e?.message||e||'').toLowerCase();
+  const minimumError=error==='minimum_five_codes'||error.includes('minimum_five')||error.includes('minimum')&&(/code|kod|كود|5/.test(error))||error.includes('five_codes')||error.includes('min_codes');
+  const insufficientError=error==='insufficient_codes'||error==='not_enough_codes'||error.includes('insufficient_codes')||error.includes('not_enough_codes');
+  toast(minimumError?henovaCodeWithdrawalText('minimum'):(insufficientError?henovaCodeWithdrawalText('insufficient'):henovaCodeWithdrawalText('unavailable')));
   await henovaGramBalanceLoad();
  }finally{henovaGramBalanceBusy=false;if(tab===5)render()}
 }
