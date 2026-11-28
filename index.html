@@ -2755,22 +2755,39 @@ function henovaUpdateCodeGramPreview(){
  const out=document.getElementById('hv-gram-code-preview');
  if(out)out.textContent=(count*0.005).toFixed(3)+' GRAM';
 }
+function henovaCodeWithdrawalText(kind){
+ const lang=s.lang||'en';
+ const messages={
+  insufficient:{ar:'عدد الأكواد غير كافٍ',en:'Insufficient number of codes',tr:'Yeterli kodunuz yok'},
+  choose:{ar:'اختر عدد الأكواد',en:'Choose a valid number of codes',tr:'Geçerli bir kod sayısı seçin'},
+  wallet:{ar:'أدخل عنوان محفظة TON',en:'Enter your TON wallet address',tr:'TON cüzdan adresinizi girin'},
+  unavailable:{ar:'تعذر إرسال طلب السحب. حاول مرة أخرى',en:'Unable to submit the withdrawal request. Please try again',tr:'Çekim talebi gönderilemedi. Lütfen tekrar deneyin'}
+ };
+ return messages[kind]?.[lang]||messages[kind]?.en||'';
+}
 async function henovaSubmitCodeWithdrawal(){
  if(henovaGramBalanceBusy)return;
  const count=Number(document.getElementById('hv-gram-code-count')?.value);
  const address=String(document.getElementById('hv-gram-code-address')?.value||'').trim();
- const available=Number(henovaGramBalanceState.available_promo_codes||0);
- if(!Number.isSafeInteger(count)||count<1)return toast(s.lang==='ar'?'اختر عدد الأكواد':'Choose a valid number of codes');
- if(count>available)return toast(s.lang==='ar'?'عدد الأكواد غير كافٍ':'Not enough available codes');
- if(!address)return toast(s.lang==='ar'?'أدخل عنوان محفظة TON':'Enter your TON wallet address');
+ if(!Number.isSafeInteger(count)||count<1)return toast(henovaCodeWithdrawalText('choose'));
+ if(!address)return toast(henovaCodeWithdrawalText('wallet'));
  henovaGramBalanceBusy=true;const button=document.getElementById('hv-gram-code-submit');if(button)button.disabled=true;
  try{
+  // Refresh the server-side code count before submitting; the cached UI balance may be stale.
+  const fresh=await henovaCall('gram_balance_state');
+  if(!fresh?.ok)throw Error(fresh?.error||'balance_unavailable');
+  henovaGramBalanceState=fresh;
+  const available=Number(fresh.available_promo_codes||0);
+  if(count>available){toast(henovaCodeWithdrawalText('insufficient'));return}
   const r=await henovaCall('gram_codes_withdrawal_request',{requestId:crypto.randomUUID(),codeCount:count,address});
   if(!r?.ok)throw Error(r?.error||'withdrawal_unavailable');
-  toast(s.lang==='ar'?'تم إرسال طلب سحب '+count+' كود بقيمة '+Number(r.amount).toFixed(3)+' GRAM':s.lang==='tr'?' '+count+' kod için '+Number(r.amount).toFixed(3)+' GRAM çekim talebi gönderildi': 'Withdrawal request submitted: '+count+' codes · '+Number(r.amount).toFixed(3)+' GRAM');
+  toast(s.lang==='ar'?'تم إرسال طلب سحب '+count+' كود بقيمة '+Number(r.amount).toFixed(3)+' GRAM':s.lang==='tr'?count+' kod için '+Number(r.amount).toFixed(3)+' GRAM çekim talebi gönderildi':'Withdrawal request submitted: '+count+' codes · '+Number(r.amount).toFixed(3)+' GRAM');
   henovaCodeWithdrawalOpen=false;await henovaGramBalanceLoad();
- }catch(e){toast(String(e.message||e).replaceAll('_',' ').slice(0,90));await henovaGramBalanceLoad()}
- finally{henovaGramBalanceBusy=false;if(tab===5)render()}
+ }catch(e){
+  const error=String(e.message||e);
+  toast(error==='insufficient_codes'||error==='not_enough_codes'?henovaCodeWithdrawalText('insufficient'):henovaCodeWithdrawalText('unavailable'));
+  await henovaGramBalanceLoad();
+ }finally{henovaGramBalanceBusy=false;if(tab===5)render()}
 }
 async function henovaSubmitGramWithdrawal(){if(henovaGramBalanceBusy)return;const amount=Number(document.getElementById('hv-gram-withdraw-amount')?.value);const address=String(document.getElementById('hv-gram-withdraw-address')?.value||'').trim();const balance=Number(henovaGramBalanceState.balance||0);if(!Number.isFinite(amount)||amount<0.005||Math.round(amount*1e9)!==amount*1e9)return toast(s.lang==='ar'?'الحد الأدنى 0.005 GRAM':'Minimum is 0.005 GRAM (up to 9 decimals)');if(amount>balance)return toast(s.lang==='ar'?'الرصيد غير كافٍ':'Insufficient GRAM balance');if(!address)return toast(s.lang==='ar'?'أدخل عنوان محفظة TON':'Enter your TON wallet address');henovaGramBalanceBusy=true;const button=document.getElementById('hv-gram-withdraw-submit');if(button)button.disabled=true;try{const r=await henovaCall('gram_withdrawal_request',{requestId:crypto.randomUUID(),amount,address});if(!r?.ok)throw Error(r?.error||'withdrawal_unavailable');toast(s.lang==='ar'?'تم حجز المبلغ وإرسال طلب السحب للإدارة':'Amount reserved. Request sent to admin.');await henovaGramBalanceLoad()}catch(e){const m=String(e.message||e);toast(m==='insufficient_balance'?'Insufficient GRAM balance':m==='invalid_ton_wallet'?'Invalid TON wallet address':m.replaceAll('_',' ').slice(0,90))}finally{henovaGramBalanceBusy=false;if(button)button.disabled=false}}
 async function henovaGramAdminLoad(){if(!henovaIsGramMiningAdmin())return;try{const [r,a]=await Promise.all([henovaCall('admin_gram_withdrawals'),henovaCall('admin_gram_summary')]);if(!r?.ok||!a?.ok)throw Error(r?.error||a?.error||'admin_list_unavailable');henovaGramAdminWithdrawals=r.withdrawals||[];henovaGramAdminSummary=a;if(tab===5)render()}catch(e){console.warn('GRAM admin withdrawals',e);toast('GRAM requests: '+String(e.message||e).slice(0,70))}}
