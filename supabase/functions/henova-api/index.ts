@@ -1938,7 +1938,7 @@ Deno.serve(async (request) => {
     const timeLabel=remaining<=1?"Less than 1 h":remaining+" h";
     const rewardAsset=p.reward_type==="gift"?(p.gift_reward_type||"coins"):p.reward_type;
     const rewardLabel=p.reward_type==="code"
-      ?"🎟️ Reward: +1 GRAM withdrawal code"
+      ?"🎟️ Reward: +1Code"
       :p.reward_type==="hen"
       ?"🐔 Timed Hen · 100 eggs/hour · "+Number(p.hen_duration_hours||1)+" hour(s)"
       :p.reward_type==="gift"?"🎁 Gift Box":rewardAsset==="eggs"?"🥚 Reward: "+Number(p.reward_coins).toLocaleString("en-US")+" eggs":"💰 Reward: "+Number(p.reward_coins).toLocaleString("en-US")+" coins";
