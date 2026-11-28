@@ -2758,6 +2758,7 @@ function henovaUpdateCodeGramPreview(){
 function henovaCodeWithdrawalText(kind){
  const lang=s.lang||'en';
  const messages={
+  minimum:{ar:'الحد الأدنى للسحب هو 5 أكواد',en:'The minimum withdrawal is 5 codes',tr:'Minimum çekim miktarı 5 koddur'},
   insufficient:{ar:'عدد الأكواد غير كافٍ',en:'Insufficient number of codes',tr:'Yeterli kodunuz yok'},
   choose:{ar:'اختر عدد الأكواد',en:'Choose a valid number of codes',tr:'Geçerli bir kod sayısı seçin'},
   wallet:{ar:'أدخل عنوان محفظة TON',en:'Enter your TON wallet address',tr:'TON cüzdan adresinizi girin'},
@@ -2770,6 +2771,7 @@ async function henovaSubmitCodeWithdrawal(){
  const count=Number(document.getElementById('hv-gram-code-count')?.value);
  const address=String(document.getElementById('hv-gram-code-address')?.value||'').trim();
  if(!Number.isSafeInteger(count)||count<1)return toast(henovaCodeWithdrawalText('choose'));
+ if(count<5)return toast(henovaCodeWithdrawalText('minimum'));
  if(!address)return toast(henovaCodeWithdrawalText('wallet'));
  henovaGramBalanceBusy=true;const button=document.getElementById('hv-gram-code-submit');if(button)button.disabled=true;
  try{
@@ -2785,7 +2787,7 @@ async function henovaSubmitCodeWithdrawal(){
   henovaCodeWithdrawalOpen=false;await henovaGramBalanceLoad();
  }catch(e){
   const error=String(e.message||e);
-  toast(error==='insufficient_codes'||error==='not_enough_codes'?henovaCodeWithdrawalText('insufficient'):henovaCodeWithdrawalText('unavailable'));
+  toast(error==='minimum_five_codes'?henovaCodeWithdrawalText('minimum'):(error==='insufficient_codes'||error==='not_enough_codes'?henovaCodeWithdrawalText('insufficient'):henovaCodeWithdrawalText('unavailable')));
   await henovaGramBalanceLoad();
  }finally{henovaGramBalanceBusy=false;if(tab===5)render()}
 }
